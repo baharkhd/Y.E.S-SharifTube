@@ -50,7 +50,7 @@ type ComplexityRoot struct {
 
 	Attachment struct {
 		Aurl        func(childComplexity int) int
-		Course      func(childComplexity int) int
+		CourseID    func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
@@ -76,8 +76,8 @@ type ComplexityRoot struct {
 
 	Content struct {
 		ApprovedBy  func(childComplexity int) int
-		Comments    func(childComplexity int) int
-		Course      func(childComplexity int) int
+		Comments    func(childComplexity int, start int, amount int) int
+		CourseID    func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Tags        func(childComplexity int) int
@@ -95,7 +95,7 @@ type ComplexityRoot struct {
 		Contents  func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
-		Inventory func(childComplexity int) int
+		Inventory func(childComplexity int, start int, amount int) int
 		Pends     func(childComplexity int) int
 		Prof      func(childComplexity int) int
 		Students  func(childComplexity int) int
@@ -121,32 +121,31 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AcceptOfferedContent func(childComplexity int, userID string, courseID string, pendingID string, changed model.ChangedPending) int
-		AddUserToCourse      func(childComplexity int, userID string, courseID string, token string) int
-		CreateComment        func(childComplexity int, userID string, contentID string, target model.TargetComment) int
-		CreateCourse         func(childComplexity int, userID string, target model.TargetCourse) int
+		AcceptOfferedContent func(childComplexity int, userName string, courseID string, pendingID string, changed model.EditedPending) int
+		AddUserToCourse      func(childComplexity int, userName string, courseID string, token string) int
+		CreateComment        func(childComplexity int, userName string, contentID string, repliedAtID *string, target model.TargetComment) int
+		CreateCourse         func(childComplexity int, userName string, target model.TargetCourse) int
 		CreateUser           func(childComplexity int, target model.TargetUser) int
-		DeleteAttachment     func(childComplexity int, userID string, courseID string, attachmentID string) int
-		DeleteComment        func(childComplexity int, userID string, contentID string, commentID string) int
-		DeleteContent        func(childComplexity int, userID string, courseID string, contentID string) int
-		DeleteCourse         func(childComplexity int, userID string, courseID string) int
-		DeleteOfferedContent func(childComplexity int, userID string, courseID string, pendingID string) int
-		DeleteUser           func(childComplexity int, userID string) int
-		DemoteUserToStd      func(childComplexity int, userID string, courseID string, targetUserID string) int
-		EditAttachment       func(childComplexity int, userID string, courseID string, attachmentID string, target model.EditContent) int
-		EditContent          func(childComplexity int, userID string, courseID string, contentID string, target model.EditContent) int
-		EditOfferedContent   func(childComplexity int, userID string, courseID string, pendingID string, target model.EditedPending) int
+		DeleteAttachment     func(childComplexity int, userName string, courseID string, attachmentID string) int
+		DeleteComment        func(childComplexity int, userName string, contentID string, commentID string) int
+		DeleteContent        func(childComplexity int, userName string, courseID string, contentID string) int
+		DeleteCourse         func(childComplexity int, userName string, courseID string) int
+		DeleteOfferedContent func(childComplexity int, userName string, courseID string, pendingID string) int
+		DeleteUser           func(childComplexity int, userName string) int
+		DemoteUserToStd      func(childComplexity int, userName string, courseID string, targetUserID string) int
+		EditAttachment       func(childComplexity int, userName string, courseID string, attachmentID string, target model.EditContent) int
+		EditContent          func(childComplexity int, userName string, courseID string, contentID string, target model.EditContent) int
+		EditOfferedContent   func(childComplexity int, userName string, courseID string, pendingID string, target model.EditedPending) int
 		Login                func(childComplexity int, input model.Login) int
-		OfferContent         func(childComplexity int, userID string, courseID string, target model.TargetPending) int
-		PromoteUserToTa      func(childComplexity int, userID string, courseID string, targetUserID string) int
+		OfferContent         func(childComplexity int, userName string, courseID string, target model.TargetPending) int
+		PromoteUserToTa      func(childComplexity int, userName string, courseID string, targetUserID string) int
 		RefreshToken         func(childComplexity int) int
-		RejectOfferedContent func(childComplexity int, userID string, courseID string, pendingID string) int
-		ReplyComment         func(childComplexity int, userID string, contentID string, commentID string, target model.TargetComment) int
-		UpdateComment        func(childComplexity int, userID string, contentID string, commentID string, target model.EditedComment) int
-		UpdateCourseInfo     func(childComplexity int, userID string, courseID string, toBe model.EditedCourse) int
-		UpdateUser           func(childComplexity int, userID string, toBe model.EditedUser) int
-		UploadAttachment     func(childComplexity int, userID string, courseID string, target model.TargetContent) int
-		UploadContent        func(childComplexity int, userID string, courseID string, target model.TargetContent) int
+		RejectOfferedContent func(childComplexity int, userName string, courseID string, pendingID string) int
+		UpdateComment        func(childComplexity int, userName string, contentID string, commentID string, target model.EditedComment) int
+		UpdateCourseInfo     func(childComplexity int, userName string, courseID string, toBe model.EditedCourse) int
+		UpdateUser           func(childComplexity int, userName string, toBe model.EditedUser) int
+		UploadAttachment     func(childComplexity int, userName string, courseID string, target model.TargetContent) int
+		UploadContent        func(childComplexity int, userName string, courseID string, target model.TargetContent) int
 	}
 
 	OfferedContentRejectedException struct {
@@ -168,21 +167,13 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Attachment      func(childComplexity int, id string) int
-		Attachments     func(childComplexity int, courseID string, start int, amount int) int
-		Comment         func(childComplexity int, id string) int
-		CommentByFilter func(childComplexity int, filter model.CommentFilter, start int, amount int) int
-		Content         func(childComplexity int, id string) int
-		ContentByFilter func(childComplexity int, filter model.CourseFilter, start int, amount int) int
-		Contents        func(childComplexity int, start int, amount int) int
-		Course          func(childComplexity int, id string) int
-		CourseByFilter  func(childComplexity int, filter model.CourseFilter, start int, amount int) int
-		Courses         func(childComplexity int, start int, amount int) int
-		Pending         func(childComplexity int, id string) int
-		PendingByFilter func(childComplexity int, filter model.PendingFilter, start int, amount int) int
-		User            func(childComplexity int, id *string) int
-		UserByFilter    func(childComplexity int, filter model.UserFilter, start int, amount int) int
-		Users           func(childComplexity int, start int, amount int) int
+		Content  func(childComplexity int, id string) int
+		Contents func(childComplexity int, tags []string, start int, amount int) int
+		Course   func(childComplexity int, id string) int
+		Courses  func(childComplexity int, keyWord *string, start int, amount int) int
+		Pendings func(childComplexity int, filter model.PendingFilter, start int, amount int) int
+		User     func(childComplexity int, username *string) int
+		Users    func(childComplexity int, start int, amount int) int
 	}
 
 	Reply struct {
@@ -198,12 +189,12 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Courses  func(childComplexity int) int
-		Email    func(childComplexity int) int
-		ID       func(childComplexity int) int
-		Name     func(childComplexity int) int
-		Password func(childComplexity int) int
-		Username func(childComplexity int) int
+		CourseIDs func(childComplexity int) int
+		Email     func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Password  func(childComplexity int) int
+		Username  func(childComplexity int) int
 	}
 
 	UserIsNotSTDException struct {
@@ -229,48 +220,39 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateUser(ctx context.Context, target model.TargetUser) (model.CreateUserPayload, error)
-	UpdateUser(ctx context.Context, userID string, toBe model.EditedUser) (model.UpdateUserPayload, error)
-	DeleteUser(ctx context.Context, userID string) (model.DeleteUserPayload, error)
+	UpdateUser(ctx context.Context, userName string, toBe model.EditedUser) (model.UpdateUserPayload, error)
+	DeleteUser(ctx context.Context, userName string) (model.DeleteUserPayload, error)
 	Login(ctx context.Context, input model.Login) (model.LoginPayload, error)
 	RefreshToken(ctx context.Context) (model.LoginPayload, error)
-	CreateCourse(ctx context.Context, userID string, target model.TargetCourse) (model.CreateCoursePayload, error)
-	UpdateCourseInfo(ctx context.Context, userID string, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error)
-	DeleteCourse(ctx context.Context, userID string, courseID string) (model.DeleteCoursePayload, error)
-	AddUserToCourse(ctx context.Context, userID string, courseID string, token string) (model.AddUserToCoursePayload, error)
-	PromoteUserToTa(ctx context.Context, userID string, courseID string, targetUserID string) (model.PromoteToTAPayload, error)
-	DemoteUserToStd(ctx context.Context, userID string, courseID string, targetUserID string) (model.DemoteToSTDPayload, error)
-	UploadContent(ctx context.Context, userID string, courseID string, target model.TargetContent) (model.UploadContentPayLoad, error)
-	EditContent(ctx context.Context, userID string, courseID string, contentID string, target model.EditContent) (model.EditContentPayLoad, error)
-	DeleteContent(ctx context.Context, userID string, courseID string, contentID string) (model.DeleteContentPayLoad, error)
-	UploadAttachment(ctx context.Context, userID string, courseID string, target model.TargetContent) (model.UploadAttachmentPayLoad, error)
-	EditAttachment(ctx context.Context, userID string, courseID string, attachmentID string, target model.EditContent) (model.EditAttachmentPayLoad, error)
-	DeleteAttachment(ctx context.Context, userID string, courseID string, attachmentID string) (model.DeleteAttachmentPayLoad, error)
-	OfferContent(ctx context.Context, userID string, courseID string, target model.TargetPending) (model.OfferContentPayLoad, error)
-	EditOfferedContent(ctx context.Context, userID string, courseID string, pendingID string, target model.EditedPending) (model.EditOfferedContentPayLoad, error)
-	DeleteOfferedContent(ctx context.Context, userID string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error)
-	AcceptOfferedContent(ctx context.Context, userID string, courseID string, pendingID string, changed model.ChangedPending) (model.EditOfferedContentPayLoad, error)
-	RejectOfferedContent(ctx context.Context, userID string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error)
-	CreateComment(ctx context.Context, userID string, contentID string, target model.TargetComment) (model.CreateCommentPayLoad, error)
-	UpdateComment(ctx context.Context, userID string, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error)
-	DeleteComment(ctx context.Context, userID string, contentID string, commentID string) (model.DeleteCommentPayLoad, error)
-	ReplyComment(ctx context.Context, userID string, contentID string, commentID string, target model.TargetComment) (model.ReplyCommentPayLoad, error)
+	CreateCourse(ctx context.Context, userName string, target model.TargetCourse) (model.CreateCoursePayload, error)
+	UpdateCourseInfo(ctx context.Context, userName string, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error)
+	DeleteCourse(ctx context.Context, userName string, courseID string) (model.DeleteCoursePayload, error)
+	AddUserToCourse(ctx context.Context, userName string, courseID string, token string) (model.AddUserToCoursePayload, error)
+	PromoteUserToTa(ctx context.Context, userName string, courseID string, targetUserID string) (model.PromoteToTAPayload, error)
+	DemoteUserToStd(ctx context.Context, userName string, courseID string, targetUserID string) (model.DemoteToSTDPayload, error)
+	UploadContent(ctx context.Context, userName string, courseID string, target model.TargetContent) (model.UploadContentPayLoad, error)
+	EditContent(ctx context.Context, userName string, courseID string, contentID string, target model.EditContent) (model.EditContentPayLoad, error)
+	DeleteContent(ctx context.Context, userName string, courseID string, contentID string) (model.DeleteContentPayLoad, error)
+	UploadAttachment(ctx context.Context, userName string, courseID string, target model.TargetContent) (model.UploadAttachmentPayLoad, error)
+	EditAttachment(ctx context.Context, userName string, courseID string, attachmentID string, target model.EditContent) (model.EditAttachmentPayLoad, error)
+	DeleteAttachment(ctx context.Context, userName string, courseID string, attachmentID string) (model.DeleteAttachmentPayLoad, error)
+	OfferContent(ctx context.Context, userName string, courseID string, target model.TargetPending) (model.OfferContentPayLoad, error)
+	EditOfferedContent(ctx context.Context, userName string, courseID string, pendingID string, target model.EditedPending) (model.EditOfferedContentPayLoad, error)
+	DeleteOfferedContent(ctx context.Context, userName string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error)
+	AcceptOfferedContent(ctx context.Context, userName string, courseID string, pendingID string, changed model.EditedPending) (model.EditOfferedContentPayLoad, error)
+	RejectOfferedContent(ctx context.Context, userName string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error)
+	CreateComment(ctx context.Context, userName string, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error)
+	UpdateComment(ctx context.Context, userName string, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error)
+	DeleteComment(ctx context.Context, userName string, contentID string, commentID string) (model.DeleteCommentPayLoad, error)
 }
 type QueryResolver interface {
-	User(ctx context.Context, id *string) (*model.User, error)
+	User(ctx context.Context, username *string) (*model.User, error)
 	Users(ctx context.Context, start int, amount int) ([]*model.User, error)
-	UserByFilter(ctx context.Context, filter model.UserFilter, start int, amount int) ([]*model.Course, error)
 	Course(ctx context.Context, id string) (*model.Course, error)
-	Courses(ctx context.Context, start int, amount int) ([]*model.Course, error)
-	CourseByFilter(ctx context.Context, filter model.CourseFilter, start int, amount int) ([]*model.Course, error)
+	Courses(ctx context.Context, keyWord *string, start int, amount int) ([]*model.Course, error)
 	Content(ctx context.Context, id string) (*model.Content, error)
-	Contents(ctx context.Context, start int, amount int) ([]*model.Content, error)
-	ContentByFilter(ctx context.Context, filter model.CourseFilter, start int, amount int) ([]*model.Content, error)
-	Comment(ctx context.Context, id string) (*model.Comment, error)
-	CommentByFilter(ctx context.Context, filter model.CommentFilter, start int, amount int) ([]*model.Comment, error)
-	Attachment(ctx context.Context, id string) (*model.Attachment, error)
-	Attachments(ctx context.Context, courseID string, start int, amount int) ([]*model.Attachment, error)
-	Pending(ctx context.Context, id string) (*model.Pending, error)
-	PendingByFilter(ctx context.Context, filter model.PendingFilter, start int, amount int) ([]*model.Pending, error)
+	Contents(ctx context.Context, tags []string, start int, amount int) ([]*model.Content, error)
+	Pendings(ctx context.Context, filter model.PendingFilter, start int, amount int) ([]*model.Pending, error)
 }
 
 type executableSchema struct {
@@ -302,12 +284,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Attachment.Aurl(childComplexity), true
 
-	case "Attachment.course":
-		if e.complexity.Attachment.Course == nil {
+	case "Attachment.courseID":
+		if e.complexity.Attachment.CourseID == nil {
 			break
 		}
 
-		return e.complexity.Attachment.Course(childComplexity), true
+		return e.complexity.Attachment.CourseID(childComplexity), true
 
 	case "Attachment.description":
 		if e.complexity.Attachment.Description == nil {
@@ -405,14 +387,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Content.Comments(childComplexity), true
+		args, err := ec.field_Content_comments_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "Content.course":
-		if e.complexity.Content.Course == nil {
+		return e.complexity.Content.Comments(childComplexity, args["start"].(int), args["amount"].(int)), true
+
+	case "Content.courseID":
+		if e.complexity.Content.CourseID == nil {
 			break
 		}
 
-		return e.complexity.Content.Course(childComplexity), true
+		return e.complexity.Content.CourseID(childComplexity), true
 
 	case "Content.description":
 		if e.complexity.Content.Description == nil {
@@ -496,7 +483,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Course.Inventory(childComplexity), true
+		args, err := ec.field_Course_inventory_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Course.Inventory(childComplexity, args["start"].(int), args["amount"].(int)), true
 
 	case "Course.pends":
 		if e.complexity.Course.Pends == nil {
@@ -578,7 +570,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AcceptOfferedContent(childComplexity, args["userID"].(string), args["courseID"].(string), args["pendingID"].(string), args["changed"].(model.ChangedPending)), true
+		return e.complexity.Mutation.AcceptOfferedContent(childComplexity, args["userName"].(string), args["courseID"].(string), args["pendingID"].(string), args["changed"].(model.EditedPending)), true
 
 	case "Mutation.addUserToCourse":
 		if e.complexity.Mutation.AddUserToCourse == nil {
@@ -590,7 +582,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddUserToCourse(childComplexity, args["userID"].(string), args["courseID"].(string), args["token"].(string)), true
+		return e.complexity.Mutation.AddUserToCourse(childComplexity, args["userName"].(string), args["courseID"].(string), args["token"].(string)), true
 
 	case "Mutation.createComment":
 		if e.complexity.Mutation.CreateComment == nil {
@@ -602,7 +594,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateComment(childComplexity, args["userID"].(string), args["contentID"].(string), args["target"].(model.TargetComment)), true
+		return e.complexity.Mutation.CreateComment(childComplexity, args["userName"].(string), args["contentID"].(string), args["repliedAtID"].(*string), args["target"].(model.TargetComment)), true
 
 	case "Mutation.createCourse":
 		if e.complexity.Mutation.CreateCourse == nil {
@@ -614,7 +606,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateCourse(childComplexity, args["userID"].(string), args["target"].(model.TargetCourse)), true
+		return e.complexity.Mutation.CreateCourse(childComplexity, args["userName"].(string), args["target"].(model.TargetCourse)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -638,7 +630,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteAttachment(childComplexity, args["userID"].(string), args["courseID"].(string), args["attachmentID"].(string)), true
+		return e.complexity.Mutation.DeleteAttachment(childComplexity, args["userName"].(string), args["courseID"].(string), args["attachmentID"].(string)), true
 
 	case "Mutation.deleteComment":
 		if e.complexity.Mutation.DeleteComment == nil {
@@ -650,7 +642,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteComment(childComplexity, args["userID"].(string), args["contentID"].(string), args["commentID"].(string)), true
+		return e.complexity.Mutation.DeleteComment(childComplexity, args["userName"].(string), args["contentID"].(string), args["commentID"].(string)), true
 
 	case "Mutation.deleteContent":
 		if e.complexity.Mutation.DeleteContent == nil {
@@ -662,7 +654,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteContent(childComplexity, args["userID"].(string), args["courseID"].(string), args["contentID"].(string)), true
+		return e.complexity.Mutation.DeleteContent(childComplexity, args["userName"].(string), args["courseID"].(string), args["contentID"].(string)), true
 
 	case "Mutation.deleteCourse":
 		if e.complexity.Mutation.DeleteCourse == nil {
@@ -674,7 +666,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteCourse(childComplexity, args["userID"].(string), args["courseID"].(string)), true
+		return e.complexity.Mutation.DeleteCourse(childComplexity, args["userName"].(string), args["courseID"].(string)), true
 
 	case "Mutation.deleteOfferedContent":
 		if e.complexity.Mutation.DeleteOfferedContent == nil {
@@ -686,7 +678,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteOfferedContent(childComplexity, args["userID"].(string), args["courseID"].(string), args["pendingID"].(string)), true
+		return e.complexity.Mutation.DeleteOfferedContent(childComplexity, args["userName"].(string), args["courseID"].(string), args["pendingID"].(string)), true
 
 	case "Mutation.deleteUser":
 		if e.complexity.Mutation.DeleteUser == nil {
@@ -698,7 +690,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteUser(childComplexity, args["userID"].(string)), true
+		return e.complexity.Mutation.DeleteUser(childComplexity, args["userName"].(string)), true
 
 	case "Mutation.demoteUserToSTD":
 		if e.complexity.Mutation.DemoteUserToStd == nil {
@@ -710,7 +702,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DemoteUserToStd(childComplexity, args["userID"].(string), args["courseID"].(string), args["targetUserID"].(string)), true
+		return e.complexity.Mutation.DemoteUserToStd(childComplexity, args["userName"].(string), args["courseID"].(string), args["targetUserID"].(string)), true
 
 	case "Mutation.editAttachment":
 		if e.complexity.Mutation.EditAttachment == nil {
@@ -722,7 +714,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditAttachment(childComplexity, args["userID"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditContent)), true
+		return e.complexity.Mutation.EditAttachment(childComplexity, args["userName"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditContent)), true
 
 	case "Mutation.editContent":
 		if e.complexity.Mutation.EditContent == nil {
@@ -734,7 +726,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditContent(childComplexity, args["userID"].(string), args["courseID"].(string), args["contentID"].(string), args["target"].(model.EditContent)), true
+		return e.complexity.Mutation.EditContent(childComplexity, args["userName"].(string), args["courseID"].(string), args["contentID"].(string), args["target"].(model.EditContent)), true
 
 	case "Mutation.editOfferedContent":
 		if e.complexity.Mutation.EditOfferedContent == nil {
@@ -746,7 +738,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditOfferedContent(childComplexity, args["userID"].(string), args["courseID"].(string), args["pendingID"].(string), args["target"].(model.EditedPending)), true
+		return e.complexity.Mutation.EditOfferedContent(childComplexity, args["userName"].(string), args["courseID"].(string), args["pendingID"].(string), args["target"].(model.EditedPending)), true
 
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
@@ -770,7 +762,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.OfferContent(childComplexity, args["userID"].(string), args["courseID"].(string), args["target"].(model.TargetPending)), true
+		return e.complexity.Mutation.OfferContent(childComplexity, args["userName"].(string), args["courseID"].(string), args["target"].(model.TargetPending)), true
 
 	case "Mutation.promoteUserToTA":
 		if e.complexity.Mutation.PromoteUserToTa == nil {
@@ -782,7 +774,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.PromoteUserToTa(childComplexity, args["userID"].(string), args["courseID"].(string), args["targetUserID"].(string)), true
+		return e.complexity.Mutation.PromoteUserToTa(childComplexity, args["userName"].(string), args["courseID"].(string), args["targetUserID"].(string)), true
 
 	case "Mutation.refreshToken":
 		if e.complexity.Mutation.RefreshToken == nil {
@@ -801,19 +793,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RejectOfferedContent(childComplexity, args["userID"].(string), args["courseID"].(string), args["pendingID"].(string)), true
-
-	case "Mutation.replyComment":
-		if e.complexity.Mutation.ReplyComment == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_replyComment_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.ReplyComment(childComplexity, args["userID"].(string), args["contentID"].(string), args["commentID"].(string), args["target"].(model.TargetComment)), true
+		return e.complexity.Mutation.RejectOfferedContent(childComplexity, args["userName"].(string), args["courseID"].(string), args["pendingID"].(string)), true
 
 	case "Mutation.updateComment":
 		if e.complexity.Mutation.UpdateComment == nil {
@@ -825,7 +805,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateComment(childComplexity, args["userID"].(string), args["contentID"].(string), args["commentID"].(string), args["target"].(model.EditedComment)), true
+		return e.complexity.Mutation.UpdateComment(childComplexity, args["userName"].(string), args["contentID"].(string), args["commentID"].(string), args["target"].(model.EditedComment)), true
 
 	case "Mutation.updateCourseInfo":
 		if e.complexity.Mutation.UpdateCourseInfo == nil {
@@ -837,7 +817,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateCourseInfo(childComplexity, args["userID"].(string), args["courseID"].(string), args["toBe"].(model.EditedCourse)), true
+		return e.complexity.Mutation.UpdateCourseInfo(childComplexity, args["userName"].(string), args["courseID"].(string), args["toBe"].(model.EditedCourse)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -849,7 +829,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["userID"].(string), args["toBe"].(model.EditedUser)), true
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["userName"].(string), args["toBe"].(model.EditedUser)), true
 
 	case "Mutation.uploadAttachment":
 		if e.complexity.Mutation.UploadAttachment == nil {
@@ -861,7 +841,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UploadAttachment(childComplexity, args["userID"].(string), args["courseID"].(string), args["target"].(model.TargetContent)), true
+		return e.complexity.Mutation.UploadAttachment(childComplexity, args["userName"].(string), args["courseID"].(string), args["target"].(model.TargetContent)), true
 
 	case "Mutation.uploadContent":
 		if e.complexity.Mutation.UploadContent == nil {
@@ -873,7 +853,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UploadContent(childComplexity, args["userID"].(string), args["courseID"].(string), args["target"].(model.TargetContent)), true
+		return e.complexity.Mutation.UploadContent(childComplexity, args["userName"].(string), args["courseID"].(string), args["target"].(model.TargetContent)), true
 
 	case "OfferedContentRejectedException.message":
 		if e.complexity.OfferedContentRejectedException.Message == nil {
@@ -938,54 +918,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PendingNotFoundException.Message(childComplexity), true
 
-	case "Query.attachment":
-		if e.complexity.Query.Attachment == nil {
-			break
-		}
-
-		args, err := ec.field_Query_attachment_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Attachment(childComplexity, args["id"].(string)), true
-
-	case "Query.attachments":
-		if e.complexity.Query.Attachments == nil {
-			break
-		}
-
-		args, err := ec.field_Query_attachments_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Attachments(childComplexity, args["courseID"].(string), args["start"].(int), args["amount"].(int)), true
-
-	case "Query.comment":
-		if e.complexity.Query.Comment == nil {
-			break
-		}
-
-		args, err := ec.field_Query_comment_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Comment(childComplexity, args["id"].(string)), true
-
-	case "Query.commentByFilter":
-		if e.complexity.Query.CommentByFilter == nil {
-			break
-		}
-
-		args, err := ec.field_Query_commentByFilter_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.CommentByFilter(childComplexity, args["filter"].(model.CommentFilter), args["start"].(int), args["amount"].(int)), true
-
 	case "Query.content":
 		if e.complexity.Query.Content == nil {
 			break
@@ -998,18 +930,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Content(childComplexity, args["id"].(string)), true
 
-	case "Query.contentByFilter":
-		if e.complexity.Query.ContentByFilter == nil {
-			break
-		}
-
-		args, err := ec.field_Query_contentByFilter_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.ContentByFilter(childComplexity, args["filter"].(model.CourseFilter), args["start"].(int), args["amount"].(int)), true
-
 	case "Query.contents":
 		if e.complexity.Query.Contents == nil {
 			break
@@ -1020,7 +940,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Contents(childComplexity, args["start"].(int), args["amount"].(int)), true
+		return e.complexity.Query.Contents(childComplexity, args["tags"].([]string), args["start"].(int), args["amount"].(int)), true
 
 	case "Query.course":
 		if e.complexity.Query.Course == nil {
@@ -1034,18 +954,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Course(childComplexity, args["id"].(string)), true
 
-	case "Query.courseByFilter":
-		if e.complexity.Query.CourseByFilter == nil {
-			break
-		}
-
-		args, err := ec.field_Query_courseByFilter_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.CourseByFilter(childComplexity, args["filter"].(model.CourseFilter), args["start"].(int), args["amount"].(int)), true
-
 	case "Query.courses":
 		if e.complexity.Query.Courses == nil {
 			break
@@ -1056,31 +964,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Courses(childComplexity, args["start"].(int), args["amount"].(int)), true
+		return e.complexity.Query.Courses(childComplexity, args["keyWord"].(*string), args["start"].(int), args["amount"].(int)), true
 
-	case "Query.pending":
-		if e.complexity.Query.Pending == nil {
+	case "Query.pendings":
+		if e.complexity.Query.Pendings == nil {
 			break
 		}
 
-		args, err := ec.field_Query_pending_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_pendings_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Pending(childComplexity, args["id"].(string)), true
-
-	case "Query.pendingByFilter":
-		if e.complexity.Query.PendingByFilter == nil {
-			break
-		}
-
-		args, err := ec.field_Query_pendingByFilter_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.PendingByFilter(childComplexity, args["filter"].(model.PendingFilter), args["start"].(int), args["amount"].(int)), true
+		return e.complexity.Query.Pendings(childComplexity, args["filter"].(model.PendingFilter), args["start"].(int), args["amount"].(int)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -1092,19 +988,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["id"].(*string)), true
-
-	case "Query.userByFilter":
-		if e.complexity.Query.UserByFilter == nil {
-			break
-		}
-
-		args, err := ec.field_Query_userByFilter_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.UserByFilter(childComplexity, args["filter"].(model.UserFilter), args["start"].(int), args["amount"].(int)), true
+		return e.complexity.Query.User(childComplexity, args["username"].(*string)), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -1160,12 +1044,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Token.Token(childComplexity), true
 
-	case "User.courses":
-		if e.complexity.User.Courses == nil {
+	case "User.courseIDs":
+		if e.complexity.User.CourseIDs == nil {
 			break
 		}
 
-		return e.complexity.User.Courses(childComplexity), true
+		return e.complexity.User.CourseIDs(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -1307,7 +1191,7 @@ var sources = []*ast.Source{
     password: String!
     name: String
     email: String
-    courses: [Course!]
+    courseIDs: [String!]
 }
 
 type Course {
@@ -1320,7 +1204,7 @@ type Course {
     pends: [Pending!]
     students: [User!]
     contents: [Content!]
-    inventory: [Attachment!]
+    inventory(start: Int!=0, amount: Int!=5): [Attachment!]
 }
 
 enum Status{
@@ -1347,9 +1231,9 @@ type Content{
     uploadedBY: User!
     approvedBY: User
     vurl: String! #todo better implementation for video file
-    comments: [Comment!]
+    comments(start: Int!=0, amount: Int!=5): [Comment!]
     tags: [String!]
-    course: Course!
+    courseID: String!
 }
 
 type Attachment{
@@ -1358,7 +1242,7 @@ type Attachment{
     aurl: String! #todo better implementation for attachment file
     description: String
     timestamp: Int!
-    course: Course!
+    courseID: String!
 }
 
 type Comment{
@@ -1378,61 +1262,23 @@ type Reply{
     comment: Comment!
 }
 
-input UserFilter{
-    username: String
-    courseID: String # search for users inside a course
-}
-
-input CourseFilter{
-    keyWord: String # search in title, summery, title of contents & description of contents
-    memberID: String # search by id of user
-    memberUsername: [String!] # search by username of user
-    tags: [String!] # search by tags of contents
-}
-
-input ContentFilter{
-    keyWord: String # search in title & description
-    courseID: String # get videos of a course
-    uploaderID: String
-    uploaderUsername: String
-    tags: [String!]
-}
-
-input CommentFilter{
-    contentID: String
-    commentID: String # get comments by ID of replied comment
-    authorID: String
-    authorUsername: String
-}
-
 input PendingFilter{
     courseID: String
     status: Status
-    uploaderID: String
     uploaderUsername: String
 }
 
 type Query {
-    user(id: String): User!
+    user(username: String): User!
     users(start: Int!=0, amount: Int!=5): [User!]!
-    userByFilter(filter:UserFilter!, start:Int!=0, amount:Int!=5): [Course!]!
 
     course(id: String!): Course!
-    courses(start: Int!=0, amount: Int!=5): [Course!]!
-    courseByFilter(filter: CourseFilter!, start: Int!=0, amount: Int!=5): [Course!]!
+    courses(keyWord: String, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
 
     content(id: String!): Content!
-    contents(start:Int !=0, amount: Int!=5): [Content!]!
-    contentByFilter(filter: CourseFilter!, start: Int!=0, amount: Int!=5): [Content!]!
+    contents(tags: [String!]!, start: Int!=0, amount: Int!=5): [Content!]!
 
-    comment(id:String!): Comment!
-    commentByFilter(filter:CommentFilter!, start: Int!=0, amount: Int!=5): [Comment!]!
-
-    attachment(id: String!): Attachment!
-    attachments(courseID: String!, start: Int!=0, amount: Int!=5): [Attachment!]!
-
-    pending(id: String!): Pending!
-    pendingByFilter(filter: PendingFilter!, start: Int!=0, amount: Int!=5): [Pending!]!
+    pendings(filter: PendingFilter!, start: Int!=0, amount: Int!=5): [Pending!]!
 }
 
 input TargetUser{
@@ -1455,7 +1301,7 @@ input Login {
 }
 
 type Token{
-    token:String!
+    token:String! # todo dual tokens :)
 }
 
 input TargetCourse{
@@ -1471,30 +1317,23 @@ input EditedCourse{
 input TargetContent{
     title: String!
     description: String
-    vurl: String!
+    vurl: String! # todo actual video
     tags: [String!]
 }
 
 input EditContent{
     title: String
     description: String
-    vurl: String
     tags: [String!]
 }
 
 input TargetPending{
     title: String!
     description: String
-    furl: String!
+    furl: String! # todo actual video
 }
 
 input EditedPending{
-    title: String
-    description: String
-    furl: String
-}
-
-input ChangedPending{
     title: String
     description: String
 }
@@ -1581,45 +1420,43 @@ union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundExce
 union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | PendingNotFoundException | InternalServerException
 union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | InternalServerException
 
-union CreateCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | InternalServerException
+union CreateCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
 union EditCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | InternalServerException
 union DeleteCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
-union ReplyCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
 
 
 type Mutation {
     createUser(target:TargetUser!): CreateUserPayload!
-    updateUser(userID:String!, toBe:EditedUser!): UpdateUserPayload! #todo implement with authentication & jwt tokens
-    deleteUser(userID:String!): DeleteUserPayload! #todo implement with authentication & jwt tokens
+    updateUser(userName:String!, toBe:EditedUser!): UpdateUserPayload! #todo implement with authentication & jwt tokens
+    deleteUser(userName:String!): DeleteUserPayload! #todo implement with authentication & jwt tokens
     login(input: Login!): LoginPayload!
     refreshToken: LoginPayload!
 
-    createCourse(userID:String!, target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
-    updateCourseInfo(userID:String!, courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
-    deleteCourse(userID:String!, courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
+    createCourse(userName:String!, target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
+    updateCourseInfo(userName:String!, courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
+    deleteCourse(userName:String!, courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
 
-    addUserToCourse(userID:String!, courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
-    promoteUserToTA(userID:String!, courseID:String!, targetUserID:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
-    demoteUserToSTD(userID:String!, courseID:String!, targetUserID:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
+    addUserToCourse(userName:String!, courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
+    promoteUserToTA(userName:String!, courseID:String!, targetUserID:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
+    demoteUserToSTD(userName:String!, courseID:String!, targetUserID:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
 
-    uploadContent(userID:String!, courseID:String!, target:TargetContent!): UploadContentPayLoad! #todo implement with authentication & jwt tokens
-    editContent(userID:String!, courseID:String!, contentID:String!, target:EditContent!): EditContentPayLoad! #todo implement with authentication & jwt tokens
-    deleteContent(userID:String!, courseID:String!, contentID:String!): DeleteContentPayLoad! #todo implement with authentication & jwt tokens
+    uploadContent(userName:String!, courseID:String!, target:TargetContent!): UploadContentPayLoad! #todo implement with authentication & jwt tokens
+    editContent(userName:String!, courseID:String!, contentID:String!, target:EditContent!): EditContentPayLoad! #todo implement with authentication & jwt tokens
+    deleteContent(userName:String!, courseID:String!, contentID:String!): DeleteContentPayLoad! #todo implement with authentication & jwt tokens
 
-    uploadAttachment(userID:String!, courseID:String!, target:TargetContent!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
-    editAttachment(userID:String!, courseID:String!, attachmentID:String!, target:EditContent!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
-    deleteAttachment(userID:String!, courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    uploadAttachment(userName:String!, courseID:String!, target:TargetContent!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    editAttachment(userName:String!, courseID:String!, attachmentID:String!, target:EditContent!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    deleteAttachment(userName:String!, courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
 
-    offerContent(userID:String!, courseID:String!, target:TargetPending!): OfferContentPayLoad! #todo implement with authentication & jwt tokens
-    editOfferedContent(userID:String!, courseID:String!, pendingID:String!, target:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
-    deleteOfferedContent(userID:String!, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
-    acceptOfferedContent(userID:String!, courseID:String!, pendingID:String!, changed:ChangedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
-    rejectOfferedContent(userID:String!, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    offerContent(userName:String!, courseID:String!, target:TargetPending!): OfferContentPayLoad! #todo implement with authentication & jwt tokens
+    editOfferedContent(userName:String!, courseID:String!, pendingID:String!, target:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    deleteOfferedContent(userName:String!, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    acceptOfferedContent(userName:String!, courseID:String!, pendingID:String!, changed:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    rejectOfferedContent(userName:String!, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
 
-    createComment(userID:String!, contentID:String!, target:TargetComment!): CreateCommentPayLoad! #todo implement with authentication & jwt tokens
-    updateComment(userID:String!, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad! #todo implement with authentication & jwt tokens
-    deleteComment(userID:String!, contentID:String!, commentID:String!): DeleteCommentPayLoad! #todo implement with authentication & jwt tokens
-    replyComment(userID:String!, contentID:String!, commentID:String!, target:TargetComment!): ReplyCommentPayLoad! #todo implement with authentication & jwt tokens
+    createComment(userName:String!, contentID:String!, repliedAtID:String, target:TargetComment!): CreateCommentPayLoad! #todo implement with authentication & jwt tokens
+    updateComment(userName:String!, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad! #todo implement with authentication & jwt tokens
+    deleteComment(userName:String!, contentID:String!, commentID:String!): DeleteCommentPayLoad! #todo implement with authentication & jwt tokens
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -1628,18 +1465,66 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Content_comments_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["start"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["start"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["amount"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["amount"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Course_inventory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["start"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["start"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["amount"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["amount"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_acceptOfferedContent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -1658,10 +1543,10 @@ func (ec *executionContext) field_Mutation_acceptOfferedContent_args(ctx context
 		}
 	}
 	args["pendingID"] = arg2
-	var arg3 model.ChangedPending
+	var arg3 model.EditedPending
 	if tmp, ok := rawArgs["changed"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("changed"))
-		arg3, err = ec.unmarshalNChangedPending2yesᚑsharifTubeᚋgraphᚋmodelᚐChangedPending(ctx, tmp)
+		arg3, err = ec.unmarshalNEditedPending2yesᚑsharifTubeᚋgraphᚋmodelᚐEditedPending(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1674,14 +1559,14 @@ func (ec *executionContext) field_Mutation_addUserToCourse_args(ctx context.Cont
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -1707,14 +1592,14 @@ func (ec *executionContext) field_Mutation_createComment_args(ctx context.Contex
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["contentID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
@@ -1724,15 +1609,24 @@ func (ec *executionContext) field_Mutation_createComment_args(ctx context.Contex
 		}
 	}
 	args["contentID"] = arg1
-	var arg2 model.TargetComment
-	if tmp, ok := rawArgs["target"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg2, err = ec.unmarshalNTargetComment2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetComment(ctx, tmp)
+	var arg2 *string
+	if tmp, ok := rawArgs["repliedAtID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("repliedAtID"))
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["target"] = arg2
+	args["repliedAtID"] = arg2
+	var arg3 model.TargetComment
+	if tmp, ok := rawArgs["target"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
+		arg3, err = ec.unmarshalNTargetComment2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetComment(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["target"] = arg3
 	return args, nil
 }
 
@@ -1740,14 +1634,14 @@ func (ec *executionContext) field_Mutation_createCourse_args(ctx context.Context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 model.TargetCourse
 	if tmp, ok := rawArgs["target"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
@@ -1779,14 +1673,14 @@ func (ec *executionContext) field_Mutation_deleteAttachment_args(ctx context.Con
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -1812,14 +1706,14 @@ func (ec *executionContext) field_Mutation_deleteComment_args(ctx context.Contex
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["contentID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
@@ -1845,14 +1739,14 @@ func (ec *executionContext) field_Mutation_deleteContent_args(ctx context.Contex
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -1878,14 +1772,14 @@ func (ec *executionContext) field_Mutation_deleteCourse_args(ctx context.Context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -1902,14 +1796,14 @@ func (ec *executionContext) field_Mutation_deleteOfferedContent_args(ctx context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -1935,14 +1829,14 @@ func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, 
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	return args, nil
 }
 
@@ -1950,14 +1844,14 @@ func (ec *executionContext) field_Mutation_demoteUserToSTD_args(ctx context.Cont
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -1983,14 +1877,14 @@ func (ec *executionContext) field_Mutation_editAttachment_args(ctx context.Conte
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -2025,14 +1919,14 @@ func (ec *executionContext) field_Mutation_editContent_args(ctx context.Context,
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -2067,14 +1961,14 @@ func (ec *executionContext) field_Mutation_editOfferedContent_args(ctx context.C
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -2124,14 +2018,14 @@ func (ec *executionContext) field_Mutation_offerContent_args(ctx context.Context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -2157,14 +2051,14 @@ func (ec *executionContext) field_Mutation_promoteUserToTA_args(ctx context.Cont
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -2190,14 +2084,14 @@ func (ec *executionContext) field_Mutation_rejectOfferedContent_args(ctx context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -2219,60 +2113,18 @@ func (ec *executionContext) field_Mutation_rejectOfferedContent_args(ctx context
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_replyComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userID"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["contentID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["contentID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["commentID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commentID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["commentID"] = arg2
-	var arg3 model.TargetComment
-	if tmp, ok := rawArgs["target"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg3, err = ec.unmarshalNTargetComment2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetComment(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["target"] = arg3
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_updateComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["contentID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
@@ -2307,14 +2159,14 @@ func (ec *executionContext) field_Mutation_updateCourseInfo_args(ctx context.Con
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -2340,14 +2192,14 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 model.EditedUser
 	if tmp, ok := rawArgs["toBe"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("toBe"))
@@ -2364,14 +2216,14 @@ func (ec *executionContext) field_Mutation_uploadAttachment_args(ctx context.Con
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -2397,14 +2249,14 @@ func (ec *executionContext) field_Mutation_uploadContent_args(ctx context.Contex
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+	if tmp, ok := rawArgs["userName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userID"] = arg0
+	args["userName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -2441,135 +2293,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_attachment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_attachments_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["courseID"] = arg0
-	var arg1 int
-	if tmp, ok := rawArgs["start"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["start"] = arg1
-	var arg2 int
-	if tmp, ok := rawArgs["amount"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
-		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["amount"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_commentByFilter_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CommentFilter
-	if tmp, ok := rawArgs["filter"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalNCommentFilter2yesᚑsharifTubeᚋgraphᚋmodelᚐCommentFilter(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["filter"] = arg0
-	var arg1 int
-	if tmp, ok := rawArgs["start"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["start"] = arg1
-	var arg2 int
-	if tmp, ok := rawArgs["amount"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
-		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["amount"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_comment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_contentByFilter_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CourseFilter
-	if tmp, ok := rawArgs["filter"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalNCourseFilter2yesᚑsharifTubeᚋgraphᚋmodelᚐCourseFilter(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["filter"] = arg0
-	var arg1 int
-	if tmp, ok := rawArgs["start"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["start"] = arg1
-	var arg2 int
-	if tmp, ok := rawArgs["amount"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
-		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["amount"] = arg2
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_content_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2588,39 +2311,15 @@ func (ec *executionContext) field_Query_content_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Query_contents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["start"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg0 []string
+	if tmp, ok := rawArgs["tags"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+		arg0, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["start"] = arg0
-	var arg1 int
-	if tmp, ok := rawArgs["amount"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["amount"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_courseByFilter_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CourseFilter
-	if tmp, ok := rawArgs["filter"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalNCourseFilter2yesᚑsharifTubeᚋgraphᚋmodelᚐCourseFilter(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["filter"] = arg0
+	args["tags"] = arg0
 	var arg1 int
 	if tmp, ok := rawArgs["start"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
@@ -2660,28 +2359,37 @@ func (ec *executionContext) field_Query_course_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_courses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["start"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg0 *string
+	if tmp, ok := rawArgs["keyWord"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyWord"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["start"] = arg0
+	args["keyWord"] = arg0
 	var arg1 int
-	if tmp, ok := rawArgs["amount"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+	if tmp, ok := rawArgs["start"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
 		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["amount"] = arg1
+	args["start"] = arg1
+	var arg2 int
+	if tmp, ok := rawArgs["amount"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["amount"] = arg2
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_pendingByFilter_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_pendings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 model.PendingFilter
@@ -2714,66 +2422,18 @@ func (ec *executionContext) field_Query_pendingByFilter_args(ctx context.Context
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_pending_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_userByFilter_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.UserFilter
-	if tmp, ok := rawArgs["filter"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalNUserFilter2yesᚑsharifTubeᚋgraphᚋmodelᚐUserFilter(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["filter"] = arg0
-	var arg1 int
-	if tmp, ok := rawArgs["start"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["start"] = arg1
-	var arg2 int
-	if tmp, ok := rawArgs["amount"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
-		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["amount"] = arg2
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["username"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
 		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["username"] = arg0
 	return args, nil
 }
 
@@ -3046,7 +2706,7 @@ func (ec *executionContext) _Attachment_timestamp(ctx context.Context, field gra
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Attachment_course(ctx context.Context, field graphql.CollectedField, obj *model.Attachment) (ret graphql.Marshaler) {
+func (ec *executionContext) _Attachment_courseID(ctx context.Context, field graphql.CollectedField, obj *model.Attachment) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -3064,7 +2724,7 @@ func (ec *executionContext) _Attachment_course(ctx context.Context, field graphq
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Course, nil
+		return obj.CourseID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3076,9 +2736,9 @@ func (ec *executionContext) _Attachment_course(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Course)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNCourse2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourse(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AttachmentNotFoundException_message(ctx context.Context, field graphql.CollectedField, obj *model.AttachmentNotFoundException) (ret graphql.Marshaler) {
@@ -3613,6 +3273,13 @@ func (ec *executionContext) _Content_comments(ctx context.Context, field graphql
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Content_comments_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Comments, nil
@@ -3661,7 +3328,7 @@ func (ec *executionContext) _Content_tags(ctx context.Context, field graphql.Col
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Content_course(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
+func (ec *executionContext) _Content_courseID(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -3679,7 +3346,7 @@ func (ec *executionContext) _Content_course(ctx context.Context, field graphql.C
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Course, nil
+		return obj.CourseID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3691,9 +3358,9 @@ func (ec *executionContext) _Content_course(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Course)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNCourse2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourse(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ContentNotFoundException_message(ctx context.Context, field graphql.CollectedField, obj *model.ContentNotFoundException) (ret graphql.Marshaler) {
@@ -4047,6 +3714,13 @@ func (ec *executionContext) _Course_inventory(ctx context.Context, field graphql
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Course_inventory_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Inventory, nil
@@ -4270,7 +3944,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, args["userID"].(string), args["toBe"].(model.EditedUser))
+		return ec.resolvers.Mutation().UpdateUser(rctx, args["userName"].(string), args["toBe"].(model.EditedUser))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4312,7 +3986,7 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteUser(rctx, args["userID"].(string))
+		return ec.resolvers.Mutation().DeleteUser(rctx, args["userName"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4431,7 +4105,7 @@ func (ec *executionContext) _Mutation_createCourse(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateCourse(rctx, args["userID"].(string), args["target"].(model.TargetCourse))
+		return ec.resolvers.Mutation().CreateCourse(rctx, args["userName"].(string), args["target"].(model.TargetCourse))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4473,7 +4147,7 @@ func (ec *executionContext) _Mutation_updateCourseInfo(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateCourseInfo(rctx, args["userID"].(string), args["courseID"].(string), args["toBe"].(model.EditedCourse))
+		return ec.resolvers.Mutation().UpdateCourseInfo(rctx, args["userName"].(string), args["courseID"].(string), args["toBe"].(model.EditedCourse))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4515,7 +4189,7 @@ func (ec *executionContext) _Mutation_deleteCourse(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteCourse(rctx, args["userID"].(string), args["courseID"].(string))
+		return ec.resolvers.Mutation().DeleteCourse(rctx, args["userName"].(string), args["courseID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4557,7 +4231,7 @@ func (ec *executionContext) _Mutation_addUserToCourse(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddUserToCourse(rctx, args["userID"].(string), args["courseID"].(string), args["token"].(string))
+		return ec.resolvers.Mutation().AddUserToCourse(rctx, args["userName"].(string), args["courseID"].(string), args["token"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4599,7 +4273,7 @@ func (ec *executionContext) _Mutation_promoteUserToTA(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().PromoteUserToTa(rctx, args["userID"].(string), args["courseID"].(string), args["targetUserID"].(string))
+		return ec.resolvers.Mutation().PromoteUserToTa(rctx, args["userName"].(string), args["courseID"].(string), args["targetUserID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4641,7 +4315,7 @@ func (ec *executionContext) _Mutation_demoteUserToSTD(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DemoteUserToStd(rctx, args["userID"].(string), args["courseID"].(string), args["targetUserID"].(string))
+		return ec.resolvers.Mutation().DemoteUserToStd(rctx, args["userName"].(string), args["courseID"].(string), args["targetUserID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4683,7 +4357,7 @@ func (ec *executionContext) _Mutation_uploadContent(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UploadContent(rctx, args["userID"].(string), args["courseID"].(string), args["target"].(model.TargetContent))
+		return ec.resolvers.Mutation().UploadContent(rctx, args["userName"].(string), args["courseID"].(string), args["target"].(model.TargetContent))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4725,7 +4399,7 @@ func (ec *executionContext) _Mutation_editContent(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditContent(rctx, args["userID"].(string), args["courseID"].(string), args["contentID"].(string), args["target"].(model.EditContent))
+		return ec.resolvers.Mutation().EditContent(rctx, args["userName"].(string), args["courseID"].(string), args["contentID"].(string), args["target"].(model.EditContent))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4767,7 +4441,7 @@ func (ec *executionContext) _Mutation_deleteContent(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteContent(rctx, args["userID"].(string), args["courseID"].(string), args["contentID"].(string))
+		return ec.resolvers.Mutation().DeleteContent(rctx, args["userName"].(string), args["courseID"].(string), args["contentID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4809,7 +4483,7 @@ func (ec *executionContext) _Mutation_uploadAttachment(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UploadAttachment(rctx, args["userID"].(string), args["courseID"].(string), args["target"].(model.TargetContent))
+		return ec.resolvers.Mutation().UploadAttachment(rctx, args["userName"].(string), args["courseID"].(string), args["target"].(model.TargetContent))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4851,7 +4525,7 @@ func (ec *executionContext) _Mutation_editAttachment(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditAttachment(rctx, args["userID"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditContent))
+		return ec.resolvers.Mutation().EditAttachment(rctx, args["userName"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditContent))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4893,7 +4567,7 @@ func (ec *executionContext) _Mutation_deleteAttachment(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteAttachment(rctx, args["userID"].(string), args["courseID"].(string), args["attachmentID"].(string))
+		return ec.resolvers.Mutation().DeleteAttachment(rctx, args["userName"].(string), args["courseID"].(string), args["attachmentID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4935,7 +4609,7 @@ func (ec *executionContext) _Mutation_offerContent(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().OfferContent(rctx, args["userID"].(string), args["courseID"].(string), args["target"].(model.TargetPending))
+		return ec.resolvers.Mutation().OfferContent(rctx, args["userName"].(string), args["courseID"].(string), args["target"].(model.TargetPending))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4977,7 +4651,7 @@ func (ec *executionContext) _Mutation_editOfferedContent(ctx context.Context, fi
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditOfferedContent(rctx, args["userID"].(string), args["courseID"].(string), args["pendingID"].(string), args["target"].(model.EditedPending))
+		return ec.resolvers.Mutation().EditOfferedContent(rctx, args["userName"].(string), args["courseID"].(string), args["pendingID"].(string), args["target"].(model.EditedPending))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5019,7 +4693,7 @@ func (ec *executionContext) _Mutation_deleteOfferedContent(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteOfferedContent(rctx, args["userID"].(string), args["courseID"].(string), args["pendingID"].(string))
+		return ec.resolvers.Mutation().DeleteOfferedContent(rctx, args["userName"].(string), args["courseID"].(string), args["pendingID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5061,7 +4735,7 @@ func (ec *executionContext) _Mutation_acceptOfferedContent(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AcceptOfferedContent(rctx, args["userID"].(string), args["courseID"].(string), args["pendingID"].(string), args["changed"].(model.ChangedPending))
+		return ec.resolvers.Mutation().AcceptOfferedContent(rctx, args["userName"].(string), args["courseID"].(string), args["pendingID"].(string), args["changed"].(model.EditedPending))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5103,7 +4777,7 @@ func (ec *executionContext) _Mutation_rejectOfferedContent(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RejectOfferedContent(rctx, args["userID"].(string), args["courseID"].(string), args["pendingID"].(string))
+		return ec.resolvers.Mutation().RejectOfferedContent(rctx, args["userName"].(string), args["courseID"].(string), args["pendingID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5145,7 +4819,7 @@ func (ec *executionContext) _Mutation_createComment(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateComment(rctx, args["userID"].(string), args["contentID"].(string), args["target"].(model.TargetComment))
+		return ec.resolvers.Mutation().CreateComment(rctx, args["userName"].(string), args["contentID"].(string), args["repliedAtID"].(*string), args["target"].(model.TargetComment))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5187,7 +4861,7 @@ func (ec *executionContext) _Mutation_updateComment(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateComment(rctx, args["userID"].(string), args["contentID"].(string), args["commentID"].(string), args["target"].(model.EditedComment))
+		return ec.resolvers.Mutation().UpdateComment(rctx, args["userName"].(string), args["contentID"].(string), args["commentID"].(string), args["target"].(model.EditedComment))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5229,7 +4903,7 @@ func (ec *executionContext) _Mutation_deleteComment(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteComment(rctx, args["userID"].(string), args["contentID"].(string), args["commentID"].(string))
+		return ec.resolvers.Mutation().DeleteComment(rctx, args["userName"].(string), args["contentID"].(string), args["commentID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5244,48 +4918,6 @@ func (ec *executionContext) _Mutation_deleteComment(ctx context.Context, field g
 	res := resTmp.(model.DeleteCommentPayLoad)
 	fc.Result = res
 	return ec.marshalNDeleteCommentPayLoad2yesᚑsharifTubeᚋgraphᚋmodelᚐDeleteCommentPayLoad(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_replyComment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_replyComment_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ReplyComment(rctx, args["userID"].(string), args["contentID"].(string), args["commentID"].(string), args["target"].(model.TargetComment))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.ReplyCommentPayLoad)
-	fc.Result = res
-	return ec.marshalNReplyCommentPayLoad2yesᚑsharifTubeᚋgraphᚋmodelᚐReplyCommentPayLoad(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OfferedContentRejectedException_message(ctx context.Context, field graphql.CollectedField, obj *model.OfferedContentRejectedException) (ret graphql.Marshaler) {
@@ -5625,7 +5257,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().User(rctx, args["id"].(*string))
+		return ec.resolvers.Query().User(rctx, args["username"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5682,48 +5314,6 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*model.User)
 	fc.Result = res
 	return ec.marshalNUser2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_userByFilter(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_userByFilter_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().UserByFilter(rctx, args["filter"].(model.UserFilter), args["start"].(int), args["amount"].(int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Course)
-	fc.Result = res
-	return ec.marshalNCourse2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourseᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_course(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5793,49 +5383,7 @@ func (ec *executionContext) _Query_courses(ctx context.Context, field graphql.Co
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Courses(rctx, args["start"].(int), args["amount"].(int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Course)
-	fc.Result = res
-	return ec.marshalNCourse2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourseᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_courseByFilter(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_courseByFilter_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CourseByFilter(rctx, args["filter"].(model.CourseFilter), args["start"].(int), args["amount"].(int))
+		return ec.resolvers.Query().Courses(rctx, args["keyWord"].(*string), args["start"].(int), args["amount"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5919,7 +5467,7 @@ func (ec *executionContext) _Query_contents(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Contents(rctx, args["start"].(int), args["amount"].(int))
+		return ec.resolvers.Query().Contents(rctx, args["tags"].([]string), args["start"].(int), args["amount"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5936,7 +5484,7 @@ func (ec *executionContext) _Query_contents(ctx context.Context, field graphql.C
 	return ec.marshalNContent2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐContentᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_contentByFilter(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_pendings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5953,7 +5501,7 @@ func (ec *executionContext) _Query_contentByFilter(ctx context.Context, field gr
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_contentByFilter_args(ctx, rawArgs)
+	args, err := ec.field_Query_pendings_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -5961,259 +5509,7 @@ func (ec *executionContext) _Query_contentByFilter(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ContentByFilter(rctx, args["filter"].(model.CourseFilter), args["start"].(int), args["amount"].(int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Content)
-	fc.Result = res
-	return ec.marshalNContent2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐContentᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_comment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_comment_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Comment(rctx, args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Comment)
-	fc.Result = res
-	return ec.marshalNComment2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐComment(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_commentByFilter(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_commentByFilter_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CommentByFilter(rctx, args["filter"].(model.CommentFilter), args["start"].(int), args["amount"].(int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Comment)
-	fc.Result = res
-	return ec.marshalNComment2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCommentᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_attachment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_attachment_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Attachment(rctx, args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Attachment)
-	fc.Result = res
-	return ec.marshalNAttachment2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐAttachment(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_attachments(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_attachments_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Attachments(rctx, args["courseID"].(string), args["start"].(int), args["amount"].(int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Attachment)
-	fc.Result = res
-	return ec.marshalNAttachment2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐAttachmentᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_pending(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_pending_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Pending(rctx, args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Pending)
-	fc.Result = res
-	return ec.marshalNPending2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐPending(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_pendingByFilter(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_pendingByFilter_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().PendingByFilter(rctx, args["filter"].(model.PendingFilter), args["start"].(int), args["amount"].(int))
+		return ec.resolvers.Query().Pendings(rctx, args["filter"].(model.PendingFilter), args["start"].(int), args["amount"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6680,7 +5976,7 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_courses(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_courseIDs(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -6698,7 +5994,7 @@ func (ec *executionContext) _User_courses(ctx context.Context, field graphql.Col
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Courses, nil
+		return obj.CourseIDs, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6707,9 +6003,9 @@ func (ec *executionContext) _User_courses(ctx context.Context, field graphql.Col
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Course)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalOCourse2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourseᚄ(ctx, field.Selections, res)
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _UserIsNotSTDException_message(ctx context.Context, field graphql.CollectedField, obj *model.UserIsNotSTDException) (ret graphql.Marshaler) {
@@ -7974,174 +7270,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputChangedPending(ctx context.Context, obj interface{}) (model.ChangedPending, error) {
-	var it model.ChangedPending
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "title":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
-			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "description":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCommentFilter(ctx context.Context, obj interface{}) (model.CommentFilter, error) {
-	var it model.CommentFilter
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "contentID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
-			it.ContentID, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "commentID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commentID"))
-			it.CommentID, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "authorID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authorID"))
-			it.AuthorID, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "authorUsername":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authorUsername"))
-			it.AuthorUsername, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputContentFilter(ctx context.Context, obj interface{}) (model.ContentFilter, error) {
-	var it model.ContentFilter
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "keyWord":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyWord"))
-			it.KeyWord, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "courseID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-			it.CourseID, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "uploaderID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uploaderID"))
-			it.UploaderID, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "uploaderUsername":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uploaderUsername"))
-			it.UploaderUsername, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "tags":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
-			it.Tags, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCourseFilter(ctx context.Context, obj interface{}) (model.CourseFilter, error) {
-	var it model.CourseFilter
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "keyWord":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyWord"))
-			it.KeyWord, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "memberID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("memberID"))
-			it.MemberID, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "memberUsername":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("memberUsername"))
-			it.MemberUsername, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "tags":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
-			it.Tags, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputEditContent(ctx context.Context, obj interface{}) (model.EditContent, error) {
 	var it model.EditContent
 	var asMap = obj.(map[string]interface{})
@@ -8161,14 +7289,6 @@ func (ec *executionContext) unmarshalInputEditContent(ctx context.Context, obj i
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
 			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "vurl":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vurl"))
-			it.Vurl, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8253,14 +7373,6 @@ func (ec *executionContext) unmarshalInputEditedPending(ctx context.Context, obj
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
 			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "furl":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("furl"))
-			it.Furl, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8361,14 +7473,6 @@ func (ec *executionContext) unmarshalInputPendingFilter(ctx context.Context, obj
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
 			it.Status, err = ec.unmarshalOStatus2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐStatus(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "uploaderID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uploaderID"))
-			it.UploaderID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8558,34 +7662,6 @@ func (ec *executionContext) unmarshalInputTargetUser(ctx context.Context, obj in
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUserFilter(ctx context.Context, obj interface{}) (model.UserFilter, error) {
-	var it model.UserFilter
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "username":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
-			it.Username, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "courseID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-			it.CourseID, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -8666,6 +7742,13 @@ func (ec *executionContext) _CreateCommentPayLoad(ctx context.Context, sel ast.S
 			return graphql.Null
 		}
 		return ec._ContentNotFoundException(ctx, sel, obj)
+	case model.CommentNotFoundException:
+		return ec._CommentNotFoundException(ctx, sel, &obj)
+	case *model.CommentNotFoundException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._CommentNotFoundException(ctx, sel, obj)
 	case model.UserNotAllowedException:
 		return ec._UserNotAllowedException(ctx, sel, &obj)
 	case *model.UserNotAllowedException:
@@ -9552,57 +8635,6 @@ func (ec *executionContext) _PromoteToTAPayload(ctx context.Context, sel ast.Sel
 	}
 }
 
-func (ec *executionContext) _ReplyCommentPayLoad(ctx context.Context, sel ast.SelectionSet, obj model.ReplyCommentPayLoad) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.Comment:
-		return ec._Comment(ctx, sel, &obj)
-	case *model.Comment:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Comment(ctx, sel, obj)
-	case model.UserNotFoundException:
-		return ec._UserNotFoundException(ctx, sel, &obj)
-	case *model.UserNotFoundException:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._UserNotFoundException(ctx, sel, obj)
-	case model.ContentNotFoundException:
-		return ec._ContentNotFoundException(ctx, sel, &obj)
-	case *model.ContentNotFoundException:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._ContentNotFoundException(ctx, sel, obj)
-	case model.UserNotAllowedException:
-		return ec._UserNotAllowedException(ctx, sel, &obj)
-	case *model.UserNotAllowedException:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._UserNotAllowedException(ctx, sel, obj)
-	case model.CommentNotFoundException:
-		return ec._CommentNotFoundException(ctx, sel, &obj)
-	case *model.CommentNotFoundException:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._CommentNotFoundException(ctx, sel, obj)
-	case model.InternalServerException:
-		return ec._InternalServerException(ctx, sel, &obj)
-	case *model.InternalServerException:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._InternalServerException(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
 func (ec *executionContext) _UpdateCourseInfoPayload(ctx context.Context, sel ast.SelectionSet, obj model.UpdateCourseInfoPayload) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -9850,8 +8882,8 @@ func (ec *executionContext) _Attachment(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "course":
-			out.Values[i] = ec._Attachment_course(ctx, field, obj)
+		case "courseID":
+			out.Values[i] = ec._Attachment_courseID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -9893,7 +8925,7 @@ func (ec *executionContext) _AttachmentNotFoundException(ctx context.Context, se
 	return out
 }
 
-var commentImplementors = []string{"Comment", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad", "ReplyCommentPayLoad"}
+var commentImplementors = []string{"Comment", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
 
 func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, obj *model.Comment) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, commentImplementors)
@@ -9942,7 +8974,7 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
-var commentNotFoundExceptionImplementors = []string{"CommentNotFoundException", "Exception", "EditCommentPayLoad", "DeleteCommentPayLoad", "ReplyCommentPayLoad"}
+var commentNotFoundExceptionImplementors = []string{"CommentNotFoundException", "Exception", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
 
 func (ec *executionContext) _CommentNotFoundException(ctx context.Context, sel ast.SelectionSet, obj *model.CommentNotFoundException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, commentNotFoundExceptionImplementors)
@@ -10013,8 +9045,8 @@ func (ec *executionContext) _Content(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Content_comments(ctx, field, obj)
 		case "tags":
 			out.Values[i] = ec._Content_tags(ctx, field, obj)
-		case "course":
-			out.Values[i] = ec._Content_course(ctx, field, obj)
+		case "courseID":
+			out.Values[i] = ec._Content_courseID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -10029,7 +9061,7 @@ func (ec *executionContext) _Content(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
-var contentNotFoundExceptionImplementors = []string{"ContentNotFoundException", "Exception", "EditContentPayLoad", "DeleteContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad", "ReplyCommentPayLoad"}
+var contentNotFoundExceptionImplementors = []string{"ContentNotFoundException", "Exception", "EditContentPayLoad", "DeleteContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
 
 func (ec *executionContext) _ContentNotFoundException(ctx context.Context, sel ast.SelectionSet, obj *model.ContentNotFoundException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, contentNotFoundExceptionImplementors)
@@ -10191,7 +9223,7 @@ func (ec *executionContext) _IncorrectTokenException(ctx context.Context, sel as
 	return out
 }
 
-var internalServerExceptionImplementors = []string{"InternalServerException", "Exception", "CreateUserPayload", "UpdateUserPayload", "DeleteUserPayload", "LoginPayload", "CreateCoursePayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad", "ReplyCommentPayLoad"}
+var internalServerExceptionImplementors = []string{"InternalServerException", "Exception", "CreateUserPayload", "UpdateUserPayload", "DeleteUserPayload", "LoginPayload", "CreateCoursePayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
 
 func (ec *executionContext) _InternalServerException(ctx context.Context, sel ast.SelectionSet, obj *model.InternalServerException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, internalServerExceptionImplementors)
@@ -10358,11 +9390,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "replyComment":
-			out.Values[i] = ec._Mutation_replyComment(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10525,20 +9552,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "userByFilter":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_userByFilter(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "course":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -10562,20 +9575,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_courses(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "courseByFilter":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_courseByFilter(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -10609,7 +9608,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "contentByFilter":
+		case "pendings":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -10617,91 +9616,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_contentByFilter(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "comment":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_comment(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "commentByFilter":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_commentByFilter(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "attachment":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_attachment(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "attachments":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_attachments(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "pending":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_pending(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "pendingByFilter":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_pendingByFilter(ctx, field)
+				res = ec._Query_pendings(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -10826,8 +9741,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._User_name(ctx, field, obj)
 		case "email":
 			out.Values[i] = ec._User_email(ctx, field, obj)
-		case "courses":
-			out.Values[i] = ec._User_courses(ctx, field, obj)
+		case "courseIDs":
+			out.Values[i] = ec._User_courseIDs(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10893,7 +9808,7 @@ func (ec *executionContext) _UserIsNotTAException(ctx context.Context, sel ast.S
 	return out
 }
 
-var userNotAllowedExceptionImplementors = []string{"UserNotAllowedException", "Exception", "UpdateUserPayload", "DeleteUserPayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad", "ReplyCommentPayLoad"}
+var userNotAllowedExceptionImplementors = []string{"UserNotAllowedException", "Exception", "UpdateUserPayload", "DeleteUserPayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
 
 func (ec *executionContext) _UserNotAllowedException(ctx context.Context, sel ast.SelectionSet, obj *model.UserNotAllowedException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userNotAllowedExceptionImplementors)
@@ -10920,7 +9835,7 @@ func (ec *executionContext) _UserNotAllowedException(ctx context.Context, sel as
 	return out
 }
 
-var userNotFoundExceptionImplementors = []string{"UserNotFoundException", "Exception", "UpdateUserPayload", "DeleteUserPayload", "CreateCoursePayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad", "ReplyCommentPayLoad"}
+var userNotFoundExceptionImplementors = []string{"UserNotFoundException", "Exception", "UpdateUserPayload", "DeleteUserPayload", "CreateCoursePayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
 
 func (ec *executionContext) _UserNotFoundException(ctx context.Context, sel ast.SelectionSet, obj *model.UserNotFoundException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userNotFoundExceptionImplementors)
@@ -11229,47 +10144,6 @@ func (ec *executionContext) marshalNAddUserToCoursePayload2yesᚑsharifTubeᚋgr
 	return ec._AddUserToCoursePayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAttachment2yesᚑsharifTubeᚋgraphᚋmodelᚐAttachment(ctx context.Context, sel ast.SelectionSet, v model.Attachment) graphql.Marshaler {
-	return ec._Attachment(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNAttachment2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐAttachmentᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Attachment) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNAttachment2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐAttachment(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
 func (ec *executionContext) marshalNAttachment2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐAttachment(ctx context.Context, sel ast.SelectionSet, v *model.Attachment) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -11295,52 +10169,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNChangedPending2yesᚑsharifTubeᚋgraphᚋmodelᚐChangedPending(ctx context.Context, v interface{}) (model.ChangedPending, error) {
-	res, err := ec.unmarshalInputChangedPending(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNComment2yesᚑsharifTubeᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v model.Comment) graphql.Marshaler {
-	return ec._Comment(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNComment2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCommentᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Comment) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNComment2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐComment(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
 func (ec *executionContext) marshalNComment2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v *model.Comment) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -11349,11 +10177,6 @@ func (ec *executionContext) marshalNComment2ᚖyesᚑsharifTubeᚋgraphᚋmodel�
 		return graphql.Null
 	}
 	return ec._Comment(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNCommentFilter2yesᚑsharifTubeᚋgraphᚋmodelᚐCommentFilter(ctx context.Context, v interface{}) (model.CommentFilter, error) {
-	res, err := ec.unmarshalInputCommentFilter(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNContent2yesᚑsharifTubeᚋgraphᚋmodelᚐContent(ctx context.Context, sel ast.SelectionSet, v model.Content) graphql.Marshaler {
@@ -11456,11 +10279,6 @@ func (ec *executionContext) marshalNCourse2ᚖyesᚑsharifTubeᚋgraphᚋmodel�
 		return graphql.Null
 	}
 	return ec._Course(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNCourseFilter2yesᚑsharifTubeᚋgraphᚋmodelᚐCourseFilter(ctx context.Context, v interface{}) (model.CourseFilter, error) {
-	res, err := ec.unmarshalInputCourseFilter(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNCreateCommentPayLoad2yesᚑsharifTubeᚋgraphᚋmodelᚐCreateCommentPayLoad(ctx context.Context, sel ast.SelectionSet, v model.CreateCommentPayLoad) graphql.Marshaler {
@@ -11683,10 +10501,6 @@ func (ec *executionContext) marshalNOfferContentPayLoad2yesᚑsharifTubeᚋgraph
 	return ec._OfferContentPayLoad(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPending2yesᚑsharifTubeᚋgraphᚋmodelᚐPending(ctx context.Context, sel ast.SelectionSet, v model.Pending) graphql.Marshaler {
-	return ec._Pending(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNPending2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐPendingᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Pending) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -11759,16 +10573,6 @@ func (ec *executionContext) marshalNReply2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐ
 	return ec._Reply(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNReplyCommentPayLoad2yesᚑsharifTubeᚋgraphᚋmodelᚐReplyCommentPayLoad(ctx context.Context, sel ast.SelectionSet, v model.ReplyCommentPayLoad) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._ReplyCommentPayLoad(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNStatus2yesᚑsharifTubeᚋgraphᚋmodelᚐStatus(ctx context.Context, v interface{}) (model.Status, error) {
 	var res model.Status
 	err := res.UnmarshalGQL(v)
@@ -11792,6 +10596,36 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalNTargetComment2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetComment(ctx context.Context, v interface{}) (model.TargetComment, error) {
@@ -11908,11 +10742,6 @@ func (ec *executionContext) marshalNUser2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐU
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNUserFilter2yesᚑsharifTubeᚋgraphᚋmodelᚐUserFilter(ctx context.Context, v interface{}) (model.UserFilter, error) {
-	res, err := ec.unmarshalInputUserFilter(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -12276,46 +11105,6 @@ func (ec *executionContext) marshalOContent2ᚕᚖyesᚑsharifTubeᚋgraphᚋmod
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNContent2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐContent(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalOCourse2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourseᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Course) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNCourse2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourse(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

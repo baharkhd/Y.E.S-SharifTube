@@ -84,10 +84,6 @@ type PromoteToTAPayload interface {
 	IsPromoteToTAPayload()
 }
 
-type ReplyCommentPayLoad interface {
-	IsReplyCommentPayLoad()
-}
-
 type UpdateCourseInfoPayload interface {
 	IsUpdateCourseInfoPayload()
 }
@@ -122,7 +118,7 @@ type Attachment struct {
 	Aurl        string  `json:"aurl"`
 	Description *string `json:"description"`
 	Timestamp   int     `json:"timestamp"`
-	Course      *Course `json:"course"`
+	CourseID    string  `json:"courseID"`
 }
 
 func (Attachment) IsUploadAttachmentPayLoad() {}
@@ -137,11 +133,6 @@ func (AttachmentNotFoundException) IsException()               {}
 func (AttachmentNotFoundException) IsEditAttachmentPayLoad()   {}
 func (AttachmentNotFoundException) IsDeleteAttachmentPayLoad() {}
 
-type ChangedPending struct {
-	Title       *string `json:"title"`
-	Description *string `json:"description"`
-}
-
 type Comment struct {
 	ID        string   `json:"id"`
 	Author    *User    `json:"author"`
@@ -154,23 +145,15 @@ type Comment struct {
 func (Comment) IsCreateCommentPayLoad() {}
 func (Comment) IsEditCommentPayLoad()   {}
 func (Comment) IsDeleteCommentPayLoad() {}
-func (Comment) IsReplyCommentPayLoad()  {}
-
-type CommentFilter struct {
-	ContentID      *string `json:"contentID"`
-	CommentID      *string `json:"commentID"`
-	AuthorID       *string `json:"authorID"`
-	AuthorUsername *string `json:"authorUsername"`
-}
 
 type CommentNotFoundException struct {
 	Message string `json:"message"`
 }
 
 func (CommentNotFoundException) IsException()            {}
+func (CommentNotFoundException) IsCreateCommentPayLoad() {}
 func (CommentNotFoundException) IsEditCommentPayLoad()   {}
 func (CommentNotFoundException) IsDeleteCommentPayLoad() {}
-func (CommentNotFoundException) IsReplyCommentPayLoad()  {}
 
 type Content struct {
 	ID          string     `json:"id"`
@@ -182,20 +165,12 @@ type Content struct {
 	Vurl        string     `json:"vurl"`
 	Comments    []*Comment `json:"comments"`
 	Tags        []string   `json:"tags"`
-	Course      *Course    `json:"course"`
+	CourseID    string     `json:"courseID"`
 }
 
 func (Content) IsUploadContentPayLoad() {}
 func (Content) IsEditContentPayLoad()   {}
 func (Content) IsDeleteContentPayLoad() {}
-
-type ContentFilter struct {
-	KeyWord          *string  `json:"keyWord"`
-	CourseID         *string  `json:"courseID"`
-	UploaderID       *string  `json:"uploaderID"`
-	UploaderUsername *string  `json:"uploaderUsername"`
-	Tags             []string `json:"tags"`
-}
 
 type ContentNotFoundException struct {
 	Message string `json:"message"`
@@ -207,7 +182,6 @@ func (ContentNotFoundException) IsDeleteContentPayLoad() {}
 func (ContentNotFoundException) IsCreateCommentPayLoad() {}
 func (ContentNotFoundException) IsEditCommentPayLoad()   {}
 func (ContentNotFoundException) IsDeleteCommentPayLoad() {}
-func (ContentNotFoundException) IsReplyCommentPayLoad()  {}
 
 type Course struct {
 	ID        string        `json:"id"`
@@ -228,13 +202,6 @@ func (Course) IsDeleteCoursePayload()     {}
 func (Course) IsAddUserToCoursePayload()  {}
 func (Course) IsPromoteToTAPayload()      {}
 func (Course) IsDemoteToSTDPayload()      {}
-
-type CourseFilter struct {
-	KeyWord        *string  `json:"keyWord"`
-	MemberID       *string  `json:"memberID"`
-	MemberUsername []string `json:"memberUsername"`
-	Tags           []string `json:"tags"`
-}
 
 type CourseNotFoundException struct {
 	Message string `json:"message"`
@@ -266,7 +233,6 @@ func (DuplicateUsernameException) IsCreateUserPayload() {}
 type EditContent struct {
 	Title       *string  `json:"title"`
 	Description *string  `json:"description"`
-	Vurl        *string  `json:"vurl"`
 	Tags        []string `json:"tags"`
 }
 
@@ -282,7 +248,6 @@ type EditedCourse struct {
 type EditedPending struct {
 	Title       *string `json:"title"`
 	Description *string `json:"description"`
-	Furl        *string `json:"furl"`
 }
 
 type EditedUser struct {
@@ -326,7 +291,6 @@ func (InternalServerException) IsDeleteOfferedContentPayLoad() {}
 func (InternalServerException) IsCreateCommentPayLoad()        {}
 func (InternalServerException) IsEditCommentPayLoad()          {}
 func (InternalServerException) IsDeleteCommentPayLoad()        {}
-func (InternalServerException) IsReplyCommentPayLoad()         {}
 
 type Login struct {
 	Username string `json:"username"`
@@ -356,7 +320,6 @@ func (Pending) IsDeleteOfferedContentPayLoad() {}
 type PendingFilter struct {
 	CourseID         *string `json:"courseID"`
 	Status           *Status `json:"status"`
-	UploaderID       *string `json:"uploaderID"`
 	UploaderUsername *string `json:"uploaderUsername"`
 }
 
@@ -412,22 +375,17 @@ type Token struct {
 func (Token) IsLoginPayload() {}
 
 type User struct {
-	ID       string    `json:"id"`
-	Username string    `json:"username"`
-	Password string    `json:"password"`
-	Name     *string   `json:"name"`
-	Email    *string   `json:"email"`
-	Courses  []*Course `json:"courses"`
+	ID        string   `json:"id"`
+	Username  string   `json:"username"`
+	Password  string   `json:"password"`
+	Name      *string  `json:"name"`
+	Email     *string  `json:"email"`
+	CourseIDs []string `json:"courseIDs"`
 }
 
 func (User) IsCreateUserPayload() {}
 func (User) IsUpdateUserPayload() {}
 func (User) IsDeleteUserPayload() {}
-
-type UserFilter struct {
-	Username *string `json:"username"`
-	CourseID *string `json:"courseID"`
-}
 
 type UserIsNotSTDException struct {
 	Message string `json:"message"`
@@ -467,7 +425,6 @@ func (UserNotAllowedException) IsDeleteOfferedContentPayLoad() {}
 func (UserNotAllowedException) IsCreateCommentPayLoad()        {}
 func (UserNotAllowedException) IsEditCommentPayLoad()          {}
 func (UserNotAllowedException) IsDeleteCommentPayLoad()        {}
-func (UserNotAllowedException) IsReplyCommentPayLoad()         {}
 
 type UserNotFoundException struct {
 	Message string `json:"message"`
@@ -494,7 +451,6 @@ func (UserNotFoundException) IsDeleteOfferedContentPayLoad() {}
 func (UserNotFoundException) IsCreateCommentPayLoad()        {}
 func (UserNotFoundException) IsEditCommentPayLoad()          {}
 func (UserNotFoundException) IsDeleteCommentPayLoad()        {}
-func (UserNotFoundException) IsReplyCommentPayLoad()         {}
 
 type UserPassMissMatchException struct {
 	Message string `json:"message"`
