@@ -44,6 +44,10 @@ type DeleteOfferedContentPayLoad interface {
 	IsDeleteOfferedContentPayLoad()
 }
 
+type DeleteUserFromCoursePayload interface {
+	IsDeleteUserFromCoursePayload()
+}
+
 type DeleteUserPayload interface {
 	IsDeleteUserPayload()
 }
@@ -188,6 +192,7 @@ type Course struct {
 	Title     string        `json:"title"`
 	Summary   *string       `json:"summary"`
 	CreatedAt int           `json:"createdAt"`
+	Token     *string       `json:"token"`
 	Prof      *User         `json:"prof"`
 	Tas       []*User       `json:"tas"`
 	Pends     []*Pending    `json:"pends"`
@@ -196,12 +201,13 @@ type Course struct {
 	Inventory []*Attachment `json:"inventory"`
 }
 
-func (Course) IsCreateCoursePayload()     {}
-func (Course) IsUpdateCourseInfoPayload() {}
-func (Course) IsDeleteCoursePayload()     {}
-func (Course) IsAddUserToCoursePayload()  {}
-func (Course) IsPromoteToTAPayload()      {}
-func (Course) IsDemoteToSTDPayload()      {}
+func (Course) IsCreateCoursePayload()         {}
+func (Course) IsUpdateCourseInfoPayload()     {}
+func (Course) IsDeleteCoursePayload()         {}
+func (Course) IsAddUserToCoursePayload()      {}
+func (Course) IsDeleteUserFromCoursePayload() {}
+func (Course) IsPromoteToTAPayload()          {}
+func (Course) IsDemoteToSTDPayload()          {}
 
 type CourseNotFoundException struct {
 	Message string `json:"message"`
@@ -211,6 +217,7 @@ func (CourseNotFoundException) IsException()                   {}
 func (CourseNotFoundException) IsUpdateCourseInfoPayload()     {}
 func (CourseNotFoundException) IsDeleteCoursePayload()         {}
 func (CourseNotFoundException) IsAddUserToCoursePayload()      {}
+func (CourseNotFoundException) IsDeleteUserFromCoursePayload() {}
 func (CourseNotFoundException) IsPromoteToTAPayload()          {}
 func (CourseNotFoundException) IsDemoteToSTDPayload()          {}
 func (CourseNotFoundException) IsUploadContentPayLoad()        {}
@@ -230,6 +237,11 @@ type DuplicateUsernameException struct {
 func (DuplicateUsernameException) IsException()         {}
 func (DuplicateUsernameException) IsCreateUserPayload() {}
 
+type EditAttachment struct {
+	Name        *string `json:"name"`
+	Description *string `json:"description"`
+}
+
 type EditContent struct {
 	Title       *string  `json:"title"`
 	Description *string  `json:"description"`
@@ -243,6 +255,7 @@ type EditedComment struct {
 type EditedCourse struct {
 	Title   *string `json:"title"`
 	Summary *string `json:"summary"`
+	Token   *string `json:"token"`
 }
 
 type EditedPending struct {
@@ -277,6 +290,7 @@ func (InternalServerException) IsCreateCoursePayload()         {}
 func (InternalServerException) IsUpdateCourseInfoPayload()     {}
 func (InternalServerException) IsDeleteCoursePayload()         {}
 func (InternalServerException) IsAddUserToCoursePayload()      {}
+func (InternalServerException) IsDeleteUserFromCoursePayload() {}
 func (InternalServerException) IsPromoteToTAPayload()          {}
 func (InternalServerException) IsDemoteToSTDPayload()          {}
 func (InternalServerException) IsUploadContentPayLoad()        {}
@@ -308,6 +322,7 @@ type Pending struct {
 	Title       string  `json:"title"`
 	Description *string `json:"description"`
 	Status      Status  `json:"status"`
+	Timestamp   int     `json:"timestamp"`
 	UploadedBy  *User   `json:"uploadedBY"`
 	Furl        string  `json:"furl"`
 	Course      *Course `json:"course"`
@@ -339,6 +354,12 @@ type Reply struct {
 	Comment   *Comment `json:"comment"`
 }
 
+type TargetAttachment struct {
+	Name        string  `json:"name"`
+	Aurl        string  `json:"aurl"`
+	Description *string `json:"description"`
+}
+
 type TargetComment struct {
 	Body string `json:"body"`
 }
@@ -353,6 +374,7 @@ type TargetContent struct {
 type TargetCourse struct {
 	Title   string  `json:"title"`
 	Summary *string `json:"summary"`
+	Token   *string `json:"token"`
 }
 
 type TargetPending struct {
@@ -411,6 +433,7 @@ func (UserNotAllowedException) IsDeleteUserPayload()           {}
 func (UserNotAllowedException) IsUpdateCourseInfoPayload()     {}
 func (UserNotAllowedException) IsDeleteCoursePayload()         {}
 func (UserNotAllowedException) IsAddUserToCoursePayload()      {}
+func (UserNotAllowedException) IsDeleteUserFromCoursePayload() {}
 func (UserNotAllowedException) IsPromoteToTAPayload()          {}
 func (UserNotAllowedException) IsDemoteToSTDPayload()          {}
 func (UserNotAllowedException) IsUploadContentPayLoad()        {}
@@ -437,6 +460,7 @@ func (UserNotFoundException) IsCreateCoursePayload()         {}
 func (UserNotFoundException) IsUpdateCourseInfoPayload()     {}
 func (UserNotFoundException) IsDeleteCoursePayload()         {}
 func (UserNotFoundException) IsAddUserToCoursePayload()      {}
+func (UserNotFoundException) IsDeleteUserFromCoursePayload() {}
 func (UserNotFoundException) IsPromoteToTAPayload()          {}
 func (UserNotFoundException) IsDemoteToSTDPayload()          {}
 func (UserNotFoundException) IsUploadContentPayLoad()        {}

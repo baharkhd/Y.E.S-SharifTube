@@ -46,11 +46,15 @@ func (r *mutationResolver) AddUserToCourse(ctx context.Context, userName string,
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) PromoteUserToTa(ctx context.Context, userName string, courseID string, targetUserID string) (model.PromoteToTAPayload, error) {
+func (r *mutationResolver) DeleteUserFromCourse(ctx context.Context, userName string, courseID string, targetUsername string) (model.DeleteUserFromCoursePayload, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) DemoteUserToStd(ctx context.Context, userName string, courseID string, targetUserID string) (model.DemoteToSTDPayload, error) {
+func (r *mutationResolver) PromoteUserToTa(ctx context.Context, userName string, courseID string, targetUsername string) (model.PromoteToTAPayload, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DemoteUserToStd(ctx context.Context, userName string, courseID string, targetUsername string) (model.DemoteToSTDPayload, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -66,11 +70,11 @@ func (r *mutationResolver) DeleteContent(ctx context.Context, userName string, c
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) UploadAttachment(ctx context.Context, userName string, courseID string, target model.TargetContent) (model.UploadAttachmentPayLoad, error) {
+func (r *mutationResolver) UploadAttachment(ctx context.Context, userName string, courseID string, target model.TargetAttachment) (model.UploadAttachmentPayLoad, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) EditAttachment(ctx context.Context, userName string, courseID string, attachmentID string, target model.EditContent) (model.EditAttachmentPayLoad, error) {
+func (r *mutationResolver) EditAttachment(ctx context.Context, userName string, courseID string, attachmentID string, target model.EditAttachment) (model.EditAttachmentPayLoad, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -118,11 +122,11 @@ func (r *queryResolver) Users(ctx context.Context, start int, amount int) ([]*mo
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Course(ctx context.Context, id string) (*model.Course, error) {
+func (r *queryResolver) Courses(ctx context.Context, ids []string) ([]*model.Course, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Courses(ctx context.Context, keyWord *string, start int, amount int) ([]*model.Course, error) {
+func (r *queryResolver) CoursesByKeyWords(ctx context.Context, keyWords []string, start int, amount int) ([]*model.Course, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -130,7 +134,7 @@ func (r *queryResolver) Content(ctx context.Context, id string) (*model.Content,
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Contents(ctx context.Context, tags []string, start int, amount int) ([]*model.Content, error) {
+func (r *queryResolver) Contents(ctx context.Context, tags []string, courseID *string, start int, amount int) ([]*model.Content, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

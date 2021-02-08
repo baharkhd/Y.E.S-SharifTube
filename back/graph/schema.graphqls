@@ -12,6 +12,7 @@ type Course {
     title: String!
     summary: String
     createdAt: Int!
+    token: String
     prof: User!
     tas: [User!]
     pends: [Pending!]
@@ -31,6 +32,7 @@ type Pending{
     title: String!
     description: String
     status: Status!
+    timestamp:Int!
     uploadedBY: User!
     furl: String! #todo better implementation for file
     course: Course!
@@ -85,11 +87,11 @@ type Query {
     user(username: String): User!
     users(start: Int!=0, amount: Int!=5): [User!]!
 
-    course(id: String!): Course!
-    courses(keyWord: String, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
+    courses(ids: [String!]!): [Course!]!
+    coursesByKeyWords(keyWords: [String!]!, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
 
     content(id: String!): Content!
-    contents(tags: [String!]!, start: Int!=0, amount: Int!=5): [Content!]!
+    contents(tags: [String!]!, courseID: String, start: Int!=0, amount: Int!=5): [Content!]!
 
     pendings(filter: PendingFilter!, start: Int!=0, amount: Int!=5): [Pending!]!
 }
@@ -120,11 +122,13 @@ type Token{
 input TargetCourse{
     title: String!
     summary: String
+    token: String
 }
 
 input EditedCourse{
     title: String
     summary: String
+    token: String
 }
 
 input TargetContent{
@@ -138,6 +142,17 @@ input EditContent{
     title: String
     description: String
     tags: [String!]
+}
+
+input TargetAttachment{
+    name: String!
+    aurl: String! # todo actual file
+    description: String
+}
+
+input EditAttachment{
+    name: String
+    description: String
 }
 
 input TargetPending{
@@ -218,6 +233,7 @@ union UpdateCourseInfoPayload = Course | UserNotFoundException | CourseNotFoundE
 union DeleteCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
 
 union AddUserToCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | IncorrectTokenException | InternalServerException
+union DeleteUserFromCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
 union PromoteToTAPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | UserIsNotSTDException | InternalServerException
 union DemoteToSTDPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | UserIsNotTAException | InternalServerException
 
@@ -248,17 +264,17 @@ type Mutation {
     createCourse(userName:String!, target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
     updateCourseInfo(userName:String!, courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
     deleteCourse(userName:String!, courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
-
     addUserToCourse(userName:String!, courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
-    promoteUserToTA(userName:String!, courseID:String!, targetUserID:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
-    demoteUserToSTD(userName:String!, courseID:String!, targetUserID:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
+    deleteUserFromCourse(userName:String!, courseID:String!, targetUsername:String!): DeleteUserFromCoursePayload! #todo implement with authentication & jwt tokens
+    promoteUserToTA(userName:String!, courseID:String!, targetUsername:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
+    demoteUserToSTD(userName:String!, courseID:String!, targetUsername:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
 
     uploadContent(userName:String!, courseID:String!, target:TargetContent!): UploadContentPayLoad! #todo implement with authentication & jwt tokens
     editContent(userName:String!, courseID:String!, contentID:String!, target:EditContent!): EditContentPayLoad! #todo implement with authentication & jwt tokens
     deleteContent(userName:String!, courseID:String!, contentID:String!): DeleteContentPayLoad! #todo implement with authentication & jwt tokens
 
-    uploadAttachment(userName:String!, courseID:String!, target:TargetContent!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
-    editAttachment(userName:String!, courseID:String!, attachmentID:String!, target:EditContent!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    uploadAttachment(userName:String!, courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    editAttachment(userName:String!, courseID:String!, attachmentID:String!, target:EditAttachment!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
     deleteAttachment(userName:String!, courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
 
     offerContent(userName:String!, courseID:String!, target:TargetPending!): OfferContentPayLoad! #todo implement with authentication & jwt tokens
