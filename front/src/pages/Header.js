@@ -1,64 +1,97 @@
 import React, { useState } from "react";
-import { Menu } from "semantic-ui-react";
+import { Menu, Segment } from "semantic-ui-react";
 
 const LoggedInHeader = props => {
-
   return (
-    <Menu fixed="top" inverted style={{ borderRadius: "0px" }}>
-      {props.isMobile && (
+    // <Menu fixed="top" inverted style={{ borderRadius: "0px" }}>
+    //   {props.isMobile && (
+    //     <Menu.Item
+    //       icon="bars"
+    //       onClick={() => {
+    //         props.setSidebarIsOpen(!props.sidebarIsOpen);
+    //       }}
+    //     />
+    //   )}
+    //   <Menu.Item
+    //     name="Logout"
+    //     active={props.state.activeItem === "Logout"}
+    //     onClick={props.handleItemClick}
+    //   />
+    //   <Menu.Menu position="right">
+    //     <Menu.Item
+    //       name="Dashboard"
+    //       active={props.state.activeItem === "Dashboard"}
+    //       onClick={props.handleItemClick}
+    //     />
+    //     <Menu.Item
+    //       name="Homepage"
+    //       active={props.state.activeItem === "Homepage"}
+    //       onClick={props.handleItemClick}
+    //     />
+    //   </Menu.Menu>
+    // </Menu>
+
+    <Segment inverted style={{ borderRadius: "0px" }}>
+      <Menu
+        inverted
+        pointing
+        secondary
+        fixed="top"
+        style={{ borderRadius: "0px" }}
+      >
+        {props.isMobile && (
+          <Menu.Item
+            icon="bars"
+            onClick={() => {
+              props.setSidebarIsOpen(!props.sidebarIsOpen);
+            }}
+          />
+        )}
         <Menu.Item
-          icon="bars"
-          onClick={() => {
-            props.setSidebarIsOpen(!props.sidebarIsOpen);
-          }}
-        />
-      )}
-      <Menu.Item
-        name="Logout"
-        active={props.state.activeItem === "Logout"}
-        onClick={props.handleItemClick}
-      />
-      <Menu.Menu position="right">
-      <Menu.Item
-          name="Dashboard"
-          active={props.state.activeItem === "Dashboard"}
+          name="Logout"
+          active={props.state.activeItem === "Logout"}
           onClick={props.handleItemClick}
         />
-        <Menu.Item
-          name="Homepage"
-          active={props.state.activeItem === "Homepage"}
-          onClick={props.handleItemClick}
-        />
-      </Menu.Menu>
-    </Menu>
+        <Menu.Menu position="right">
+          <Menu.Item
+            name="Dashboard"
+            active={props.state.activeItem === "Dashboard"}
+            onClick={props.handleItemClick}
+          />
+          <Menu.Item
+            name="Homepage"
+            active={props.state.activeItem === "Homepage"}
+            onClick={props.handleItemClick}
+          />
+        </Menu.Menu>
+      </Menu>
+    </Segment>
   );
 };
 
 const MainHeader = props => {
   return (
-    <Menu
-      fixed="top"
-      inverted
-      style={{ borderRadius: "0px", marginBottom: 20 }}
-    >
-      <Menu.Item
-        name="Login"
-        active={props.state.activeItem === "Login"}
-        onClick={props.handleItemClick}
-      />
-      <Menu.Item
-        name="Register"
-        active={props.state.activeItem === "Register"}
-        onClick={props.handleItemClick}
-      />
-      <Menu.Menu position="right">
+    <Segment inverted style={{ borderRadius: "0px" }}>
+      <Menu inverted pointing secondary>
         <Menu.Item
-          name="Homepage"
-          active={props.state.activeItem === "Homepage"}
+          name="Login"
+          active={props.state.activeItem === "Login"}
           onClick={props.handleItemClick}
         />
-      </Menu.Menu>
-    </Menu>
+        <Menu.Item
+          name="Register"
+          active={props.state.activeItem === "Register"}
+          onClick={props.handleItemClick}
+        />
+        <Menu.Menu position="right">
+          <Menu.Item
+            name="Homepage"
+            active={props.state.activeItem === "Homepage"}
+            onClick={props.handleItemClick}
+          />
+        </Menu.Menu>
+      </Menu>
+    </Segment>
   );
 };
 
@@ -68,9 +101,8 @@ const Header = props => {
     loggedIn: false
   });
 
-//   const history = useHistory();
-//   const auth_token = localStorage.getItem(constants.AUTH_TOKEN);
-
+  //   const history = useHistory();
+  //   const auth_token = localStorage.getItem(constants.AUTH_TOKEN);
 
   function handleItemClick(e, { name }) {
     setState({ activeItem: name });
