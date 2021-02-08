@@ -1,0 +1,274 @@
+type User {
+    id: ID!
+    username: String! # uniqe
+    password: String!
+    name: String
+    email: String
+    courseIDs: [String!]
+}
+
+type Course {
+    id: ID!
+    title: String!
+    summary: String
+    createdAt: Int!
+    prof: User!
+    tas: [User!]
+    pends: [Pending!]
+    students: [User!]
+    contents: [Content!]
+    inventory(start: Int!=0, amount: Int!=5): [Attachment!]
+}
+
+enum Status{
+    PENDING
+    ACCEPTED
+    REJECTED
+}
+
+type Pending{
+    id: ID!
+    title: String!
+    description: String
+    status: Status!
+    timestamp: Int!
+    uploadedBY: User!
+    furl: String! #todo better implementation for file
+    course: Course!
+}
+
+type Content{
+    id: ID!
+    title: String!
+    description: String
+    timestamp: Int!
+    uploadedBY: User!
+    approvedBY: User!
+    vurl: String! #todo better implementation for video file
+    comments(start: Int!=0, amount: Int!=5): [Comment!]
+    tags: [String!]
+    courseID: String!
+}
+
+type Attachment{
+    id: ID!
+    name: String!
+    aurl: String! #todo better implementation for attachment file
+    description: String
+    timestamp: Int!
+    courseID: String!
+}
+
+type Comment{
+    id: ID!
+    author: User!
+    body: String!
+    timestamp: Int!
+    replies: [Reply!]
+    content: Content!
+}
+
+type Reply{
+    id: ID!
+    author: User!
+    body: String!
+    timestamp: Int!
+    comment: Comment!
+}
+
+input PendingFilter{
+    courseID: String
+    status: Status
+    uploaderUsername: String
+}
+
+type Query {
+    user(username: String): User!
+    users(start: Int!=0, amount: Int!=5): [User!]!
+
+    courses(id: [String!]!): [Course!]!
+    coursesByKeyWord(keyWord: String, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
+
+    content(id: String!): Content!
+    contents(tags: [String!], courseID:String, start: Int!=0, amount: Int!=5): [Content!]!
+
+    pendings(filter: PendingFilter!, start: Int!=0, amount: Int!=5): [Pending!]!
+}
+
+input TargetUser{
+    username: String!
+    password: String!
+    name: String
+    email: String
+}
+
+input EditedUser {
+    username: String
+    password: String
+    name: String
+    email: String
+}
+
+input Login {
+    username: String!
+    password: String!
+}
+
+type Token{
+    token:String! # todo dual tokens :)
+}
+
+input TargetCourse{
+    title: String!
+    summary: String
+}
+
+input EditedCourse{
+    title: String
+    summary: String
+}
+
+input TargetContent{
+    title: String!
+    description: String
+    vurl: String! # todo actual video
+    tags: [String!]
+}
+
+input EditContent{
+    title: String
+    description: String
+    tags: [String!]
+}
+
+input TargetPending{
+    title: String!
+    description: String
+    furl: String! # todo actual video
+}
+
+input EditedPending{
+    title: String
+    description: String
+}
+
+input TargetComment{
+    body: String!
+}
+
+input EditedComment{
+    body: String
+}
+
+interface Exception{
+    message: String!
+}
+type InternalServerException implements Exception{
+    message:String!
+}
+type AllFieldsEmptyException implements Exception{
+    message: String!
+}
+type DuplicateUsernameException implements Exception{
+    message:String!
+}
+type UserNotFoundException implements Exception{
+    message:String!
+}
+type UserNotAllowedException implements Exception{
+    message:String!
+}
+type UserPassMissMatchException implements Exception{
+    message:String!
+}
+type CourseNotFoundException implements Exception{
+    message: String!
+}
+type IncorrectTokenException implements Exception{
+    message: String!
+}
+type UserIsNotTAException implements Exception{
+    message: String!
+}
+type UserIsNotSTDException implements Exception{
+    message: String!
+}
+type ContentNotFoundException implements Exception{
+    message: String!
+}
+type AttachmentNotFoundException implements Exception{
+    message: String!
+}
+type PendingNotFoundException implements Exception{
+    message: String!
+}
+type OfferedContentRejectedException implements Exception{
+    message: String!
+}
+type CommentNotFoundException implements Exception{
+    message: String!
+}
+
+union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
+union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
+union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | InternalServerException
+union LoginPayload = Token | UserPassMissMatchException | InternalServerException
+
+union CreateCoursePayload = Course | UserNotFoundException | InternalServerException
+union UpdateCourseInfoPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
+union DeleteCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
+
+union AddUserToCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | IncorrectTokenException | InternalServerException
+union PromoteToTAPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | UserIsNotSTDException | InternalServerException
+union DemoteToSTDPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | UserIsNotTAException | InternalServerException
+
+union UploadContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
+union EditContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | ContentNotFoundException | InternalServerException
+union DeleteContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | ContentNotFoundException | InternalServerException
+
+union UploadAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
+union EditAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | AttachmentNotFoundException | InternalServerException
+union DeleteAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AttachmentNotFoundException | InternalServerException
+
+union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
+union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | PendingNotFoundException | InternalServerException
+union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | InternalServerException
+
+union CreateCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
+union EditCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | InternalServerException
+union DeleteCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
+
+
+type Mutation {
+    createUser(target:TargetUser!): CreateUserPayload!
+    updateUser(userName:String!, toBe:EditedUser!): UpdateUserPayload! #todo implement with authentication & jwt tokens
+    deleteUser(userName:String!): DeleteUserPayload! #todo implement with authentication & jwt tokens
+    login(input: Login!): LoginPayload!
+    refreshToken: LoginPayload!
+
+    createCourse(userName:String!, target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
+    updateCourseInfo(userName:String!, courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
+    deleteCourse(userName:String!, courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
+
+    addUserToCourse(userName:String!, courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
+    promoteUserToTA(userName:String!, courseID:String!, targetUserID:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
+    demoteUserToSTD(userName:String!, courseID:String!, targetUserID:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
+
+    uploadContent(userName:String!, courseID:String!, target:TargetContent!): UploadContentPayLoad! #todo implement with authentication & jwt tokens
+    editContent(userName:String!, courseID:String!, contentID:String!, target:EditContent!): EditContentPayLoad! #todo implement with authentication & jwt tokens
+    deleteContent(userName:String!, courseID:String!, contentID:String!): DeleteContentPayLoad! #todo implement with authentication & jwt tokens
+
+    uploadAttachment(userName:String!, courseID:String!, target:TargetContent!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    editAttachment(userName:String!, courseID:String!, attachmentID:String!, target:EditContent!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    deleteAttachment(userName:String!, courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
+
+    offerContent(userName:String!, courseID:String!, target:TargetPending!): OfferContentPayLoad! #todo implement with authentication & jwt tokens
+    editOfferedContent(userName:String!, courseID:String!, pendingID:String!, target:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    deleteOfferedContent(userName:String!, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    acceptOfferedContent(userName:String!, courseID:String!, pendingID:String!, changed:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    rejectOfferedContent(userName:String!, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+
+    createComment(userName:String!, contentID:String!, repliedAtID:String, target:TargetComment!): CreateCommentPayLoad! #todo implement with authentication & jwt tokens
+    updateComment(userName:String!, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad! #todo implement with authentication & jwt tokens
+    deleteComment(userName:String!, contentID:String!, commentID:String!): DeleteCommentPayLoad! #todo implement with authentication & jwt tokens
+}
