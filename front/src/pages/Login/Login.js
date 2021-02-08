@@ -69,7 +69,7 @@ const LoginForm = props => {
         </Segment>
       </Form>
       <Message>
-        New to us? <a href="/register">Sign Up</a>
+        New to us? <a href="/signup">Sign Up</a>
       </Message>
       {state.error !== "" && <Message negative>{state.error}</Message>}
     </div>
@@ -78,7 +78,7 @@ const LoginForm = props => {
 
 function Login() {
   return (
-    <div style={{ top: "50px", position: "absolute", width: "100%" }}>
+    <div style={{ top: "80px", position: "absolute", width: "100%" }}>
       <Grid
         centered
         style={{ height: "100vh" }}
