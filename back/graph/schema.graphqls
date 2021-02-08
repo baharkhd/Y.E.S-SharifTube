@@ -31,6 +31,7 @@ type Pending{
     title: String!
     description: String
     status: Status!
+    timestamp: Int!
     uploadedBY: User!
     furl: String! #todo better implementation for file
     course: Course!
@@ -42,7 +43,7 @@ type Content{
     description: String
     timestamp: Int!
     uploadedBY: User!
-    approvedBY: User
+    approvedBY: User!
     vurl: String! #todo better implementation for video file
     comments(start: Int!=0, amount: Int!=5): [Comment!]
     tags: [String!]
@@ -85,11 +86,11 @@ type Query {
     user(username: String): User!
     users(start: Int!=0, amount: Int!=5): [User!]!
 
-    course(id: String!): Course!
-    courses(keyWord: String, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
+    courses(id: [String!]!): [Course!]!
+    coursesByKeyWord(keyWord: String, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
 
     content(id: String!): Content!
-    contents(tags: [String!]!, start: Int!=0, amount: Int!=5): [Content!]!
+    contents(tags: [String!], courseID:String, start: Int!=0, amount: Int!=5): [Content!]!
 
     pendings(filter: PendingFilter!, start: Int!=0, amount: Int!=5): [Pending!]!
 }

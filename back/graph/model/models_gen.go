@@ -308,6 +308,7 @@ type Pending struct {
 	Title       string  `json:"title"`
 	Description *string `json:"description"`
 	Status      Status  `json:"status"`
+	Timestamp   int     `json:"timestamp"`
 	UploadedBy  *User   `json:"uploadedBY"`
 	Furl        string  `json:"furl"`
 	Course      *Course `json:"course"`

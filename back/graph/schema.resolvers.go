@@ -118,11 +118,11 @@ func (r *queryResolver) Users(ctx context.Context, start int, amount int) ([]*mo
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Course(ctx context.Context, id string) (*model.Course, error) {
+func (r *queryResolver) Courses(ctx context.Context, id []string) ([]*model.Course, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Courses(ctx context.Context, keyWord *string, start int, amount int) ([]*model.Course, error) {
+func (r *queryResolver) CoursesByKeyWord(ctx context.Context, keyWord *string, start int, amount int) ([]*model.Course, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -130,7 +130,7 @@ func (r *queryResolver) Content(ctx context.Context, id string) (*model.Content,
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Contents(ctx context.Context, tags []string, start int, amount int) ([]*model.Content, error) {
+func (r *queryResolver) Contents(ctx context.Context, tags []string, courseID *string, start int, amount int) ([]*model.Content, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

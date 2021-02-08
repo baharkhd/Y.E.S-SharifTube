@@ -158,6 +158,7 @@ type ComplexityRoot struct {
 		Furl        func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Status      func(childComplexity int) int
+		Timestamp   func(childComplexity int) int
 		Title       func(childComplexity int) int
 		UploadedBy  func(childComplexity int) int
 	}
@@ -167,13 +168,13 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Content  func(childComplexity int, id string) int
-		Contents func(childComplexity int, tags []string, start int, amount int) int
-		Course   func(childComplexity int, id string) int
-		Courses  func(childComplexity int, keyWord *string, start int, amount int) int
-		Pendings func(childComplexity int, filter model.PendingFilter, start int, amount int) int
-		User     func(childComplexity int, username *string) int
-		Users    func(childComplexity int, start int, amount int) int
+		Content          func(childComplexity int, id string) int
+		Contents         func(childComplexity int, tags []string, courseID *string, start int, amount int) int
+		Courses          func(childComplexity int, id []string) int
+		CoursesByKeyWord func(childComplexity int, keyWord *string, start int, amount int) int
+		Pendings         func(childComplexity int, filter model.PendingFilter, start int, amount int) int
+		User             func(childComplexity int, username *string) int
+		Users            func(childComplexity int, start int, amount int) int
 	}
 
 	Reply struct {
@@ -248,10 +249,10 @@ type MutationResolver interface {
 type QueryResolver interface {
 	User(ctx context.Context, username *string) (*model.User, error)
 	Users(ctx context.Context, start int, amount int) ([]*model.User, error)
-	Course(ctx context.Context, id string) (*model.Course, error)
-	Courses(ctx context.Context, keyWord *string, start int, amount int) ([]*model.Course, error)
+	Courses(ctx context.Context, id []string) ([]*model.Course, error)
+	CoursesByKeyWord(ctx context.Context, keyWord *string, start int, amount int) ([]*model.Course, error)
 	Content(ctx context.Context, id string) (*model.Content, error)
-	Contents(ctx context.Context, tags []string, start int, amount int) ([]*model.Content, error)
+	Contents(ctx context.Context, tags []string, courseID *string, start int, amount int) ([]*model.Content, error)
 	Pendings(ctx context.Context, filter model.PendingFilter, start int, amount int) ([]*model.Pending, error)
 }
 
@@ -897,6 +898,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Pending.Status(childComplexity), true
 
+	case "Pending.timestamp":
+		if e.complexity.Pending.Timestamp == nil {
+			break
+		}
+
+		return e.complexity.Pending.Timestamp(childComplexity), true
+
 	case "Pending.title":
 		if e.complexity.Pending.Title == nil {
 			break
@@ -940,19 +948,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Contents(childComplexity, args["tags"].([]string), args["start"].(int), args["amount"].(int)), true
-
-	case "Query.course":
-		if e.complexity.Query.Course == nil {
-			break
-		}
-
-		args, err := ec.field_Query_course_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Course(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.Contents(childComplexity, args["tags"].([]string), args["courseID"].(*string), args["start"].(int), args["amount"].(int)), true
 
 	case "Query.courses":
 		if e.complexity.Query.Courses == nil {
@@ -964,7 +960,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Courses(childComplexity, args["keyWord"].(*string), args["start"].(int), args["amount"].(int)), true
+		return e.complexity.Query.Courses(childComplexity, args["id"].([]string)), true
+
+	case "Query.coursesByKeyWord":
+		if e.complexity.Query.CoursesByKeyWord == nil {
+			break
+		}
+
+		args, err := ec.field_Query_coursesByKeyWord_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CoursesByKeyWord(childComplexity, args["keyWord"].(*string), args["start"].(int), args["amount"].(int)), true
 
 	case "Query.pendings":
 		if e.complexity.Query.Pendings == nil {
@@ -1218,6 +1226,7 @@ type Pending{
     title: String!
     description: String
     status: Status!
+    timestamp: Int!
     uploadedBY: User!
     furl: String! #todo better implementation for file
     course: Course!
@@ -1229,7 +1238,7 @@ type Content{
     description: String
     timestamp: Int!
     uploadedBY: User!
-    approvedBY: User
+    approvedBY: User!
     vurl: String! #todo better implementation for video file
     comments(start: Int!=0, amount: Int!=5): [Comment!]
     tags: [String!]
@@ -1272,11 +1281,11 @@ type Query {
     user(username: String): User!
     users(start: Int!=0, amount: Int!=5): [User!]!
 
-    course(id: String!): Course!
-    courses(keyWord: String, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
+    courses(id: [String!]!): [Course!]!
+    coursesByKeyWord(keyWord: String, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
 
     content(id: String!): Content!
-    contents(tags: [String!]!, start: Int!=0, amount: Int!=5): [Content!]!
+    contents(tags: [String!], courseID:String, start: Int!=0, amount: Int!=5): [Content!]!
 
     pendings(filter: PendingFilter!, start: Int!=0, amount: Int!=5): [Pending!]!
 }
@@ -2314,49 +2323,43 @@ func (ec *executionContext) field_Query_contents_args(ctx context.Context, rawAr
 	var arg0 []string
 	if tmp, ok := rawArgs["tags"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
-		arg0, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["tags"] = arg0
-	var arg1 int
-	if tmp, ok := rawArgs["start"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg1 *string
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["start"] = arg1
+	args["courseID"] = arg1
 	var arg2 int
-	if tmp, ok := rawArgs["amount"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+	if tmp, ok := rawArgs["start"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
 		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["amount"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_course_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	args["start"] = arg2
+	var arg3 int
+	if tmp, ok := rawArgs["amount"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+		arg3, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["amount"] = arg3
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_courses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_coursesByKeyWord_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -2386,6 +2389,21 @@ func (ec *executionContext) field_Query_courses_args(ctx context.Context, rawArg
 		}
 	}
 	args["amount"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_courses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -3215,11 +3233,14 @@ func (ec *executionContext) _Content_approvedBY(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Content_vurl(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
@@ -5092,6 +5113,41 @@ func (ec *executionContext) _Pending_status(ctx context.Context, field graphql.C
 	return ec.marshalNStatus2yesᚑsharifTubeᚋgraphᚋmodelᚐStatus(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Pending_timestamp(ctx context.Context, field graphql.CollectedField, obj *model.Pending) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pending",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Timestamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Pending_uploadedBY(ctx context.Context, field graphql.CollectedField, obj *model.Pending) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5316,48 +5372,6 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	return ec.marshalNUser2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_course(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_course_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Course(rctx, args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Course)
-	fc.Result = res
-	return ec.marshalNCourse2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourse(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_courses(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5383,7 +5397,49 @@ func (ec *executionContext) _Query_courses(ctx context.Context, field graphql.Co
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Courses(rctx, args["keyWord"].(*string), args["start"].(int), args["amount"].(int))
+		return ec.resolvers.Query().Courses(rctx, args["id"].([]string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Course)
+	fc.Result = res
+	return ec.marshalNCourse2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourseᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_coursesByKeyWord(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_coursesByKeyWord_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CoursesByKeyWord(rctx, args["keyWord"].(*string), args["start"].(int), args["amount"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5467,7 +5523,7 @@ func (ec *executionContext) _Query_contents(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Contents(rctx, args["tags"].([]string), args["start"].(int), args["amount"].(int))
+		return ec.resolvers.Query().Contents(rctx, args["tags"].([]string), args["courseID"].(*string), args["start"].(int), args["amount"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9036,6 +9092,9 @@ func (ec *executionContext) _Content(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "approvedBY":
 			out.Values[i] = ec._Content_approvedBY(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "vurl":
 			out.Values[i] = ec._Content_vurl(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -9456,6 +9515,11 @@ func (ec *executionContext) _Pending(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "timestamp":
+			out.Values[i] = ec._Pending_timestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "uploadedBY":
 			out.Values[i] = ec._Pending_uploadedBY(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -9552,20 +9616,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "course":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_course(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "courses":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -9575,6 +9625,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_courses(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "coursesByKeyWord":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_coursesByKeyWord(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -10228,10 +10292,6 @@ func (ec *executionContext) marshalNContent2ᚖyesᚑsharifTubeᚋgraphᚋmodel�
 		return graphql.Null
 	}
 	return ec._Content(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNCourse2yesᚑsharifTubeᚋgraphᚋmodelᚐCourse(ctx context.Context, sel ast.SelectionSet, v model.Course) graphql.Marshaler {
-	return ec._Course(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNCourse2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourseᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Course) graphql.Marshaler {
@@ -11311,13 +11371,6 @@ func (ec *executionContext) marshalOUser2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodel�
 	}
 	wg.Wait()
 	return ret
-}
-
-func (ec *executionContext) marshalOUser2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
