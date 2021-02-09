@@ -64,7 +64,7 @@ type ComplexityRoot struct {
 	Comment struct {
 		Author    func(childComplexity int) int
 		Body      func(childComplexity int) int
-		Content   func(childComplexity int) int
+		ContentID func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Replies   func(childComplexity int) int
 		Timestamp func(childComplexity int) int
@@ -155,7 +155,7 @@ type ComplexityRoot struct {
 	}
 
 	Pending struct {
-		Course      func(childComplexity int) int
+		CourseID    func(childComplexity int) int
 		Description func(childComplexity int) int
 		Furl        func(childComplexity int) int
 		ID          func(childComplexity int) int
@@ -182,7 +182,7 @@ type ComplexityRoot struct {
 	Reply struct {
 		Author    func(childComplexity int) int
 		Body      func(childComplexity int) int
-		Comment   func(childComplexity int) int
+		CommentID func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Timestamp func(childComplexity int) int
 	}
@@ -344,12 +344,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.Body(childComplexity), true
 
-	case "Comment.content":
-		if e.complexity.Comment.Content == nil {
+	case "Comment.contentID":
+		if e.complexity.Comment.ContentID == nil {
 			break
 		}
 
-		return e.complexity.Comment.Content(childComplexity), true
+		return e.complexity.Comment.ContentID(childComplexity), true
 
 	case "Comment.id":
 		if e.complexity.Comment.ID == nil {
@@ -885,12 +885,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OfferedContentRejectedException.Message(childComplexity), true
 
-	case "Pending.course":
-		if e.complexity.Pending.Course == nil {
+	case "Pending.courseID":
+		if e.complexity.Pending.CourseID == nil {
 			break
 		}
 
-		return e.complexity.Pending.Course(childComplexity), true
+		return e.complexity.Pending.CourseID(childComplexity), true
 
 	case "Pending.description":
 		if e.complexity.Pending.Description == nil {
@@ -1046,12 +1046,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Reply.Body(childComplexity), true
 
-	case "Reply.comment":
-		if e.complexity.Reply.Comment == nil {
+	case "Reply.commentID":
+		if e.complexity.Reply.CommentID == nil {
 			break
 		}
 
-		return e.complexity.Reply.Comment(childComplexity), true
+		return e.complexity.Reply.CommentID(childComplexity), true
 
 	case "Reply.id":
 		if e.complexity.Reply.ID == nil {
@@ -1252,7 +1252,7 @@ type Pending{
     timestamp:Int!
     uploadedBY: User!
     furl: String! #todo better implementation for file
-    course: Course!
+    courseID: String!
 }
 
 type Content{
@@ -1283,7 +1283,7 @@ type Comment{
     body: String!
     timestamp: Int!
     replies: [Reply!]
-    content: Content!
+    contentID: String!
 }
 
 type Reply{
@@ -1291,7 +1291,7 @@ type Reply{
     author: User!
     body: String!
     timestamp: Int!
-    comment: Comment!
+    commentID: String!
 }
 
 input PendingFilter{
@@ -1466,9 +1466,9 @@ union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundExce
 union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | PendingNotFoundException | InternalServerException
 union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | InternalServerException
 
-union CreateCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
-union EditCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | InternalServerException
-union DeleteCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
+union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
+union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | InternalServerException
+union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
 
 
 type Mutation {
@@ -3036,7 +3036,7 @@ func (ec *executionContext) _Comment_replies(ctx context.Context, field graphql.
 	return ec.marshalOReply2ᚕᚖyesᚑsharifTubeᚋgraphᚋmodelᚐReplyᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Comment_content(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+func (ec *executionContext) _Comment_contentID(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -3054,7 +3054,7 @@ func (ec *executionContext) _Comment_content(ctx context.Context, field graphql.
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Content, nil
+		return obj.ContentID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3066,9 +3066,9 @@ func (ec *executionContext) _Comment_content(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Content)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNContent2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐContent(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CommentNotFoundException_message(ctx context.Context, field graphql.CollectedField, obj *model.CommentNotFoundException) (ret graphql.Marshaler) {
@@ -5359,7 +5359,7 @@ func (ec *executionContext) _Pending_furl(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Pending_course(ctx context.Context, field graphql.CollectedField, obj *model.Pending) (ret graphql.Marshaler) {
+func (ec *executionContext) _Pending_courseID(ctx context.Context, field graphql.CollectedField, obj *model.Pending) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5377,7 +5377,7 @@ func (ec *executionContext) _Pending_course(ctx context.Context, field graphql.C
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Course, nil
+		return obj.CourseID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5389,9 +5389,9 @@ func (ec *executionContext) _Pending_course(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Course)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNCourse2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐCourse(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PendingNotFoundException_message(ctx context.Context, field graphql.CollectedField, obj *model.PendingNotFoundException) (ret graphql.Marshaler) {
@@ -5934,7 +5934,7 @@ func (ec *executionContext) _Reply_timestamp(ctx context.Context, field graphql.
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Reply_comment(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
+func (ec *executionContext) _Reply_commentID(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5952,7 +5952,7 @@ func (ec *executionContext) _Reply_comment(ctx context.Context, field graphql.Co
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Comment, nil
+		return obj.CommentID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5964,9 +5964,9 @@ func (ec *executionContext) _Reply_comment(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Comment)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNComment2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐComment(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Token_token(ctx context.Context, field graphql.CollectedField, obj *model.Token) (ret graphql.Marshaler) {
@@ -8005,6 +8005,13 @@ func (ec *executionContext) _CreateCommentPayLoad(ctx context.Context, sel ast.S
 			return graphql.Null
 		}
 		return ec._Comment(ctx, sel, obj)
+	case model.Reply:
+		return ec._Reply(ctx, sel, &obj)
+	case *model.Reply:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Reply(ctx, sel, obj)
 	case model.UserNotFoundException:
 		return ec._UserNotFoundException(ctx, sel, &obj)
 	case *model.UserNotFoundException:
@@ -8167,6 +8174,13 @@ func (ec *executionContext) _DeleteCommentPayLoad(ctx context.Context, sel ast.S
 			return graphql.Null
 		}
 		return ec._Comment(ctx, sel, obj)
+	case model.Reply:
+		return ec._Reply(ctx, sel, &obj)
+	case *model.Reply:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Reply(ctx, sel, obj)
 	case model.UserNotFoundException:
 		return ec._UserNotFoundException(ctx, sel, &obj)
 	case *model.UserNotFoundException:
@@ -8554,6 +8568,13 @@ func (ec *executionContext) _EditCommentPayLoad(ctx context.Context, sel ast.Sel
 			return graphql.Null
 		}
 		return ec._Comment(ctx, sel, obj)
+	case model.Reply:
+		return ec._Reply(ctx, sel, &obj)
+	case *model.Reply:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Reply(ctx, sel, obj)
 	case model.UserNotFoundException:
 		return ec._UserNotFoundException(ctx, sel, &obj)
 	case *model.UserNotFoundException:
@@ -9279,8 +9300,8 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "replies":
 			out.Values[i] = ec._Comment_replies(ctx, field, obj)
-		case "content":
-			out.Values[i] = ec._Comment_content(ctx, field, obj)
+		case "contentID":
+			out.Values[i] = ec._Comment_contentID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -9799,8 +9820,8 @@ func (ec *executionContext) _Pending(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "course":
-			out.Values[i] = ec._Pending_course(ctx, field, obj)
+		case "courseID":
+			out.Values[i] = ec._Pending_courseID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -9970,7 +9991,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var replyImplementors = []string{"Reply"}
+var replyImplementors = []string{"Reply", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
 
 func (ec *executionContext) _Reply(ctx context.Context, sel ast.SelectionSet, obj *model.Reply) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, replyImplementors)
@@ -10001,8 +10022,8 @@ func (ec *executionContext) _Reply(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "comment":
-			out.Values[i] = ec._Reply_comment(ctx, field, obj)
+		case "commentID":
+			out.Values[i] = ec._Reply_commentID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

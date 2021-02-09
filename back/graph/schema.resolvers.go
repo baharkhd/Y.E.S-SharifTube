@@ -8,6 +8,11 @@ import (
 	"fmt"
 	"yes-sharifTube/graph/generated"
 	"yes-sharifTube/graph/model"
+	attachmentController "yes-sharifTube/internal/controller/attachment"
+	commentController "yes-sharifTube/internal/controller/comment"
+	contentController "yes-sharifTube/internal/controller/content"
+	courseController "yes-sharifTube/internal/controller/course"
+	pendingController "yes-sharifTube/internal/controller/pending"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, target model.TargetUser) (model.CreateUserPayload, error) {
@@ -31,87 +36,102 @@ func (r *mutationResolver) RefreshToken(ctx context.Context) (model.LoginPayload
 }
 
 func (r *mutationResolver) CreateCourse(ctx context.Context, userName string, target model.TargetCourse) (model.CreateCoursePayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	return courseController.GetCourseController().CreateCourse(userName, target.Title, *target.Summary, *target.Token)
 }
 
 func (r *mutationResolver) UpdateCourseInfo(ctx context.Context, userName string, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	return courseController.GetCourseController().UpdateCourse(userName, courseID, *toBe.Title, *toBe.Summary, *toBe.Token)
 }
 
 func (r *mutationResolver) DeleteCourse(ctx context.Context, userName string, courseID string) (model.DeleteCoursePayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	return courseController.GetCourseController().DeleteCourse(userName, courseID)
 }
 
 func (r *mutationResolver) AddUserToCourse(ctx context.Context, userName string, courseID string, token string) (model.AddUserToCoursePayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	return courseController.GetCourseController().AddUserToCourse(userName, courseID, token)
 }
 
 func (r *mutationResolver) DeleteUserFromCourse(ctx context.Context, userName string, courseID string, targetUsername string) (model.DeleteUserFromCoursePayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	return courseController.GetCourseController().DeleteUserFromCourse(userName, courseID, targetUsername)
 }
 
 func (r *mutationResolver) PromoteUserToTa(ctx context.Context, userName string, courseID string, targetUsername string) (model.PromoteToTAPayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	return courseController.GetCourseController().PromoteUserToTA(userName, courseID, targetUsername)
 }
 
 func (r *mutationResolver) DemoteUserToStd(ctx context.Context, userName string, courseID string, targetUsername string) (model.DemoteToSTDPayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	return courseController.GetCourseController().DemoteUserToSTD(userName, courseID, targetUsername)
 }
 
 func (r *mutationResolver) UploadContent(ctx context.Context, userName string, courseID string, target model.TargetContent) (model.UploadContentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return contentController.GetContentController().CreateContent(userName, courseID, target.Title, *target.Description, target.Vurl, target.Tags)
 }
 
 func (r *mutationResolver) EditContent(ctx context.Context, userName string, courseID string, contentID string, target model.EditContent) (model.EditContentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return contentController.GetContentController().UpdateContent(userName, courseID, contentID, *target.Title, *target.Description, target.Tags)
 }
 
 func (r *mutationResolver) DeleteContent(ctx context.Context, userName string, courseID string, contentID string) (model.DeleteContentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return contentController.GetContentController().DeleteContent(userName, courseID, contentID)
 }
 
 func (r *mutationResolver) UploadAttachment(ctx context.Context, userName string, courseID string, target model.TargetAttachment) (model.UploadAttachmentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return attachmentController.GetAttachmentController().CreateAttachment(userName, courseID, target.Name, *target.Description, target.Aurl)
 }
 
 func (r *mutationResolver) EditAttachment(ctx context.Context, userName string, courseID string, attachmentID string, target model.EditAttachment) (model.EditAttachmentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return attachmentController.GetAttachmentController().UpdateAttachment(userName, courseID, attachmentID, *target.Name, *target.Description)
 }
 
 func (r *mutationResolver) DeleteAttachment(ctx context.Context, userName string, courseID string, attachmentID string) (model.DeleteAttachmentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return attachmentController.GetAttachmentController().DeleteAttachment(userName, courseID, attachmentID)
 }
 
 func (r *mutationResolver) OfferContent(ctx context.Context, userName string, courseID string, target model.TargetPending) (model.OfferContentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return pendingController.GetPendingController().CreatePending(userName, courseID, target.Title, *target.Description, target.Furl)
 }
 
 func (r *mutationResolver) EditOfferedContent(ctx context.Context, userName string, courseID string, pendingID string, target model.EditedPending) (model.EditOfferedContentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return pendingController.GetPendingController().UpdatePending(userName, courseID, pendingID, *target.Title, *target.Description)
 }
 
 func (r *mutationResolver) DeleteOfferedContent(ctx context.Context, userName string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return pendingController.GetPendingController().DeletePending(userName, courseID, pendingID)
 }
 
 func (r *mutationResolver) AcceptOfferedContent(ctx context.Context, userName string, courseID string, pendingID string, changed model.EditedPending) (model.EditOfferedContentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return pendingController.GetPendingController().AcceptPending(userName, courseID, pendingID, *changed.Title, *changed.Description)
 }
 
 func (r *mutationResolver) RejectOfferedContent(ctx context.Context, userName string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	return pendingController.GetPendingController().RejectPending(userName, courseID, pendingID)
 }
 
 func (r *mutationResolver) CreateComment(ctx context.Context, userName string, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	con, rep, e := commentController.GetCommentController().CreateComment(userName, contentID, target.Body, repliedAtID)
+	if con != nil {
+		return con, e
+	} else {
+		return rep, e
+	}
 }
 
 func (r *mutationResolver) UpdateComment(ctx context.Context, userName string, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	con, rep, e := commentController.GetCommentController().UpdateComment(userName, contentID, commentID, *target.Body)
+	if con != nil {
+		return con, e
+	} else {
+		return rep, e
+	}
 }
 
 func (r *mutationResolver) DeleteComment(ctx context.Context, userName string, contentID string, commentID string) (model.DeleteCommentPayLoad, error) {
-	panic(fmt.Errorf("not implemented"))
+	con, rep, e := commentController.GetCommentController().DeleteComment(userName, contentID, commentID)
+	if con != nil {
+		return con, e
+	} else {
+		return rep, e
+	}
 }
 
 func (r *queryResolver) User(ctx context.Context, username *string) (*model.User, error) {
@@ -123,23 +143,23 @@ func (r *queryResolver) Users(ctx context.Context, start int, amount int) ([]*mo
 }
 
 func (r *queryResolver) Courses(ctx context.Context, ids []string) ([]*model.Course, error) {
-	panic(fmt.Errorf("not implemented"))
+	return courseController.GetCourseController().GetCourses(ids)
 }
 
 func (r *queryResolver) CoursesByKeyWords(ctx context.Context, keyWords []string, start int, amount int) ([]*model.Course, error) {
-	panic(fmt.Errorf("not implemented"))
+	return courseController.GetCourseController().GetCoursesByKeyWords(keyWords, start, amount)
 }
 
 func (r *queryResolver) Content(ctx context.Context, id string) (*model.Content, error) {
-	panic(fmt.Errorf("not implemented"))
+	return contentController.GetContentController().GetContent(id)
 }
 
 func (r *queryResolver) Contents(ctx context.Context, tags []string, courseID *string, start int, amount int) ([]*model.Content, error) {
-	panic(fmt.Errorf("not implemented"))
+	return contentController.GetContentController().GetContents(tags, courseID, start, amount)
 }
 
 func (r *queryResolver) Pendings(ctx context.Context, filter model.PendingFilter, start int, amount int) ([]*model.Pending, error) {
-	panic(fmt.Errorf("not implemented"))
+	return pendingController.GetPendingController().GetPendings(filter.CourseID, filter.UploaderUsername, filter.Status, start, amount)
 }
 
 // Mutation returns generated.MutationResolver implementation.

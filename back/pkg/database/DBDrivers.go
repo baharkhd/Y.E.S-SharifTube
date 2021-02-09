@@ -22,7 +22,7 @@ type CourseDBDriver interface {
 }
 
 type PendingDBDriver interface {
-	GetByFilter(courseID primitive.ObjectID, status pending.Status, uploaderUsername string, start, amount int) ([]*pending.Pending, error)
+	GetByFilter(courseID *primitive.ObjectID, status *pending.Status, uploaderUsername *string, start, amount int) ([]*pending.Pending, error)
 	Insert(username string, courseID primitive.ObjectID, pending *pending.Pending) (*pending.Pending, error)
 	Update(username string, courseID primitive.ObjectID, pending *pending.Pending) (*pending.Pending, error)
 	Delete(username string, courseID, pendingID primitive.ObjectID) (*pending.Pending, error)
@@ -32,7 +32,7 @@ type PendingDBDriver interface {
 
 type ContentDBDriver interface {
 	Get(contentID primitive.ObjectID) (*content.Content, error)
-	GetAll(courseID primitive.ObjectID, tags []string, start, amount int) ([]*content.Content, error)
+	GetAll(courseID *primitive.ObjectID, tags []string, start, amount int) ([]*content.Content, error)
 	Insert(username string, courseID primitive.ObjectID, content *content.Content) (*content.Content, error)
 	Update(username string, courseID primitive.ObjectID, content *content.Content) (*content.Content, error)
 	Delete(username string, courseID, contentID primitive.ObjectID) (*content.Content, error)
@@ -45,7 +45,7 @@ type AttachmentDBDriver interface {
 }
 
 type CommentDBDriver interface {
-	Insert(username string, courseID, repliedAtID primitive.ObjectID, comment *comment.Comment) (*comment.Comment, error)
-	Update(username string, courseID primitive.ObjectID, comment *comment.Comment) (*comment.Comment, error)
-	Delete(username string, courseID, commentID primitive.ObjectID) (*comment.Comment, error)
+	Insert(username string, contentID primitive.ObjectID, repliedAtID *primitive.ObjectID, comment *comment.Comment) (*comment.Comment, *comment.Reply, error)
+	Update(username string, contentID primitive.ObjectID, comment *comment.Comment) (*comment.Comment, *comment.Reply, error)
+	Delete(username string, contentID, commentID primitive.ObjectID) (*comment.Comment, *comment.Reply, error)
 }

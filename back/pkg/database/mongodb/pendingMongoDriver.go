@@ -10,7 +10,7 @@ type PendingMongoDriver struct {
 	collection *mongo.Collection
 }
 
-func (p PendingMongoDriver) GetByFilter(courseID primitive.ObjectID, status pending.Status, uploaderUsername string, start, amount int) ([]*pending.Pending, error) {
+func (p PendingMongoDriver) GetByFilter(courseID *primitive.ObjectID, status *pending.Status, uploaderUsername *string, start, amount int) ([]*pending.Pending, error) {
 	panic("not implemented")
 }
 func (p PendingMongoDriver) Insert(username string, courseID primitive.ObjectID, pending *pending.Pending) (*pending.Pending, error) {

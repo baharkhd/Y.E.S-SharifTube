@@ -13,7 +13,7 @@ type ContentMongoDriver struct {
 func (c *ContentMongoDriver) Get(contentID primitive.ObjectID) (*content.Content, error) {
 	panic("not implemented")
 }
-func (c *ContentMongoDriver) GetAll(courseID primitive.ObjectID, tags []string, start, amount int) ([]*content.Content, error) {
+func (c *ContentMongoDriver) GetAll(courseID *primitive.ObjectID, tags []string, start, amount int) ([]*content.Content, error) {
 	panic("not implemented")
 }
 func (c *ContentMongoDriver) Insert(username string, courseID primitive.ObjectID, content *content.Content) (*content.Content, error) {

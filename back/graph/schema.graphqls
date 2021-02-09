@@ -35,7 +35,7 @@ type Pending{
     timestamp:Int!
     uploadedBY: User!
     furl: String! #todo better implementation for file
-    course: Course!
+    courseID: String!
 }
 
 type Content{
@@ -66,7 +66,7 @@ type Comment{
     body: String!
     timestamp: Int!
     replies: [Reply!]
-    content: Content!
+    contentID: String!
 }
 
 type Reply{
@@ -74,7 +74,7 @@ type Reply{
     author: User!
     body: String!
     timestamp: Int!
-    comment: Comment!
+    commentID: String!
 }
 
 input PendingFilter{
@@ -249,9 +249,9 @@ union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundExce
 union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | PendingNotFoundException | InternalServerException
 union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | InternalServerException
 
-union CreateCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
-union EditCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | InternalServerException
-union DeleteCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
+union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
+union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | InternalServerException
+union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
 
 
 type Mutation {

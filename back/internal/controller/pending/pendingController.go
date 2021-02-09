@@ -1,8 +1,11 @@
 package controller
 
 import (
-	"yes-sharifTube/pkg/database"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
+	"yes-sharifTube/internal"
+	"yes-sharifTube/internal/model/pending"
+	"yes-sharifTube/pkg/database"
 )
 
 type pendingController struct {
@@ -24,9 +27,39 @@ func (p *pendingController) SetDBDriver(dbDriver database.PendingDBDriver) {
 }
 
 func (p *pendingController) AcceptPending(username, courseID, pendingID, newTitle, newDescription string) (*model.Pending, error) {
-	panic("not implemented")
+	np, err := pending.New(newTitle, newDescription, username, "", courseID)
+	if err != nil {
+		return nil, &model.InternalServerException{Message: err.Error()}
+	}
+	cID, err := primitive.ObjectIDFromHex(courseID)
+	if err != nil {
+		return nil, &model.InternalServerException{Message: err.Error()}
+	}
+	np.ID, err = primitive.ObjectIDFromHex(pendingID)
+	if err != nil {
+		return nil, &model.InternalServerException{Message: err.Error()}
+	}
+	pr, err := p.dbDriver.Accept(username, cID, np)
+	err = internal.CastDBExceptionToGQLException(err)
+	if err != nil {
+		return nil, err
+	}
+	return pr.Reshape()
 }
 
 func (p *pendingController) RejectPending(username, courseID, pendingID string) (*model.Pending, error) {
-	panic("not implemented")
+	cID, err := primitive.ObjectIDFromHex(courseID)
+	if err != nil {
+		return nil, &model.InternalServerException{Message: err.Error()}
+	}
+	pID, err := primitive.ObjectIDFromHex(pendingID)
+	if err != nil {
+		return nil, &model.InternalServerException{Message: err.Error()}
+	}
+	pr, err := p.dbDriver.Reject(username, cID, pID)
+	err = internal.CastDBExceptionToGQLException(err)
+	if err != nil {
+		return nil, err
+	}
+	return pr.Reshape()
 }

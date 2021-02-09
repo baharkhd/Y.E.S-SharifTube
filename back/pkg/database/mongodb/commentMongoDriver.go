@@ -10,13 +10,13 @@ type CommentMongoDriver struct {
 	collection *mongo.Collection
 }
 
-func (c CommentMongoDriver) Insert(username string, courseID, repliedAtID primitive.ObjectID, comment *comment.Comment) (*comment.Comment, error) {
+func (c CommentMongoDriver) Insert(username string, contentID primitive.ObjectID, repliedAtID *primitive.ObjectID, comment *comment.Comment) (*comment.Comment, *comment.Reply, error) {
 	panic("not implemented")
 }
-func (c CommentMongoDriver) Update(username string, courseID primitive.ObjectID, comment *comment.Comment) (*comment.Comment, error) {
+func (c CommentMongoDriver) Update(username string, contentID primitive.ObjectID, comment *comment.Comment) (*comment.Comment, *comment.Reply, error) {
 	panic("not implemented")
 }
-func (c CommentMongoDriver) Delete(username string, courseID, commentID primitive.ObjectID) (*comment.Comment, error) {
+func (c CommentMongoDriver) Delete(username string, contentID, commentID primitive.ObjectID) (*comment.Comment, *comment.Reply, error) {
 	panic("not implemented")
 }
 

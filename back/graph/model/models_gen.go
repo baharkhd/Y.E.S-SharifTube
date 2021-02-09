@@ -143,7 +143,7 @@ type Comment struct {
 	Body      string   `json:"body"`
 	Timestamp int      `json:"timestamp"`
 	Replies   []*Reply `json:"replies"`
-	Content   *Content `json:"content"`
+	ContentID string   `json:"contentID"`
 }
 
 func (Comment) IsCreateCommentPayLoad() {}
@@ -325,7 +325,7 @@ type Pending struct {
 	Timestamp   int     `json:"timestamp"`
 	UploadedBy  *User   `json:"uploadedBY"`
 	Furl        string  `json:"furl"`
-	Course      *Course `json:"course"`
+	CourseID    string  `json:"courseID"`
 }
 
 func (Pending) IsOfferContentPayLoad()         {}
@@ -347,12 +347,16 @@ func (PendingNotFoundException) IsEditOfferedContentPayLoad()   {}
 func (PendingNotFoundException) IsDeleteOfferedContentPayLoad() {}
 
 type Reply struct {
-	ID        string   `json:"id"`
-	Author    *User    `json:"author"`
-	Body      string   `json:"body"`
-	Timestamp int      `json:"timestamp"`
-	Comment   *Comment `json:"comment"`
+	ID        string `json:"id"`
+	Author    *User  `json:"author"`
+	Body      string `json:"body"`
+	Timestamp int    `json:"timestamp"`
+	CommentID string `json:"commentID"`
 }
+
+func (Reply) IsCreateCommentPayLoad() {}
+func (Reply) IsEditCommentPayLoad()   {}
+func (Reply) IsDeleteCommentPayLoad() {}
 
 type TargetAttachment struct {
 	Name        string  `json:"name"`
