@@ -4,8 +4,8 @@ import { useHistory } from "react-router-dom";
 
 const LoggedInHeader = props => {
   return (
-    <Segment inverted style={{ borderRadius: "0px" }} fixed="top">
-      <Menu inverted pointing secondary>
+    <Segment inverted style={{ borderRadius: "0px", top: "0px", position: "fixed", right: "0px", left: "0px", zIndex: 100 }}>
+      <Menu pointing secondary inverted>
         {props.isMobile && (
           <Menu.Item
             icon="bars"

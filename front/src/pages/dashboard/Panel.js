@@ -29,7 +29,8 @@ function Panel(props) {
           position: "absolute",
           left: props.isMobile ? 0 : 250,
           right: 0,
-          margin: 30
+          margin: 30,
+          top: 70
         }}
       >
         <Form>
