@@ -14,8 +14,8 @@ function Dashboard(props) {
   return (
     <div>
       <SideBar />
-      {/* <Panel /> */}
-      <Courses />
+      <Panel />
+      {/* <Courses /> */}
     </div>
   );
 }

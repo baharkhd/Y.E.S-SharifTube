@@ -35,7 +35,7 @@ function SideBar(props) {
         <Icon name="book" />
         Courses
       </Menu.Item>
-      <Menu.Item as="a">
+      {/* <Menu.Item as="a">
         <Button
           positive
           onClick={() => {
@@ -44,7 +44,7 @@ function SideBar(props) {
         >
           Add New Post
         </Button>
-      </Menu.Item>
+      </Menu.Item> */}
     </Sidebar>
   );
 }
