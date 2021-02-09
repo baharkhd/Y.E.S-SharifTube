@@ -1,37 +1,10 @@
-package internal
+package controller
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/crypto/bcrypt"
 	"yes-sharifTube/graph/model"
-	database "yes-sharifTube/pkg/database"
+	"yes-sharifTube/pkg/database"
 )
 
-func HashToken(pwd []byte) (string, error) {
-	if hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.DefaultCost);
-		err != nil {
-		return "", err
-	} else {
-		return string(hash), nil
-	}
-}
-
-func CheckTokenHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
-func ConvertStringsToObjectIDs(arr []string) ([]primitive.ObjectID, error) {
-	var coIDs []primitive.ObjectID
-	for _, cID := range arr {
-		objID, err := primitive.ObjectIDFromHex(cID)
-		if err != nil {
-			return nil, err
-		}
-		coIDs = append(coIDs, objID)
-	}
-	return coIDs, nil
-}
 
 // casting database errors to model.graphQL exceptions
 func CastDBExceptionToGQLException(err error) error {

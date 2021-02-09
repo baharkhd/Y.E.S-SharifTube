@@ -3,7 +3,7 @@ package controller
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal"
+	"yes-sharifTube/internal/controller"
 	"yes-sharifTube/internal/model/attachment"
 )
 
@@ -17,7 +17,7 @@ func (a *attachmentController) CreateAttachment(authorUsername, courseID, name, 
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	ar, err := a.dbDriver.Insert(authorUsername, cID, an)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (a *attachmentController) UpdateAttachment(authorUsername, courseID, attach
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	ar, err := a.dbDriver.Update(authorUsername, cID, an)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (a *attachmentController) DeleteAttachment(authorUsername, courseID, attach
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	ar, err := a.dbDriver.Delete(authorUsername, cID, aID)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}

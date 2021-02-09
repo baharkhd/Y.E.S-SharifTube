@@ -3,7 +3,7 @@ package controller
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal"
+	"yes-sharifTube/internal/controller"
 	"yes-sharifTube/internal/model/pending"
 	"yes-sharifTube/pkg/database"
 )
@@ -40,7 +40,7 @@ func (p *pendingController) AcceptPending(username, courseID, pendingID, newTitl
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	pr, err := p.dbDriver.Accept(username, cID, np)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (p *pendingController) RejectPending(username, courseID, pendingID string) 
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	pr, err := p.dbDriver.Reject(username, cID, pID)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}

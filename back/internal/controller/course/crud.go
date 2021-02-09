@@ -3,17 +3,18 @@ package controller
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal"
+	"yes-sharifTube/internal/controller"
+	modelUtil "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/course"
 )
 
 func (c *courseController) GetCourses(courseIDs []string) ([]*model.Course, error) {
-	objIDs, err := internal.ConvertStringsToObjectIDs(courseIDs)
+	objIDs, err := modelUtil.ConvertStringsToObjectIDs(courseIDs)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	courses, err := c.dbDriver.GetAll(objIDs)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +23,7 @@ func (c *courseController) GetCourses(courseIDs []string) ([]*model.Course, erro
 
 func (c *courseController) GetCoursesByKeyWords(keywords []string, startIdx, amount int) ([]*model.Course, error) {
 	courses, err := c.dbDriver.GetByFilter(keywords, startIdx, amount)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +36,7 @@ func (c *courseController) CreateCourse(authorUsername, title, summery, token st
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	cr, err := c.dbDriver.Insert(authorUsername, nc)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +53,7 @@ func (c *courseController) UpdateCourse(authorUsername, courseID, newTitle, newS
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	cr, err := c.dbDriver.Update(authorUsername, nc)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +66,7 @@ func (c *courseController) DeleteCourse(authorUsername, courseID string) (*model
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	cr, err := c.dbDriver.Delete(authorUsername, cID)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}

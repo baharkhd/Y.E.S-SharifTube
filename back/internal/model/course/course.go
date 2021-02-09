@@ -4,7 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal"
+	modelUtil "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/attachment"
 	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/pending"
@@ -25,7 +25,7 @@ type Course struct {
 }
 
 func New(title, summery, profUsername, token string) (*Course, error) {
-	hashedToken, err := internal.HashToken([]byte(token))
+	hashedToken, err := modelUtil.HashToken([]byte(token))
 	if err != nil {
 		return nil, model.InternalServerException{Message: "internal server error: couldn't hash token"}
 	}

@@ -3,7 +3,7 @@ package controller
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal"
+	"yes-sharifTube/internal/controller"
 	"yes-sharifTube/internal/model/pending"
 )
 
@@ -25,7 +25,7 @@ func (p *pendingController) GetPendings(courseID, uploaderUsername *string, stat
 		spt = &st
 	}
 	pr, err := p.dbDriver.GetByFilter(cpID, spt, uploaderUsername, startIdx, amount)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (p *pendingController) CreatePending(authorUsername, courseID, title, descr
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	pr, err := p.dbDriver.Insert(authorUsername, cID, np)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (p *pendingController) UpdatePending(authorUsername, courseID, pendingID, n
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	pr, err := p.dbDriver.Update(authorUsername, cID, np)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (p *pendingController) DeletePending(authorUsername, courseID, pendingID st
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	pr, err := p.dbDriver.Delete(authorUsername, cID, pID)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}

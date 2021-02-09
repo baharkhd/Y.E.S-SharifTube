@@ -3,7 +3,7 @@ package controller
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal"
+	"yes-sharifTube/internal/controller"
 	"yes-sharifTube/internal/model/content"
 )
 
@@ -13,7 +13,7 @@ func (c *contentController) GetContent(contentID string) (*model.Content, error)
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	cr, err := c.dbDriver.Get(cID)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (c *contentController) GetContents(tags []string, courseID *string, startId
 		cpID = &cID
 	}
 	contents, err := c.dbDriver.GetAll(cpID, tags, startIdx, amount)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *contentController) CreateContent(authorUsername, courseID, title, descr
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	cr, err := c.dbDriver.Insert(authorUsername, cID, nc)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (c *contentController) UpdateContent(authorUsername, courseID, contentID, n
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	cr, err := c.dbDriver.Update(authorUsername, cID, nc)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (c *contentController) DeleteContent(authorUsername, courseID, contentID st
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
 	cr, err := c.dbDriver.Delete(authorUsername, crID, coID)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
 	}

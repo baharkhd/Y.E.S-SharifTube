@@ -3,7 +3,7 @@ package controller
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal"
+	"yes-sharifTube/internal/controller"
 	"yes-sharifTube/internal/model/comment"
 )
 
@@ -23,7 +23,7 @@ func (c *commentController) CreateComment(authorUsername, contentID, body string
 		rpID = &rID
 	}
 	cr, rr, err := c.dbDriver.Insert(authorUsername, cID, rpID, cn)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -47,7 +47,7 @@ func (c *commentController) UpdateComment(authorUsername, contentID, commentID, 
 		return nil, nil, &model.InternalServerException{Message: err.Error()}
 	}
 	cr, rr, err := c.dbDriver.Update(authorUsername, cID, cn)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -70,7 +70,7 @@ func (c *commentController) DeleteComment(authorUsername, contentID, commentID s
 		return nil, nil, &model.InternalServerException{Message: err.Error()}
 	}
 	cr, rr, err := c.dbDriver.Delete(authorUsername, coID, cnID)
-	err = internal.CastDBExceptionToGQLException(err)
+	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, nil, err
 	}
