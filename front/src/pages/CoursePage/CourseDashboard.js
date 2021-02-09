@@ -1,7 +1,16 @@
 import React from "react";
-import { Segment, Card, Sidebar, Label, Icon, Grid } from "semantic-ui-react";
+import {
+  Segment,
+  Card,
+  Sidebar,
+  Label,
+  Icon,
+  Grid,
+  Divider,
+  Header
+} from "semantic-ui-react";
 import SideBar from "./CourseSidebar.js";
-import './CourseDashboard.css'
+import "./CourseDashboard.css";
 
 const contents = [
   {
@@ -86,6 +95,12 @@ function CourseDashboard(props) {
           top: 70
         }}
       >
+        <Divider horizontal>
+          <Header textAlign="left">
+            <Icon name="video play" />
+            Videos
+          </Header>
+        </Divider>
         <Grid columns={2} stackable>
           {contents.map(content => {
             return (
@@ -100,6 +115,15 @@ function CourseDashboard(props) {
               </Grid.Column>
             );
           })}
+        </Grid>
+        <Divider horizontal>
+          <Header textAlign="left">
+            <Icon name="file" />
+            Invetories
+          </Header>
+        </Divider>
+        <Grid columns={1} textAlign="left">
+          <Grid.Column>Sample inventory</Grid.Column>
         </Grid>
       </Segment>
     </div>
