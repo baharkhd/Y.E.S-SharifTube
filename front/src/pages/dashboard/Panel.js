@@ -23,7 +23,14 @@ const genderOptions = [
 ];
 
 const UpdatePanelModal = ({ modalOpen, setModalOpen }) => {
-  console.log("open:", modalOpen);
+  const [state, setState] = useState({
+    newName: "",
+    newGender: "",
+    newUsername: "",
+    newPass: "",
+    newEmail: ""
+  });
+
   return (
     <Modal open={modalOpen}>
       <Modal.Header>Update your account!</Modal.Header>

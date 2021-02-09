@@ -1,0 +1,10 @@
+@keyframes hoverAnimation {
+    from {background-color: white}
+    to {background-color: #bdd3de}
+  }
+
+.ui.card.fluid.Content:hover {
+    cursor: pointer;
+    animation-name: hoverAnimation;
+    animation-duration: 1s;
+}

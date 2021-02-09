@@ -3,6 +3,7 @@ import { Sidebar, Menu, Button, Icon } from "semantic-ui-react";
 import SideBar from "./Sidebar.js";
 import Panel from "./Panel.js";
 import Courses from "./Courses.js";
+import { Route, Switch } from "react-router-dom";
 
 function Dashboard(props) {
   const [state, setState] = useState({
@@ -14,7 +15,14 @@ function Dashboard(props) {
   return (
     <div>
       <SideBar />
-      <Panel />
+      <Switch>
+        <Route path="/panel">
+          <Panel />
+        </Route>
+        <Route path="/courses">
+          <Courses />
+        </Route>
+      </Switch>
       {/* <Courses /> */}
     </div>
   );
