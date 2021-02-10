@@ -13,8 +13,11 @@ func hashAndSalt(pwd []byte) (string,error) {
 	}
 }
 
-func CheckPasswordHash(password, hash string) bool {
+func checkPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
 
+func (u *User) Verify(password string) bool {
+	return checkPasswordHash(password, u.Password)
+}
