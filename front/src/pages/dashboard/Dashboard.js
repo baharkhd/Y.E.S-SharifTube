@@ -3,7 +3,7 @@ import { Sidebar, Menu, Button, Icon } from "semantic-ui-react";
 import SideBar from "./Sidebar.js";
 import Panel from "./Panel.js";
 import Courses from "./Courses.js";
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, Link } from "react-router-dom";
 
 function Dashboard(props) {
   const [state, setState] = useState({
@@ -12,20 +12,25 @@ function Dashboard(props) {
 
   const handleItemClick = (e, { name }) => setState({ activeItem: name });
 
+  console.log("component:", props.component)
+  const Component = props.component ? (
+    props.component
+  ) : (
+    <Panel isMobile={props.isMobile} />
+  );
+
   return (
     <div>
       <SideBar isMobile={props.isMobile} open={props.sidebarOpen} />
-      {/* <Panel isMobile={props.isMobile} /> */}
-      <Courses isMobile={props.isMobile} />
+      {Component}
       {/* <Switch>
-        <Route exact path="/panel">
-          <Panel />
+        <Route exact path="/dashboard/panel">
+          <Panel isMobile={props.isMobile} />
         </Route>
-        <Route exact path="/courses">
-          <Courses />
+        <Route exact path="/dashboard/courses">
+          <Courses isMobile={props.isMobile} />
         </Route>
       </Switch> */}
-      {/* <Courses /> */}
     </div>
   );
 }

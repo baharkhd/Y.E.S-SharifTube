@@ -61,7 +61,7 @@ function JoinCourseModel({ joiningCourse, setState }) {
   return (
     <Modal open={joiningCourse}>
       <Modal.Header>Join other classes</Modal.Header>
-      <Modal.Content>
+      <Modal.Content scrolling>
         <Grid columns={2}>
           {otherClasses.map((course, i) => {
             console.log("here ", i);

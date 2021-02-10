@@ -11,6 +11,11 @@ import Dashboard from "./pages/dashboard/Dashboard.js";
 import CourseDashboard from "./pages/CoursePage/CourseDashboard.js";
 import ContentPage from "./pages/Content/ContentPage.js";
 import { useMediaQuery } from "react-responsive";
+import SearchTest from "./pages/SearchTest.js";
+import SearchCourse from "./pages/Search/SearchCourse.js";
+import SearchIndex from "./pages/Search/SearchIndex.js";
+import Panel from './pages/dashboard/Panel.js'
+import Courses from './pages/dashboard/Courses.js'
 
 function App() {
   const isMobile = useMediaQuery({
@@ -30,6 +35,23 @@ function App() {
         <Route exact path="/dashboard">
           <Dashboard isMobile={isMobile} sidebarOpen={sidebarOpen} />
         </Route>
+
+        <Route exact path="/dashboard/panel">
+          <Dashboard
+            isMobile={isMobile}
+            sidebarOpen={sidebarOpen}
+            component={<Panel isMobile={isMobile} />}
+          />
+        </Route>
+
+        <Route exact path="/dashboard/courses">
+          <Dashboard
+            isMobile={isMobile}
+            sidebarOpen={sidebarOpen}
+            component={<Courses isMobile={isMobile} />}
+          />
+        </Route>
+
         <Route exact path="/content">
           <ContentPage />
         </Route>
@@ -45,6 +67,9 @@ function App() {
         </Route>
         <Route exact path="/signup">
           <Signup />
+        </Route>
+        <Route exact path="/search">
+          <SearchIndex />
         </Route>
       </Switch>
     </div>

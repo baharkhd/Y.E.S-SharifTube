@@ -17,7 +17,7 @@ function SideBar(props) {
 
   return (
     <div>
-      <AddCourseModal addingPost={state.addingCourse} setState={setState} />
+      <AddCourseModal addingCourse={state.addingCourse} setState={setState} />
       <JoinCourseModel
         joiningCourse={state.joiningCourse}
         setState={setState}

@@ -1,11 +1,11 @@
 import React from "react";
 import { Modal, Button, Form, Label, Input, TextArea } from "semantic-ui-react";
 
-function AddCourseModal({ addingPost, setState }) {
+function AddCourseModal({ addingCourse, setState }) {
   return (
-    <Modal open={addingPost}>
+    <Modal open={addingCourse}>
       <Modal.Header>Add a new class</Modal.Header>
-      <Modal.Content>
+      <Modal.Content scrolling>
         <Form>
           <Form.Group>
             <Form.Field
@@ -32,10 +32,9 @@ function AddCourseModal({ addingPost, setState }) {
         <Button
           negative
           onClick={() => {
-            setState({ addingPost: false });
+            setState({ addingCourse: false });
           }}
         >
-          {" "}
           Cancel
         </Button>
       </Modal.Actions>
