@@ -56,22 +56,22 @@ func (u UserMongoDriver) Insert(user *user.User) status.QueryStatus {
 
 }
 
-func (u UserMongoDriver) Get(name *string) (*user.User, status.QueryStatus) {
+func (u UserMongoDriver) Get(username *string) (*user.User, status.QueryStatus) {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
 	var result user.User
-	if err := u.collection.FindOne(ctx, bson.M{"name":name}).Decode(&result); err != nil {
+	if err := u.collection.FindOne(ctx, bson.M{"username":username}).Decode(&result); err != nil {
 		return &result, status.FAILED
 	}
 	return &result, status.SUCCESSFUL
 }
 
-func (u UserMongoDriver) Delete(name *string) status.QueryStatus {
+func (u UserMongoDriver) Delete(username *string) status.QueryStatus {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
-	if _, err := u.collection.DeleteOne(ctx, bson.M{"name":name}); err != nil {
+	if _, err := u.collection.DeleteOne(ctx, bson.M{"username":username}); err != nil {
 		return status.FAILED
 	}
 	return status.SUCCESSFUL
@@ -84,6 +84,12 @@ func (u UserMongoDriver) Update(target string, user *user.User) status.QueryStat
 	update:=bson.M{"$set":query}
 	if user.Name != ""{
 		query["name"]=user.Name
+	}
+	if user.Username != ""{
+		query["username"]=user.Username
+	}
+	if user.Email != ""{
+		query["email"]=user.Email
 	}
 	if user.Password != ""{
 		query["password"]=user.Password
@@ -110,7 +116,7 @@ func (u UserMongoDriver) Replace(target *string, toBe *user.User) status.QuerySt
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
-	if _, err := u.collection.ReplaceOne(ctx,bson.M{"name":target},toBe); err != nil {
+	if _, err := u.collection.ReplaceOne(ctx,bson.M{"username":target},toBe); err != nil {
 		return status.FAILED
 	}
 	return status.SUCCESSFUL
