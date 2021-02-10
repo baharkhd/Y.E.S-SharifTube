@@ -26,7 +26,16 @@ func (r *mutationResolver) CreateUser(ctx context.Context, target model.TargetUs
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, userName string, toBe model.EditedUser) (model.UpdateUserPayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	update, err := user.Update(extractUsernameFromContext(ctx), toBe)
+	if err != nil {
+		switch err.(type) {
+		case model.UserNotFoundException:
+			return err.(model.UserNotFoundException), nil
+		default:
+			return err.(model.InternalServerException), nil
+		}
+	}
+	return reformatUser(update), err
 }
 
 func (r *mutationResolver) DeleteUser(ctx context.Context, userName string) (model.DeleteUserPayload, error) {
