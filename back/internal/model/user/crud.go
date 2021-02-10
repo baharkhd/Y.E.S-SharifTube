@@ -12,7 +12,7 @@ import (
 	status.SUCCESSFUL to return a successful status (obviously)
 */
 func GetAll(start, amount int64) ([]*User, error) {
-	all, err := UserDBD.GetAll(start, amount)
+	all, err := DBD.GetAll(start, amount)
 	if err == status.FAILED {
 		return nil, model.InternalServerException{Message: "couldn't fetch the required users"}
 	}
@@ -24,10 +24,10 @@ func Update(targetUsername string, toBe model.EditedUser) (*User,error) {
 	targetUser := newFrom(toBe)
 
 	// updating the database
-	if stat := UserDBD.Update(targetUsername, &targetUser); stat == status.FAILED {
+	if stat := DBD.Update(targetUsername, &targetUser); stat == status.FAILED {
 
 		// checking if the target user exists
-		_, stat2 := UserDBD.Get(&targetUsername)
+		_, stat2 := DBD.Get(&targetUsername)
 		if stat2 == status.FAILED {
 			return nil, model.UserNotFoundException{Message: "target Doesnt exist"}
 		}
@@ -56,7 +56,7 @@ func newFrom(toBe model.EditedUser) User {
 
 func Delete(username string) error {
 
-	if stat := UserDBD.Delete(&username); stat == status.FAILED {
+	if stat := DBD.Delete(&username); stat == status.FAILED {
 		return model.InternalServerException{Message: "couldn't delete the user"}
 	} else {
 		return nil
@@ -66,7 +66,7 @@ func Delete(username string) error {
 func New(name, email, username, password string) (*User, error) {
 
 	// checking for duplicate username
-	if _, stat := UserDBD.Get(&name); stat == status.SUCCESSFUL {
+	if _, stat := DBD.Get(&name); stat == status.SUCCESSFUL {
 		return nil, model.DuplicateUsernameException{}
 	}
 
@@ -85,7 +85,7 @@ func New(name, email, username, password string) (*User, error) {
 	}
 
 	// inserting into the database
-	if stat := UserDBD.Insert(user); stat == status.FAILED {
+	if stat := DBD.Insert(user); stat == status.FAILED {
 		return &User{}, model.InternalServerException{Message: "couldn't create user"}
 	} else {
 		return user, nil
@@ -93,7 +93,7 @@ func New(name, email, username, password string) (*User, error) {
 }
 
 func Get(username string) (*User, error) {
-	if target, stat := UserDBD.Get(&username); stat == status.FAILED {
+	if target, stat := DBD.Get(&username); stat == status.FAILED {
 		return nil, model.UserNotFoundException{Message: "couldn't find the requested user"}
 	} else {
 		return target, nil

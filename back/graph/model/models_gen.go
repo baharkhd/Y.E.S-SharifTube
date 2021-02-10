@@ -302,6 +302,12 @@ type OfferedContentRejectedException struct {
 
 func (OfferedContentRejectedException) IsException() {}
 
+type OperationSuccessfull struct {
+	Message string `json:"message"`
+}
+
+func (OperationSuccessfull) IsDeleteUserPayload() {}
+
 type Pending struct {
 	ID          string  `json:"id"`
 	Title       string  `json:"title"`
@@ -406,8 +412,6 @@ type UserNotAllowedException struct {
 }
 
 func (UserNotAllowedException) IsException()                   {}
-func (UserNotAllowedException) IsUpdateUserPayload()           {}
-func (UserNotAllowedException) IsDeleteUserPayload()           {}
 func (UserNotAllowedException) IsUpdateCourseInfoPayload()     {}
 func (UserNotAllowedException) IsDeleteCoursePayload()         {}
 func (UserNotAllowedException) IsAddUserToCoursePayload()      {}

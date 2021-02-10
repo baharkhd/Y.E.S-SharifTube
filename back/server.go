@@ -19,7 +19,7 @@ const queryComplexity = 8
 
 func main() {
 	//setting a mongodb driver for DBDriver filed of our controllers instance
-	user.UserDBD = mongodb.NewUserMongoDriver("yes-blog", "users")
+	user.DBD = mongodb.NewUserMongoDriver("yes-blog", "users")
 
 	// Setting up Gin
 	r := gin.Default()

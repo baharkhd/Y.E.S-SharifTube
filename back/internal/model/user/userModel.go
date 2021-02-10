@@ -3,7 +3,6 @@ package user
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
-	"yes-sharifTube/pkg/database/mongodb"
 )
 
 type User struct {
@@ -15,8 +14,7 @@ type User struct {
 	Courses  []string
 }
 
-var UserDBD *mongodb.UserMongoDriver
-
+var DBD DBDriver
 
 func (u *User) Enroll(courseID string) *User {
 	u.Courses = append(u.Courses, courseID)
@@ -38,7 +36,7 @@ func (u *User) UpdateName(name string) *User {
 	return u
 }
 func (u *User) UpdateEmail(email string) *User {
-	u.Email=email
+	u.Email = email
 	return u
 }
 
