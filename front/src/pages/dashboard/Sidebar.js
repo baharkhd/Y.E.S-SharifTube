@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Sidebar, Menu, Button, Icon } from "semantic-ui-react";
 import { useHistory } from "react-router-dom";
 import AddCourseModal from "./AddCourse.js";
+import JoinCourseModel from "./JoinCourse.js";
 
 function SideBar(props) {
   const [state, setState] = useState({
     activeItem: "Personal Information",
-    addingPost: false
+    addingCourse: false,
+    joiningCourse: false
   });
 
   const history = useHistory();
@@ -15,7 +17,11 @@ function SideBar(props) {
 
   return (
     <div>
-      <AddCourseModal addingPost={state.addingPost} setState={setState} />
+      <AddCourseModal addingPost={state.addingCourse} setState={setState} />
+      <JoinCourseModel
+        joiningCourse={state.joiningCourse}
+        setState={setState}
+      />
       <Sidebar
         as={Menu}
         animation="overlay"
@@ -52,7 +58,7 @@ function SideBar(props) {
           <Button
             positive
             onClick={() => {
-              setState({ addingPost: true });
+              setState({ addingCourse: true });
             }}
           >
             Add New Class
@@ -62,7 +68,7 @@ function SideBar(props) {
           <Button
             color="blue"
             onClick={() => {
-              //   setState({ addingPost: true });
+              setState({ joiningCourse: true });
             }}
           >
             Join Other Classes

@@ -29,7 +29,8 @@ function Courses(props) {
         left: props.isMobile ? 0 : 250,
         right: 0,
         margin: 30,
-        top: 70
+        top: 70,
+       padding: 10
       }}
     >
       <Grid columns={3}>
