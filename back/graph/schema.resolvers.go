@@ -11,7 +11,17 @@ import (
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, target model.TargetUser) (model.CreateUserPayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	println("user: " + extractUsernameFromContext(ctx))
+	newUser, err := userController.GetUserController().Create(target.Username, target.Password, target.Email)
+	if err != nil {
+		switch err.(type) {
+		case model.DuplicateUsernameException:
+			return err.(model.DuplicateUsernameException), nil
+		default:
+			return err.(model.InternalServerException), nil
+		}
+	}
+	return reformatUser(newUser), err
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, userName string, toBe model.EditedUser) (model.UpdateUserPayload, error) {
