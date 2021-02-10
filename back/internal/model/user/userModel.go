@@ -18,6 +18,8 @@ type User struct {
 var UserDBD *mongodb.UserMongoDriver
 
 func New(name, email, username, password string) (*User,error) {
+
+
 	// hashing password
 	hashedPass, err := hashAndSalt([]byte(password))
 	if err != nil {

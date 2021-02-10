@@ -3,6 +3,7 @@ package jwt
 import (
 	"github.com/dgrijalva/jwt-go"
 	"time"
+	"yes-sharifTube/graph/model"
 )
 
 // secret key being used to sign tokens
