@@ -18,8 +18,8 @@ const defaultPort = "8080"
 const queryComplexity = 8
 
 func main() {
-	//setting a mongodb driver for DBDriver filed of our controllers instance
-	user.DBD = mongodb.NewUserMongoDriver("yes-blog", "users")
+	//setting a mongodb driver for DBDriver filed of user model
+	user.DBD = mongodb.NewUserMongoDriver("yes-shariftube", "users")
 
 	// Setting up Gin
 	r := gin.Default()

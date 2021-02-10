@@ -13,7 +13,7 @@ import (
 
 func (r *mutationResolver) CreateUser(ctx context.Context, target model.TargetUser) (model.CreateUserPayload, error) {
 	println("user: " + extractUsernameFromContext(ctx))
-	newUser, err := user.New(*target.Name, *target.Email, target.Username, target.Password)
+	newUser, err := user.New(deref(target.Name), deref(target.Email), target.Username, target.Password)
 	if err != nil {
 		switch err.(type) {
 		case model.DuplicateUsernameException:

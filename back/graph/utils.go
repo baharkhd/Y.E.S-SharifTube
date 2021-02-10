@@ -43,3 +43,9 @@ func getUserName(ctx context.Context, name *string) string {
 	return username
 }
 
+func deref(input *string) string {
+	if input==nil{
+		return ""
+	}
+	return *input
+}
