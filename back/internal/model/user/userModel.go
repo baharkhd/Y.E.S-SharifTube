@@ -4,6 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
 	"yes-sharifTube/pkg/database/mongodb"
+	"yes-sharifTube/pkg/database/status"
 )
 
 type User struct {
@@ -19,6 +20,10 @@ var UserDBD *mongodb.UserMongoDriver
 
 func New(name, email, username, password string) (*User,error) {
 
+	// checking for duplicate username
+	if _,stat := UserDBD.Get(&name); stat == status.SUCCESSFUL {
+		return nil, model.DuplicateUsernameException{}
+	}
 
 	// hashing password
 	hashedPass, err := hashAndSalt([]byte(password))
@@ -26,14 +31,20 @@ func New(name, email, username, password string) (*User,error) {
 		return nil, model.InternalServerException{Message: "internal server error: couldn't hash password"}
 	}
 
-	user := User{
+	user := &User{
 		Name:     name,
 		Email:    email,
 		Username: username,
 		Password: hashedPass,
 		Courses:  []string{},
 	}
-	return &user,nil
+
+	// inserting into the database
+	if stat := UserDBD.Insert(user); stat == status.FAILED {
+		return &User{},model.InternalServerException{Message: "couldn't create user"}
+	} else {
+		return user, nil
+	}
 }
 
 func (u *User) Enroll(courseID string) *User {
