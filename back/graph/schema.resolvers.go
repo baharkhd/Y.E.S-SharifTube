@@ -8,11 +8,12 @@ import (
 	"fmt"
 	"yes-sharifTube/graph/generated"
 	"yes-sharifTube/graph/model"
+	"yes-sharifTube/internal/model/user"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, target model.TargetUser) (model.CreateUserPayload, error) {
 	println("user: " + extractUsernameFromContext(ctx))
-	newUser, err := userController.GetUserController().Create(target.Username, target.Password, target.Email)
+	newUser, err := user.New(*target.Name, *target.Email, target.Username, target.Password)
 	if err != nil {
 		switch err.(type) {
 		case model.DuplicateUsernameException:
