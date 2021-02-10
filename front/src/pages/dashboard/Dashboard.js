@@ -14,15 +14,17 @@ function Dashboard(props) {
 
   return (
     <div>
-      <SideBar />
-      <Switch>
-        <Route path="/panel">
+      <SideBar isMobile={props.isMobile} open={props.sidebarOpen} />
+      {/* <Panel isMobile={props.isMobile} /> */}
+      <Courses isMobile={props.isMobile} />
+      {/* <Switch>
+        <Route exact path="/panel">
           <Panel />
         </Route>
-        <Route path="/courses">
+        <Route exact path="/courses">
           <Courses />
         </Route>
-      </Switch>
+      </Switch> */}
       {/* <Courses /> */}
     </div>
   );

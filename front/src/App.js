@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
-import React from "react";
+import React, { useState } from "react";
 import { Button, Input } from "semantic-ui-react";
 import { Route, Switch } from "react-router-dom";
 import Header from "./pages/Header.js";
@@ -10,14 +10,25 @@ import Homepage from "./pages/Homepage/Homepage.js";
 import Dashboard from "./pages/dashboard/Dashboard.js";
 import CourseDashboard from "./pages/CoursePage/CourseDashboard.js";
 import ContentPage from "./pages/Content/ContentPage.js";
+import { useMediaQuery } from "react-responsive";
 
 function App() {
+  const isMobile = useMediaQuery({
+    query: "(max-device-width: 570px)"
+  });
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="App">
-      <Header />
+      <Header
+        isMobile={isMobile}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
       <Switch>
         <Route exact path="/dashboard">
-          <Dashboard />
+          <Dashboard isMobile={isMobile} sidebarOpen={sidebarOpen} />
         </Route>
         <Route exact path="/content">
           <ContentPage />

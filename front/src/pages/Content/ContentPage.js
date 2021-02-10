@@ -167,8 +167,8 @@ function ContentPage(props) {
   return (
     <div>
       <Segment style={{ top: 70, overflow: "hidden", borderRadius: 0 }}>
-        <Grid columns={2} textAlign="center" fluid >
-          <Grid.Column>
+        <Grid columns={2} textAlign="center" fluid stackable >
+          <Grid.Column >
             <Placeholder className="test" fluid>
               <Placeholder.Image rectangular />
             </Placeholder>

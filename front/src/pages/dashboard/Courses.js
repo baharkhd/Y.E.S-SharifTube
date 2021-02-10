@@ -19,27 +19,8 @@ const avatars = [
   "https://semantic-ui.com/images/avatar/small/veronika.jpg"
 ];
 
-// function* shuffle(array) {
-//   var i = array.length;
-
-//   while (i--) {
-//     yield array.splice(Math.floor(Math.random() * (i + 1)), 1)[0];
-//   }
-// }
 
 function Courses(props) {
-  //   const courses_num = 10;
-  //   const arr = Array.from(Array(courses_num), (_, index) => index + 1);
-  //   var ranNums = shuffle(arr);
-  //   var randomIndexes = [];
-
-  //   console.log("arr:", arr)
-
-  //   for (let i = 0; i < arr.length; i++) {
-  //     randomIndexes.push(ranNums.next().value);
-  //   }
-
-  //   console.log("random indexes:", randomIndexes);
 
   return (
     <Segment

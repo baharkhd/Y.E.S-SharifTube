@@ -158,11 +158,11 @@ const PanelInfo = props => {
 };
 
 function Panel(props) {
-  const [modalOpen, setModalOpen] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
   return (
     <div>
       <UpdatePanelModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
-      <PanelInfo setModalOpen={setModalOpen} />
+      <PanelInfo setModalOpen={setModalOpen} isMobile={props.isMobile} />
     </div>
   );
 }
