@@ -4,6 +4,55 @@ import (
 	"yes-sharifTube/graph/model"
 	"yes-sharifTube/pkg/database/status"
 )
+/*	the actual implementation of CRUD for user model is here
+	we also added getAll method due to our certain needs
+*/
+/*	we use status.QueryStatus as a statusCode for our controllers
+	we use status.FAILED to return a failed status and
+	status.SUCCESSFUL to return a successful status (obviously)
+*/
+func GetAll(start, amount int64) ([]*User, error) {
+	all, err := UserDBD.GetAll(start, amount)
+	if err == status.FAILED {
+		return nil, model.InternalServerException{Message: "couldn't fetch the required users"}
+	}
+	return all, nil
+}
+
+func Update(targetUsername string, toBe model.EditedUser) (*User,error) {
+
+	targetUser := newFrom(toBe)
+
+	// updating the database
+	if stat := UserDBD.Update(targetUsername, &targetUser); stat == status.FAILED {
+
+		// checking if the target user exists
+		_, stat2 := UserDBD.Get(&targetUsername)
+		if stat2 == status.FAILED {
+			return nil, model.UserNotFoundException{Message: "target Doesnt exist"}
+		}
+		// no clue why query failed
+		return nil, model.InternalServerException{Message: "couldn't update the user"}
+	} else {
+		return &targetUser, nil
+	}
+}
+
+func newFrom(toBe model.EditedUser) User {
+	// filling the update fields of the user
+	var targetUser = User{}
+	if toBe.Name != nil {
+		targetUser.UpdateName(*toBe.Name)
+	}
+	if toBe.Password != nil {
+		_ = targetUser.UpdatePassword(*(toBe.Password))
+	}
+	if toBe.Email != nil {
+		targetUser.UpdateEmail(*toBe.Name)
+	}
+	return targetUser
+}
+
 
 func Delete(username string) error {
 

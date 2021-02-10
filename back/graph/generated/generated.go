@@ -1298,7 +1298,6 @@ input TargetUser{
 }
 
 input EditedUser {
-    username: String
     password: String
     name: String
     email: String
@@ -7444,14 +7443,6 @@ func (ec *executionContext) unmarshalInputEditedUser(ctx context.Context, obj in
 
 	for k, v := range asMap {
 		switch k {
-		case "username":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
-			it.Username, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "password":
 			var err error
 

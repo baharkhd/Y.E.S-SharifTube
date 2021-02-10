@@ -103,7 +103,6 @@ input TargetUser{
 }
 
 input EditedUser {
-    username: String
     password: String
     name: String
     email: String
