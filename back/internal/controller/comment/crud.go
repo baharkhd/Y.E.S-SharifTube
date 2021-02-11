@@ -4,11 +4,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
 	"yes-sharifTube/internal/controller"
-	"yes-sharifTube/internal/model/comment"
 )
 
 func (c *commentController) CreateComment(authorUsername, contentID, body string, repliedID *string) (*model.Comment, *model.Reply, error) {
-	cn := comment.New(body, authorUsername, contentID)
 	cID, err := primitive.ObjectIDFromHex(contentID)
 	if err != nil {
 		return nil, nil, &model.InternalServerException{Message: err.Error()}
@@ -22,7 +20,7 @@ func (c *commentController) CreateComment(authorUsername, contentID, body string
 		}
 		rpID = &rID
 	}
-	cr, rr, err := c.dbDriver.Insert(authorUsername, cID, rpID, cn)
+	cr, rr, err := c.dbDriver.Insert(authorUsername, cID, rpID, body)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, nil, err
@@ -36,17 +34,16 @@ func (c *commentController) CreateComment(authorUsername, contentID, body string
 	}
 }
 
-func (c *commentController) UpdateComment(authorUsername, contentID, commentID, newBody string) (*model.Comment, *model.Reply, error) {
-	cn := comment.New(newBody, authorUsername, contentID)
+func (c *commentController) UpdateComment(authorUsername, contentID, commentID string, newBody *string) (*model.Comment, *model.Reply, error) {
 	cID, err := primitive.ObjectIDFromHex(contentID)
 	if err != nil {
 		return nil, nil, &model.InternalServerException{Message: err.Error()}
 	}
-	cn.ID, err = primitive.ObjectIDFromHex(commentID)
+	cmID, err := primitive.ObjectIDFromHex(commentID)
 	if err != nil {
 		return nil, nil, &model.InternalServerException{Message: err.Error()}
 	}
-	cr, rr, err := c.dbDriver.Update(authorUsername, cID, cn)
+	cr, rr, err := c.dbDriver.Update(authorUsername, cID, cmID, newBody)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, nil, err

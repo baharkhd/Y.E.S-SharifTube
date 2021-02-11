@@ -14,13 +14,18 @@ type Reply struct {
 	CommentID string             `json:"replyTo" bson:"replyTo"`
 }
 
-func NewReply(body, authorID, commentID string) *Reply {
+func NewReply(ID primitive.ObjectID, body, authorID, commentID string) (*Reply, error) {
+	err := RegexValidate(&body, &authorID, &commentID)
+	if err != nil {
+		return nil, err
+	}
 	return &Reply{
+		ID:        ID,
 		Body:      body,
 		Timestamp: time.Now().Unix(),
 		AuthorUn:  authorID,
 		CommentID: commentID,
-	}
+	}, nil
 }
 
 func (r Reply) Reshape() (*model.Reply, error) {
@@ -41,14 +46,22 @@ func ReshapeAllReplies(replies []*Reply) ([]*model.Reply, error) {
 	for _, c := range replies {
 		tmp, err := c.Reshape()
 		if err != nil {
-			return nil, &model.InternalServerException{Message: "error while reshape reply array: /n" + err.Error()}
+			return nil, model.InternalServerException{Message: "error while reshape reply array: /n" + err.Error()}
 		}
 		cs = append(cs, tmp)
 	}
 	return cs, nil
 }
 
-func (r *Reply) Update(newBody string) {
-	r.Body = newBody
+func (r *Reply) Update(newBody *string) error {
+	if newBody == nil {
+		return model.EmptyFieldsException{Message: model.EmptyKeyErrorMessage}
+	}
+	err := RegexValidate(newBody, nil, nil)
+	if err != nil {
+		return err
+	}
+	r.Body = *newBody
 	r.Timestamp = time.Now().Unix()
+	return nil
 }

@@ -15,7 +15,7 @@ type AttachmentMongoDriver struct {
 	collection *mongo.Collection
 }
 
-func (a AttachmentMongoDriver) Insert(username string, courseID primitive.ObjectID, atch *attachment.Attachment) (*attachment.Attachment, error) {
+func (a AttachmentMongoDriver) Insert(username string, courseID primitive.ObjectID, name, arul string, description *string) (*attachment.Attachment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
@@ -31,20 +31,22 @@ func (a AttachmentMongoDriver) Insert(username string, courseID primitive.Object
 	if !fc.IsUserNotStudent(username) {
 		return nil, database.ThrowUserNotAllowedException(username)
 	}
-	atch.ID = primitive.NewObjectID()
-	atch.CourseID = fc.ID.Hex()
+	atch, err := attachment.New(primitive.NewObjectID(), name, arul, fc.ID.Hex(), description)
+	if err != nil {
+		return nil, err
+	}
 	change := bson.M{
 		"$push": bson.M{
 			"inventory": atch,
 		},
 	}
-	if _, err := a.collection.UpdateOne(ctx, target, change); err != nil {
+	if _, err = a.collection.UpdateOne(ctx, target, change); err != nil {
 		return nil, database.ThrowInternalDBException(err.Error())
 	}
 	return atch, nil
 }
 
-func (a AttachmentMongoDriver) Update(username string, courseID primitive.ObjectID, atch *attachment.Attachment) (*attachment.Attachment, error) {
+func (a AttachmentMongoDriver) Update(username string, courseID, attachmentID primitive.ObjectID, name, description *string) (*attachment.Attachment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
@@ -60,23 +62,26 @@ func (a AttachmentMongoDriver) Update(username string, courseID primitive.Object
 	if !fc.IsUserNotStudent(username) {
 		return nil, database.ThrowUserNotAllowedException(username)
 	}
-	natch := fc.GetAttachment(atch.ID)
+	natch := fc.GetAttachment(attachmentID)
 	if natch == nil {
-		return nil, database.ThrowAttachmentNotFoundException(atch.ID.Hex())
+		return nil, database.ThrowAttachmentNotFoundException(attachmentID.Hex())
 	}
-	natch.Update(atch.Name, atch.Description)
+	err := natch.Update(name, description)
+	if err != nil {
+		return nil, err
+	}
 	target = bson.M{
 		"_id":           courseID,
-		"inventory._id": atch.ID,
+		"inventory._id": natch.ID,
 	}
 	change := bson.M{
 		"$set": bson.M{
-			"inventory.$.name":        atch.Name,
-			"inventory.$.description": atch.Description,
-			"inventory.$.timestamp":   atch.Timestamp,
+			"inventory.$.name":        natch.Name,
+			"inventory.$.description": natch.Description,
+			"inventory.$.timestamp":   natch.Timestamp,
 		},
 	}
-	if _, err := a.collection.UpdateOne(ctx, target, change); err != nil {
+	if _, err = a.collection.UpdateOne(ctx, target, change); err != nil {
 		return nil, database.ThrowInternalDBException(err.Error())
 	}
 	return natch, nil

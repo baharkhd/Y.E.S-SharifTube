@@ -44,10 +44,6 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	AllFieldsEmptyException struct {
-		Message func(childComplexity int) int
-	}
-
 	Attachment struct {
 		Aurl        func(childComplexity int) int
 		CourseID    func(childComplexity int) int
@@ -110,6 +106,10 @@ type ComplexityRoot struct {
 	}
 
 	DuplicateUsernameException struct {
+		Message func(childComplexity int) int
+	}
+
+	EmptyFieldsException struct {
 		Message func(childComplexity int) int
 	}
 
@@ -177,6 +177,10 @@ type ComplexityRoot struct {
 		Pendings          func(childComplexity int, filter model.PendingFilter, start int, amount int) int
 		User              func(childComplexity int, username *string) int
 		Users             func(childComplexity int, start int, amount int) int
+	}
+
+	RegexMismatchException struct {
+		Message func(childComplexity int) int
 	}
 
 	Reply struct {
@@ -273,13 +277,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "AllFieldsEmptyException.message":
-		if e.complexity.AllFieldsEmptyException.Message == nil {
-			break
-		}
-
-		return e.complexity.AllFieldsEmptyException.Message(childComplexity), true
 
 	case "Attachment.aurl":
 		if e.complexity.Attachment.Aurl == nil {
@@ -556,6 +553,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DuplicateUsernameException.Message(childComplexity), true
+
+	case "EmptyFieldsException.message":
+		if e.complexity.EmptyFieldsException.Message == nil {
+			break
+		}
+
+		return e.complexity.EmptyFieldsException.Message(childComplexity), true
 
 	case "IncorrectTokenException.message":
 		if e.complexity.IncorrectTokenException.Message == nil {
@@ -1032,6 +1036,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Users(childComplexity, args["start"].(int), args["amount"].(int)), true
 
+	case "RegexMismatchException.message":
+		if e.complexity.RegexMismatchException.Message == nil {
+			break
+		}
+
+		return e.complexity.RegexMismatchException.Message(childComplexity), true
+
 	case "Reply.author":
 		if e.complexity.Reply.Author == nil {
 			break
@@ -1229,7 +1240,7 @@ type Course {
     title: String!
     summary: String
     createdAt: Int!
-    token: String
+    token: String!
     prof: User!
     tas: [User!]
     pends: [Pending!]
@@ -1305,7 +1316,7 @@ type Query {
     users(start: Int!=0, amount: Int!=5): [User!]!
 
     courses(ids: [String!]!): [Course!]!
-    coursesByKeyWords(keyWords: [String!]!, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
+    coursesByKeyWords(keyWords: [String!]!, start: Int!=0, amount: Int!=5): [Course!]!
 
     content(id: String!): Content!
     contents(tags: [String!]!, courseID: String, start: Int!=0, amount: Int!=5): [Content!]!
@@ -1339,7 +1350,7 @@ type Token{
 input TargetCourse{
     title: String!
     summary: String
-    token: String
+    token: String!
 }
 
 input EditedCourse{
@@ -1397,7 +1408,10 @@ interface Exception{
 type InternalServerException implements Exception{
     message:String!
 }
-type AllFieldsEmptyException implements Exception{
+type EmptyFieldsException implements Exception{
+    message: String!
+}
+type RegexMismatchException implements Exception{
     message: String!
 }
 type DuplicateUsernameException implements Exception{
@@ -1441,34 +1455,34 @@ type CommentNotFoundException implements Exception{
 }
 
 union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
-union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
+union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | EmptyFieldsException | InternalServerException
 union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | InternalServerException
 union LoginPayload = Token | UserPassMissMatchException | InternalServerException
 
-union CreateCoursePayload = Course | UserNotFoundException | InternalServerException
-union UpdateCourseInfoPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
+union CreateCoursePayload = Course | UserNotFoundException | RegexMismatchException | InternalServerException
+union UpdateCourseInfoPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | RegexMismatchException | InternalServerException
 union DeleteCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
 
-union AddUserToCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | IncorrectTokenException | InternalServerException
+union AddUserToCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | DuplicateUsernameException | IncorrectTokenException | InternalServerException
 union DeleteUserFromCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
 union PromoteToTAPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | UserIsNotSTDException | InternalServerException
 union DemoteToSTDPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | UserIsNotTAException | InternalServerException
 
-union UploadContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
-union EditContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | ContentNotFoundException | InternalServerException
+union UploadContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | RegexMismatchException | InternalServerException
+union EditContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | ContentNotFoundException | RegexMismatchException | InternalServerException
 union DeleteContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | ContentNotFoundException | InternalServerException
 
-union UploadAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
-union EditAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | AttachmentNotFoundException | InternalServerException
+union UploadAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | RegexMismatchException | InternalServerException
+union EditAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | AttachmentNotFoundException | RegexMismatchException | InternalServerException
 union DeleteAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AttachmentNotFoundException | InternalServerException
 
-union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
-union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | PendingNotFoundException | InternalServerException
-union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | InternalServerException
+union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | RegexMismatchException | InternalServerException
+union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | PendingNotFoundException | RegexMismatchException | OfferedContentNotPendingException | InternalServerException
+union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | OfferedContentNotPendingException | InternalServerException
 
 union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
-union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | OfferedContentNotPendingException | InternalServerException
-union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | OfferedContentNotPendingException | InternalServerException
+union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | EmptyFieldsException | CommentNotFoundException | InternalServerException
+union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
 
 
 type Mutation {
@@ -2587,41 +2601,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _AllFieldsEmptyException_message(ctx context.Context, field graphql.CollectedField, obj *model.AllFieldsEmptyException) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "AllFieldsEmptyException",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Message, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Attachment_id(ctx context.Context, field graphql.CollectedField, obj *model.Attachment) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3648,11 +3627,14 @@ func (ec *executionContext) _Course_token(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Course_prof(ctx context.Context, field graphql.CollectedField, obj *model.Course) (ret graphql.Marshaler) {
@@ -3901,6 +3883,41 @@ func (ec *executionContext) _DuplicateUsernameException_message(ctx context.Cont
 	}()
 	fc := &graphql.FieldContext{
 		Object:     "DuplicateUsernameException",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EmptyFieldsException_message(ctx context.Context, field graphql.CollectedField, obj *model.EmptyFieldsException) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "EmptyFieldsException",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -5792,6 +5809,41 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegexMismatchException_message(ctx context.Context, field graphql.CollectedField, obj *model.RegexMismatchException) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegexMismatchException",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Reply_id(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
@@ -7849,7 +7901,7 @@ func (ec *executionContext) unmarshalInputTargetCourse(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
-			it.Token, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Token, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7975,6 +8027,13 @@ func (ec *executionContext) _AddUserToCoursePayload(ctx context.Context, sel ast
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
+	case model.DuplicateUsernameException:
+		return ec._DuplicateUsernameException(ctx, sel, &obj)
+	case *model.DuplicateUsernameException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._DuplicateUsernameException(ctx, sel, obj)
 	case model.IncorrectTokenException:
 		return ec._IncorrectTokenException(ctx, sel, &obj)
 	case *model.IncorrectTokenException:
@@ -8070,6 +8129,13 @@ func (ec *executionContext) _CreateCoursePayload(ctx context.Context, sel ast.Se
 			return graphql.Null
 		}
 		return ec._UserNotFoundException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -8209,13 +8275,6 @@ func (ec *executionContext) _DeleteCommentPayLoad(ctx context.Context, sel ast.S
 			return graphql.Null
 		}
 		return ec._CommentNotFoundException(ctx, sel, obj)
-	case model.OfferedContentNotPendingException:
-		return ec._OfferedContentNotPendingException(ctx, sel, &obj)
-	case *model.OfferedContentNotPendingException:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._OfferedContentNotPendingException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -8362,6 +8421,13 @@ func (ec *executionContext) _DeleteOfferedContentPayLoad(ctx context.Context, se
 			return graphql.Null
 		}
 		return ec._PendingNotFoundException(ctx, sel, obj)
+	case model.OfferedContentNotPendingException:
+		return ec._OfferedContentNotPendingException(ctx, sel, &obj)
+	case *model.OfferedContentNotPendingException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._OfferedContentNotPendingException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -8538,13 +8604,13 @@ func (ec *executionContext) _EditAttachmentPayLoad(ctx context.Context, sel ast.
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
-	case model.AllFieldsEmptyException:
-		return ec._AllFieldsEmptyException(ctx, sel, &obj)
-	case *model.AllFieldsEmptyException:
+	case model.EmptyFieldsException:
+		return ec._EmptyFieldsException(ctx, sel, &obj)
+	case *model.EmptyFieldsException:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._AllFieldsEmptyException(ctx, sel, obj)
+		return ec._EmptyFieldsException(ctx, sel, obj)
 	case model.AttachmentNotFoundException:
 		return ec._AttachmentNotFoundException(ctx, sel, &obj)
 	case *model.AttachmentNotFoundException:
@@ -8552,6 +8618,13 @@ func (ec *executionContext) _EditAttachmentPayLoad(ctx context.Context, sel ast.
 			return graphql.Null
 		}
 		return ec._AttachmentNotFoundException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -8603,13 +8676,13 @@ func (ec *executionContext) _EditCommentPayLoad(ctx context.Context, sel ast.Sel
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
-	case model.AllFieldsEmptyException:
-		return ec._AllFieldsEmptyException(ctx, sel, &obj)
-	case *model.AllFieldsEmptyException:
+	case model.EmptyFieldsException:
+		return ec._EmptyFieldsException(ctx, sel, &obj)
+	case *model.EmptyFieldsException:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._AllFieldsEmptyException(ctx, sel, obj)
+		return ec._EmptyFieldsException(ctx, sel, obj)
 	case model.CommentNotFoundException:
 		return ec._CommentNotFoundException(ctx, sel, &obj)
 	case *model.CommentNotFoundException:
@@ -8617,13 +8690,6 @@ func (ec *executionContext) _EditCommentPayLoad(ctx context.Context, sel ast.Sel
 			return graphql.Null
 		}
 		return ec._CommentNotFoundException(ctx, sel, obj)
-	case model.OfferedContentNotPendingException:
-		return ec._OfferedContentNotPendingException(ctx, sel, &obj)
-	case *model.OfferedContentNotPendingException:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._OfferedContentNotPendingException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -8668,13 +8734,13 @@ func (ec *executionContext) _EditContentPayLoad(ctx context.Context, sel ast.Sel
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
-	case model.AllFieldsEmptyException:
-		return ec._AllFieldsEmptyException(ctx, sel, &obj)
-	case *model.AllFieldsEmptyException:
+	case model.EmptyFieldsException:
+		return ec._EmptyFieldsException(ctx, sel, &obj)
+	case *model.EmptyFieldsException:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._AllFieldsEmptyException(ctx, sel, obj)
+		return ec._EmptyFieldsException(ctx, sel, obj)
 	case model.ContentNotFoundException:
 		return ec._ContentNotFoundException(ctx, sel, &obj)
 	case *model.ContentNotFoundException:
@@ -8682,6 +8748,13 @@ func (ec *executionContext) _EditContentPayLoad(ctx context.Context, sel ast.Sel
 			return graphql.Null
 		}
 		return ec._ContentNotFoundException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -8726,13 +8799,13 @@ func (ec *executionContext) _EditOfferedContentPayLoad(ctx context.Context, sel 
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
-	case model.AllFieldsEmptyException:
-		return ec._AllFieldsEmptyException(ctx, sel, &obj)
-	case *model.AllFieldsEmptyException:
+	case model.EmptyFieldsException:
+		return ec._EmptyFieldsException(ctx, sel, &obj)
+	case *model.EmptyFieldsException:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._AllFieldsEmptyException(ctx, sel, obj)
+		return ec._EmptyFieldsException(ctx, sel, obj)
 	case model.PendingNotFoundException:
 		return ec._PendingNotFoundException(ctx, sel, &obj)
 	case *model.PendingNotFoundException:
@@ -8740,6 +8813,20 @@ func (ec *executionContext) _EditOfferedContentPayLoad(ctx context.Context, sel 
 			return graphql.Null
 		}
 		return ec._PendingNotFoundException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
+	case model.OfferedContentNotPendingException:
+		return ec._OfferedContentNotPendingException(ctx, sel, &obj)
+	case *model.OfferedContentNotPendingException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._OfferedContentNotPendingException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -8763,13 +8850,20 @@ func (ec *executionContext) _Exception(ctx context.Context, sel ast.SelectionSet
 			return graphql.Null
 		}
 		return ec._InternalServerException(ctx, sel, obj)
-	case model.AllFieldsEmptyException:
-		return ec._AllFieldsEmptyException(ctx, sel, &obj)
-	case *model.AllFieldsEmptyException:
+	case model.EmptyFieldsException:
+		return ec._EmptyFieldsException(ctx, sel, &obj)
+	case *model.EmptyFieldsException:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._AllFieldsEmptyException(ctx, sel, obj)
+		return ec._EmptyFieldsException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.DuplicateUsernameException:
 		return ec._DuplicateUsernameException(ctx, sel, &obj)
 	case *model.DuplicateUsernameException:
@@ -8928,6 +9022,13 @@ func (ec *executionContext) _OfferContentPayLoad(ctx context.Context, sel ast.Se
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -9023,13 +9124,20 @@ func (ec *executionContext) _UpdateCourseInfoPayload(ctx context.Context, sel as
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
-	case model.AllFieldsEmptyException:
-		return ec._AllFieldsEmptyException(ctx, sel, &obj)
-	case *model.AllFieldsEmptyException:
+	case model.EmptyFieldsException:
+		return ec._EmptyFieldsException(ctx, sel, &obj)
+	case *model.EmptyFieldsException:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._AllFieldsEmptyException(ctx, sel, obj)
+		return ec._EmptyFieldsException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -9067,13 +9175,13 @@ func (ec *executionContext) _UpdateUserPayload(ctx context.Context, sel ast.Sele
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
-	case model.AllFieldsEmptyException:
-		return ec._AllFieldsEmptyException(ctx, sel, &obj)
-	case *model.AllFieldsEmptyException:
+	case model.EmptyFieldsException:
+		return ec._EmptyFieldsException(ctx, sel, &obj)
+	case *model.EmptyFieldsException:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._AllFieldsEmptyException(ctx, sel, obj)
+		return ec._EmptyFieldsException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -9118,6 +9226,13 @@ func (ec *executionContext) _UploadAttachmentPayLoad(ctx context.Context, sel as
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -9162,6 +9277,13 @@ func (ec *executionContext) _UploadContentPayLoad(ctx context.Context, sel ast.S
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -9177,33 +9299,6 @@ func (ec *executionContext) _UploadContentPayLoad(ctx context.Context, sel ast.S
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
-
-var allFieldsEmptyExceptionImplementors = []string{"AllFieldsEmptyException", "Exception", "UpdateUserPayload", "UpdateCourseInfoPayload", "EditContentPayLoad", "EditAttachmentPayLoad", "EditOfferedContentPayLoad", "EditCommentPayLoad"}
-
-func (ec *executionContext) _AllFieldsEmptyException(ctx context.Context, sel ast.SelectionSet, obj *model.AllFieldsEmptyException) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, allFieldsEmptyExceptionImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("AllFieldsEmptyException")
-		case "message":
-			out.Values[i] = ec._AllFieldsEmptyException_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
 
 var attachmentImplementors = []string{"Attachment", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad"}
 
@@ -9474,6 +9569,9 @@ func (ec *executionContext) _Course(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "token":
 			out.Values[i] = ec._Course_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "prof":
 			out.Values[i] = ec._Course_prof(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -9527,7 +9625,7 @@ func (ec *executionContext) _CourseNotFoundException(ctx context.Context, sel as
 	return out
 }
 
-var duplicateUsernameExceptionImplementors = []string{"DuplicateUsernameException", "Exception", "CreateUserPayload"}
+var duplicateUsernameExceptionImplementors = []string{"DuplicateUsernameException", "Exception", "CreateUserPayload", "AddUserToCoursePayload"}
 
 func (ec *executionContext) _DuplicateUsernameException(ctx context.Context, sel ast.SelectionSet, obj *model.DuplicateUsernameException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, duplicateUsernameExceptionImplementors)
@@ -9540,6 +9638,33 @@ func (ec *executionContext) _DuplicateUsernameException(ctx context.Context, sel
 			out.Values[i] = graphql.MarshalString("DuplicateUsernameException")
 		case "message":
 			out.Values[i] = ec._DuplicateUsernameException_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var emptyFieldsExceptionImplementors = []string{"EmptyFieldsException", "Exception", "UpdateUserPayload", "UpdateCourseInfoPayload", "EditContentPayLoad", "EditAttachmentPayLoad", "EditOfferedContentPayLoad", "EditCommentPayLoad"}
+
+func (ec *executionContext) _EmptyFieldsException(ctx context.Context, sel ast.SelectionSet, obj *model.EmptyFieldsException) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, emptyFieldsExceptionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EmptyFieldsException")
+		case "message":
+			out.Values[i] = ec._EmptyFieldsException_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -9764,7 +9889,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
-var offeredContentNotPendingExceptionImplementors = []string{"OfferedContentNotPendingException", "Exception", "EditCommentPayLoad", "DeleteCommentPayLoad"}
+var offeredContentNotPendingExceptionImplementors = []string{"OfferedContentNotPendingException", "Exception", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad"}
 
 func (ec *executionContext) _OfferedContentNotPendingException(ctx context.Context, sel ast.SelectionSet, obj *model.OfferedContentNotPendingException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, offeredContentNotPendingExceptionImplementors)
@@ -9994,6 +10119,33 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var regexMismatchExceptionImplementors = []string{"RegexMismatchException", "Exception", "CreateCoursePayload", "UpdateCourseInfoPayload", "UploadContentPayLoad", "EditContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad"}
+
+func (ec *executionContext) _RegexMismatchException(ctx context.Context, sel ast.SelectionSet, obj *model.RegexMismatchException) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, regexMismatchExceptionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RegexMismatchException")
+		case "message":
+			out.Values[i] = ec._RegexMismatchException_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

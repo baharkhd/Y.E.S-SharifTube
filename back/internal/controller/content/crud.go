@@ -39,16 +39,12 @@ func (c *contentController) GetContents(tags []string, courseID *string, startId
 	return content.ReshapeAll(contents)
 }
 
-func (c *contentController) CreateContent(authorUsername, courseID, title, description, vurl string, tags []string) (*model.Content, error) {
-	nc, err := content.New(title, description, authorUsername, vurl, courseID, nil, tags)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
+func (c *contentController) CreateContent(authorUsername, courseID, title string, description *string, vurl string, tags []string) (*model.Content, error) {
 	cID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	cr, err := c.dbDriver.Insert(authorUsername, cID, nc)
+	cr, err := c.dbDriver.Insert(authorUsername, cID, title, vurl, description, tags)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
@@ -56,20 +52,16 @@ func (c *contentController) CreateContent(authorUsername, courseID, title, descr
 	return cr.Reshape()
 }
 
-func (c *contentController) UpdateContent(authorUsername, courseID, contentID, newTitle, newDescription string, newTags []string) (*model.Content, error) {
-	nc, err := content.New(newTitle, newDescription, authorUsername, "", courseID, nil, newTags)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
+func (c *contentController) UpdateContent(authorUsername, courseID, contentID string, newTitle, newDescription *string, newTags []string) (*model.Content, error) {
 	cID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	nc.ID, err = primitive.ObjectIDFromHex(contentID)
+	cnID, err := primitive.ObjectIDFromHex(contentID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	cr, err := c.dbDriver.Update(authorUsername, cID, nc)
+	cr, err := c.dbDriver.Update(authorUsername, cID, cnID, newTitle, newDescription, newTags)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err

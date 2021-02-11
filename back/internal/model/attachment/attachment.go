@@ -4,6 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 	"yes-sharifTube/graph/model"
+	modelUtil "yes-sharifTube/internal/model"
 )
 
 type Attachment struct {
@@ -15,16 +16,24 @@ type Attachment struct {
 	CourseID    string             `json:"course" bson:"course"`
 }
 
-func New(name, description, aurl, courseID string) (*Attachment, error) {
-	//todo regex checking for url field
-
+func New(ID primitive.ObjectID, name, aurl, courseID string, description *string) (*Attachment, error) {
+	err := RegexValidate(&name, description, &aurl, &courseID)
+	if err != nil {
+		return nil, err
+	}
 	return &Attachment{
+		ID:          ID,
 		Name:        name,
-		Description: description,
+		Description: modelUtil.PtrTOStr(description),
 		Timestamp:   time.Now().Unix(),
 		Aurl:        aurl,
 		CourseID:    courseID,
 	}, nil
+}
+
+func RegexValidate(name, description, aurl, courseID *string) error {
+	//todo validate fields of an Attachment
+	return nil
 }
 
 func (a Attachment) Reshape() *model.Attachment {
@@ -46,8 +55,20 @@ func ReshapeAll(courses []*Attachment) []*model.Attachment {
 	return cs
 }
 
-func (a *Attachment) Update(newName, newDescription string) {
-	a.Name = newName
-	a.Description = newDescription
+func (a *Attachment) Update(newName, newDescription *string) error {
+	if newName == nil && newDescription == nil {
+		return model.EmptyFieldsException{Message: model.EmptyKeyErrorMessage}
+	}
+	err := RegexValidate(newName, newDescription, nil, nil)
+	if err != nil {
+		return err
+	}
+	if newName != nil {
+		a.Name = *newName
+	}
+	if newDescription != nil {
+		a.Description = *newDescription
+	}
 	a.Timestamp = time.Now().Unix()
+	return nil
 }

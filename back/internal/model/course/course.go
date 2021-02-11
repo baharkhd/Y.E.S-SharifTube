@@ -25,15 +25,19 @@ type Course struct {
 	Inventory []*attachment.Attachment `json:"inventory" bson:"inventory"`
 }
 
-func New(title, summery, profUsername, token string) (*Course, error) {
+func New(ID primitive.ObjectID, title, profUsername, token string, summery *string) (*Course, error) {
 	hashedToken, err := modelUtils.HashToken([]byte(token))
 	if err != nil {
 		return nil, model.InternalServerException{Message: "internal server error: couldn't hash token"}
 	}
-
+	err = RegexValidate(&title, summery, &profUsername, &token)
+	if err != nil {
+		return nil, err
+	}
 	return &Course{
+		ID:        ID,
 		Title:     title,
-		Summery:   summery,
+		Summery:   modelUtils.PtrTOStr(summery),
 		CreatedAt: time.Now().Unix(),
 		ProfUn:    profUsername,
 		Token:     hashedToken,
@@ -43,6 +47,11 @@ func New(title, summery, profUsername, token string) (*Course, error) {
 		Pends:     []*pending.Pending{},
 		Inventory: []*attachment.Attachment{},
 	}, nil
+}
+
+func RegexValidate(title, summery, profUsername, token *string) error {
+	//todo validate fields of a Course
+	return nil
 }
 
 func (c Course) Reshape() (*model.Course, error) {
@@ -67,14 +76,14 @@ func (c Course) Reshape() (*model.Course, error) {
 	//reshape pendings
 	pends, err := pending.ReshapeAll(c.Pends)
 	if err != nil {
-		return nil, &model.InternalServerException{Message: "error while reshape pending array of course: /n" + err.Error()}
+		return nil, model.InternalServerException{Message: "error while reshape pending array of course: /n" + err.Error()}
 	}
 	res.Pends = pends
 
 	//reshape contents
 	contents, err := content.ReshapeAll(c.Contents)
 	if err != nil {
-		return nil, &model.InternalServerException{Message: "error while reshape contents of course: /n" + err.Error()}
+		return nil, model.InternalServerException{Message: "error while reshape contents of course: /n" + err.Error()}
 	}
 	res.Contents = contents
 
@@ -89,17 +98,35 @@ func ReshapeAll(courses []*Course) ([]*model.Course, error) {
 	for _, c := range courses {
 		tmp, err := c.Reshape()
 		if err != nil {
-			return nil, &model.InternalServerException{Message: "error while reshape course array: " + err.Error()}
+			return nil, model.InternalServerException{Message: "error while reshape course array: " + err.Error()}
 		}
 		cs = append(cs, tmp)
 	}
 	return cs, nil
 }
 
-func (c *Course) UpdateInfo(newTitle, newSummery, newToken string) {
-	c.Title = newTitle
-	c.Summery = newSummery
-	c.Token = newToken
+func (c *Course) Update(newTitle, newSummery, newToken *string) error {
+	if newTitle == nil && newSummery == nil && newToken == nil {
+		return model.EmptyFieldsException{Message: model.EmptyKeyErrorMessage}
+	}
+	err := RegexValidate(newTitle, newSummery, nil, nil)
+	if err != nil {
+		return err
+	}
+	if newTitle != nil {
+		c.Title = *newTitle
+	}
+	if newSummery != nil {
+		c.Summery = *newSummery
+	}
+	if newToken != nil {
+		hashedToken, err := modelUtils.HashToken([]byte(*newToken))
+		if err != nil {
+			return model.InternalServerException{Message: "internal server error: couldn't hash token"}
+		}
+		c.Token = hashedToken
+	}
+	return nil
 }
 
 func (c Course) IsUserNotStudent(username string) bool {
@@ -195,7 +222,7 @@ func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cn
 	for i, com := range cnt.Comments {
 		if com.ID == commentID {
 			if !c.IsUserAllowedToDeleteUserComment(username, com.AuthorUn) {
-				return nil, nil, &model.UserNotAllowedException{Message: "NotAllowed"}
+				return nil, nil, model.UserNotAllowedException{Message: "permission denied for username: " + username}
 			}
 			rc := cnt.Comments[i]
 			cnt.Comments = append(cnt.Comments[:i], cnt.Comments[i+1:]...)
@@ -204,7 +231,7 @@ func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cn
 			for j, rep := range cnt.Comments[i].Replies {
 				if rep.ID == commentID {
 					if !c.IsUserAllowedToDeleteUserComment(username, rep.AuthorUn) {
-						return nil, nil, &model.UserNotAllowedException{Message: "NotAllowed"}
+						return nil, nil, model.UserNotAllowedException{Message: "permission denied for username: " + username}
 					}
 					rc := cnt.Comments[i].Replies[j]
 					cnt.Comments[i].Replies = append(cnt.Comments[i].Replies[:j], cnt.Comments[i].Replies[j+1:]...)
@@ -213,5 +240,5 @@ func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cn
 			}
 		}
 	}
-	return nil, nil, &model.CommentNotFoundException{Message: "NotFound"}
+	return nil, nil, model.CommentNotFoundException{Message: "there is no comment @" + commentID.Hex()}
 }

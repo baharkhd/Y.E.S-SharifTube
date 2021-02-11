@@ -4,19 +4,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
 	"yes-sharifTube/internal/controller"
-	"yes-sharifTube/internal/model/attachment"
 )
 
-func (a *attachmentController) CreateAttachment(authorUsername, courseID, name, description, aurl string) (*model.Attachment, error) {
-	an, err := attachment.New(name, description, aurl, courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
+func (a *attachmentController) CreateAttachment(authorUsername, courseID, name string, description *string, aurl string) (*model.Attachment, error) {
 	cID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	ar, err := a.dbDriver.Insert(authorUsername, cID, an)
+	ar, err := a.dbDriver.Insert(authorUsername, cID, name, aurl, description)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
@@ -24,20 +19,16 @@ func (a *attachmentController) CreateAttachment(authorUsername, courseID, name, 
 	return ar.Reshape(), nil
 }
 
-func (a *attachmentController) UpdateAttachment(authorUsername, courseID, attachmentID, newName, newDescription string) (*model.Attachment, error) {
-	an, err := attachment.New(newName, newDescription, "", courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
+func (a *attachmentController) UpdateAttachment(authorUsername, courseID, attachmentID string, newName, newDescription *string) (*model.Attachment, error) {
 	cID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	an.ID, err = primitive.ObjectIDFromHex(attachmentID)
+	aID, err := primitive.ObjectIDFromHex(attachmentID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	ar, err := a.dbDriver.Update(authorUsername, cID, an)
+	ar, err := a.dbDriver.Update(authorUsername, cID, aID, newName, newDescription)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err

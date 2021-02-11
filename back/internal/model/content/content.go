@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 	"yes-sharifTube/graph/model"
+	modelUtil "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/comment"
 )
 
@@ -14,27 +15,35 @@ type Content struct {
 	Description  string             `json:"description" bson:"description"`
 	Timestamp    int64              `json:"timestamp" bson:"timestamp"`
 	UploadedByID string             `json:"uploaded_by" bson:"uploaded_by"`
-	ApprovedByID *string            `json:"approved_by" bson:"approved_by"`
+	ApprovedByID string             `json:"approved_by" bson:"approved_by"`
 	Vurl         string             `json:"vurl" bson:"vurl"` //todo better implementation
 	Tags         []string           `json:"tags" bson:"tags"`
 	Comments     []*comment.Comment `json:"comments" bson:"comments"`
 	CourseID     string             `json:"course" bson:"course"`
 }
 
-func New(title, description, uploadedBy, vurl, courseID string, approvedBy *string, tags []string) (*Content, error) {
-	//todo regex checking for url field
-
+func New(ID primitive.ObjectID, title, uploadedBy, vurl, courseID string, description, approvedBy *string, tags []string) (*Content, error) {
+	err := RegexValidate(&title, description, &uploadedBy, &vurl, &courseID, approvedBy, tags)
+	if err != nil {
+		return nil, err
+	}
 	return &Content{
+		ID:           ID,
 		Title:        title,
-		Description:  description,
+		Description:  modelUtil.PtrTOStr(description),
 		Timestamp:    time.Now().Unix(),
 		UploadedByID: uploadedBy,
-		ApprovedByID: approvedBy,
+		ApprovedByID: modelUtil.PtrTOStr(approvedBy),
 		Vurl:         vurl,
 		Tags:         tags,
 		Comments:     []*comment.Comment{},
 		CourseID:     courseID,
 	}, nil
+}
+
+func RegexValidate(title, description, uploadedBy, vurl, courseID, approvedBy *string, tags []string) error {
+	//todo validate fields of a Content
+	return nil
 }
 
 func (c Content) Reshape() (*model.Content, error) {
@@ -58,7 +67,7 @@ func (c Content) Reshape() (*model.Content, error) {
 	//reshape comments
 	comments, err := comment.ReshapeAll(c.Comments)
 	if err != nil {
-		return nil, &model.InternalServerException{Message: "error while reshape comments of content: /n" + err.Error()}
+		return nil, model.InternalServerException{Message: "error while reshape comments of content: /n" + err.Error()}
 	}
 	res.Comments = comments
 
@@ -70,7 +79,7 @@ func ReshapeAll(courses []*Content) ([]*model.Content, error) {
 	for _, c := range courses {
 		tmp, err := c.Reshape()
 		if err != nil {
-			return nil, &model.InternalServerException{Message: "error while reshape content array: /n" + err.Error()}
+			return nil, model.InternalServerException{Message: "error while reshape content array: /n" + err.Error()}
 		}
 		cs = append(cs, tmp)
 	}
@@ -97,11 +106,25 @@ func GetAll(arr []*Content, start, amount int) []*Content {
 	}
 }
 
-func (c *Content) Update(newTitle, newDescription string, newTags []string) {
-	c.Title = newTitle
-	c.Description = newDescription
-	c.Tags = newTags
+func (c *Content) Update(newTitle, newDescription *string, newTags []string) error {
+	if newTitle == nil && newDescription == nil {
+		return model.EmptyFieldsException{Message: model.EmptyKeyErrorMessage}
+	}
+	err := RegexValidate(newTitle, newDescription, nil, nil, nil, nil, newTags)
+	if err != nil {
+		return err
+	}
+	if newTitle != nil {
+		c.Title = *newTitle
+	}
+	if newDescription != nil {
+		c.Description = *newDescription
+	}
+	if newTags != nil {
+		c.Tags = newTags
+	}
 	c.Timestamp = time.Now().Unix()
+	return nil
 }
 
 func (c *Content) GetComment(commentID primitive.ObjectID) (*comment.Comment, *comment.Reply) {

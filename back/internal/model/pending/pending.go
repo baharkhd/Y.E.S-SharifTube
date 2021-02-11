@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 	"yes-sharifTube/graph/model"
+	modelUtil "yes-sharifTube/internal/model"
 )
 
 type Pending struct {
@@ -18,18 +19,26 @@ type Pending struct {
 	CourseID     string             `json:"course" bson:"course"`
 }
 
-func New(title, description, uploadedByID, furl, courseID string) (*Pending, error) {
-	//todo regex checking for url field
-
+func New(ID primitive.ObjectID, title, uploadedByID, furl, courseID string, description *string) (*Pending, error) {
+	err := RegexValidate(&title, description, &uploadedByID, &furl, &courseID)
+	if err != nil {
+		return nil, err
+	}
 	return &Pending{
+		ID:           ID,
 		Title:        title,
-		Description:  description,
+		Description:  modelUtil.PtrTOStr(description),
 		Status:       PENDING,
 		Timestamp:    time.Now().Unix(),
 		UploadedByUn: uploadedByID,
 		Furl:         furl,
 		CourseID:     courseID,
 	}, nil
+}
+
+func RegexValidate(title, description, uploadedByID, furl, courseID *string) error {
+	//todo validate fields of Pending
+	return nil
 }
 
 func (p Pending) Reshape() (*model.Pending, error) {
@@ -53,17 +62,29 @@ func ReshapeAll(pendings []*Pending) ([]*model.Pending, error) {
 	for _, p := range pendings {
 		tmp, err := p.Reshape()
 		if err != nil {
-			return nil, &model.InternalServerException{Message: "error while reshape pending array: /n" + err.Error()}
+			return nil, model.InternalServerException{Message: "error while reshape pending array: /n" + err.Error()}
 		}
 		ps = append(ps, tmp)
 	}
 	return ps, nil
 }
 
-func (p *Pending) Update(newTitle, newDescription string) {
-	p.Title = newTitle
-	p.Description = newDescription
+func (p *Pending) Update(newTitle, newDescription *string) error {
+	if newTitle == nil && newDescription == nil {
+		return model.EmptyFieldsException{Message: model.EmptyKeyErrorMessage}
+	}
+	err := RegexValidate(newTitle, newDescription, nil, nil, nil)
+	if err != nil {
+		return err
+	}
+	if newTitle != nil {
+		p.Title = *newTitle
+	}
+	if newDescription != nil {
+		p.Description = *newDescription
+	}
 	p.Timestamp = time.Now().Unix()
+	return nil
 }
 
 func (p *Pending) Accept() {

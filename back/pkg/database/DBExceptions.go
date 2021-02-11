@@ -13,8 +13,8 @@ const DuplicateUsernameMessage = "received username is duplicated"
 const IncorrectTokenMessage = "incorrect course token"
 const UserIsNotTAMessage = "there is no TA in this course with username: "
 const UserIsNotSTDMessage = "there is no student in this course with username: "
-const OfferedContentRejectedMessage = "there is no accepted offer @"
 const OfferedContentNotPendingMessage = "there is no pending offer @"
+const RegexMismatchMessage = "invalid value for "
 
 type InternalDBError struct {
 	Message string
@@ -28,16 +28,28 @@ func ThrowInternalDBException(mongoErr string) error {
 	return &InternalDBError{Message: InternalMessage + mongoErr}
 }
 
-type AllFieldsEmpty struct {
+type EmptyFields struct {
 	Message string
 }
 
-func (e *AllFieldsEmpty) Error() string {
+func (e *EmptyFields) Error() string {
 	return e.Message
 }
 
-func ThrowAllFieldsEmptyException() error {
-	return &AllFieldsEmpty{Message: FieldsEmptyMessage}
+func ThrowEmptyFieldsException() error {
+	return &EmptyFields{Message: FieldsEmptyMessage}
+}
+
+type RegexMismatch struct {
+	Message string
+}
+
+func (e *RegexMismatch) Error() string {
+	return e.Message
+}
+
+func ThrowRegexMismatchException(fieldName string) error {
+	return &RegexMismatch{Message: RegexMismatchMessage + fieldName}
 }
 
 type DuplicateUsername struct {
@@ -49,7 +61,7 @@ func (e *DuplicateUsername) Error() string {
 }
 
 func ThrowDuplicateUsernameException() error {
-	return &AllFieldsEmpty{Message: DuplicateUsernameMessage}
+	return &DuplicateUsername{Message: DuplicateUsernameMessage}
 }
 
 type UserNotFound struct {
@@ -181,5 +193,5 @@ func (e *OfferedContentNotPending) Error() string {
 }
 
 func ThrowOfferedContentNotPendingException(pendingID string) error {
-	return &OfferedContentNotPending{Message: OfferedContentRejectedMessage + pendingID}
+	return &OfferedContentNotPending{Message: OfferedContentNotPendingMessage + pendingID}
 }

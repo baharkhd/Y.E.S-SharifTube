@@ -30,12 +30,8 @@ func (c *courseController) GetCoursesByKeyWords(keywords []string, startIdx, amo
 	return course.ReshapeAll(courses)
 }
 
-func (c *courseController) CreateCourse(authorUsername, title, summery, token string) (*model.Course, error) {
-	nc, err := course.New(title, summery, authorUsername, token)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
-	cr, err := c.dbDriver.Insert(authorUsername, nc)
+func (c *courseController) CreateCourse(authorUsername, title string, summery *string, token string) (*model.Course, error) {
+	cr, err := c.dbDriver.Insert(authorUsername, title, token, summery)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
@@ -43,16 +39,12 @@ func (c *courseController) CreateCourse(authorUsername, title, summery, token st
 	return cr.Reshape()
 }
 
-func (c *courseController) UpdateCourse(authorUsername, courseID, newTitle, newSummery, newToken string) (*model.Course, error) {
-	nc, err := course.New(newTitle, newSummery, authorUsername, newToken)
+func (c *courseController) UpdateCourse(authorUsername, courseID string, newTitle, newSummery, newToken *string) (*model.Course, error) {
+	cID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	nc.ID, err = primitive.ObjectIDFromHex(courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
-	cr, err := c.dbDriver.Update(authorUsername, nc)
+	cr, err := c.dbDriver.Update(authorUsername, cID, newTitle, newToken, newSummery)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err

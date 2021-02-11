@@ -15,14 +15,24 @@ type Comment struct {
 	ContentID string             `json:"content" bson:"content"`
 }
 
-func New(body, authorID, contentID string) *Comment {
+func New(ID primitive.ObjectID, body, authorID, contentID string) (*Comment, error) {
+	err := RegexValidate(&body, &authorID, &contentID)
+	if err != nil {
+		return nil, err
+	}
 	return &Comment{
+		ID:        ID,
 		Body:      body,
 		Timestamp: time.Now().Unix(),
 		AuthorUn:  authorID,
 		Replies:   []*Reply{},
 		ContentID: contentID,
-	}
+	}, nil
+}
+
+func RegexValidate(body, authorUn, ownerID *string) error {
+	//todo validate fields of a Comment
+	return nil
 }
 
 func (c Comment) Reshape() (*model.Comment, error) {
@@ -41,7 +51,7 @@ func (c Comment) Reshape() (*model.Comment, error) {
 	//reshape replies
 	replies, err := ReshapeAllReplies(c.Replies)
 	if err != nil {
-		return nil, &model.InternalServerException{Message: "error while reshape replies of comment: /n" + err.Error()}
+		return nil, model.InternalServerException{Message: "error while reshape replies of comment: /n" + err.Error()}
 	}
 	res.Replies = replies
 
@@ -53,16 +63,24 @@ func ReshapeAll(courses []*Comment) ([]*model.Comment, error) {
 	for _, c := range courses {
 		tmp, err := c.Reshape()
 		if err != nil {
-			return nil, &model.InternalServerException{Message: "error while reshape comment array: /n" + err.Error()}
+			return nil, model.InternalServerException{Message: "error while reshape comment array: /n" + err.Error()}
 		}
 		cs = append(cs, tmp)
 	}
 	return cs, nil
 }
 
-func (c *Comment) Update(newBody string) {
-	c.Body = newBody
+func (c *Comment) Update(newBody *string) error {
+	if newBody == nil {
+		return model.EmptyFieldsException{Message: model.EmptyKeyErrorMessage}
+	}
+	err := RegexValidate(newBody, nil, nil)
+	if err != nil {
+		return err
+	}
+	c.Body = *newBody
 	c.Timestamp = time.Now().Unix()
+	return nil
 }
 
 func (c *Comment) ConvertToReply(repID primitive.ObjectID) *Reply {

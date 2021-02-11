@@ -49,3 +49,9 @@ func RemoveFromStringArray(s []string, r string) []string {
 	return s
 }
 
+func PtrTOStr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}

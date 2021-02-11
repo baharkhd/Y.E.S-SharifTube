@@ -4,7 +4,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
 	"yes-sharifTube/internal/controller"
-	"yes-sharifTube/internal/model/pending"
 	"yes-sharifTube/pkg/database"
 )
 
@@ -26,20 +25,16 @@ func (p *pendingController) SetDBDriver(dbDriver database.PendingDBDriver) {
 	pendingc.dbDriver = dbDriver
 }
 
-func (p *pendingController) AcceptPending(username, courseID, pendingID, newTitle, newDescription string) (*model.Pending, error) {
-	np, err := pending.New(newTitle, newDescription, username, "", courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
+func (p *pendingController) AcceptPending(username, courseID, pendingID string, newTitle, newDescription *string) (*model.Pending, error) {
 	cID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	np.ID, err = primitive.ObjectIDFromHex(pendingID)
+	pID, err := primitive.ObjectIDFromHex(pendingID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	pr, err := p.dbDriver.Accept(username, cID, np)
+	pr, err := p.dbDriver.Accept(username, cID, pID, newTitle, newDescription)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err

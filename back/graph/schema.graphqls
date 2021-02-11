@@ -12,7 +12,7 @@ type Course {
     title: String!
     summary: String
     createdAt: Int!
-    token: String
+    token: String!
     prof: User!
     tas: [User!]
     pends: [Pending!]
@@ -88,7 +88,7 @@ type Query {
     users(start: Int!=0, amount: Int!=5): [User!]!
 
     courses(ids: [String!]!): [Course!]!
-    coursesByKeyWords(keyWords: [String!]!, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
+    coursesByKeyWords(keyWords: [String!]!, start: Int!=0, amount: Int!=5): [Course!]!
 
     content(id: String!): Content!
     contents(tags: [String!]!, courseID: String, start: Int!=0, amount: Int!=5): [Content!]!
@@ -122,7 +122,7 @@ type Token{
 input TargetCourse{
     title: String!
     summary: String
-    token: String
+    token: String!
 }
 
 input EditedCourse{
@@ -180,7 +180,10 @@ interface Exception{
 type InternalServerException implements Exception{
     message:String!
 }
-type AllFieldsEmptyException implements Exception{
+type EmptyFieldsException implements Exception{
+    message: String!
+}
+type RegexMismatchException implements Exception{
     message: String!
 }
 type DuplicateUsernameException implements Exception{
@@ -224,34 +227,34 @@ type CommentNotFoundException implements Exception{
 }
 
 union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
-union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
+union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | EmptyFieldsException | InternalServerException
 union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | InternalServerException
 union LoginPayload = Token | UserPassMissMatchException | InternalServerException
 
-union CreateCoursePayload = Course | UserNotFoundException | InternalServerException
-union UpdateCourseInfoPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
+union CreateCoursePayload = Course | UserNotFoundException | RegexMismatchException | InternalServerException
+union UpdateCourseInfoPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | RegexMismatchException | InternalServerException
 union DeleteCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
 
-union AddUserToCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | IncorrectTokenException | InternalServerException
+union AddUserToCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | DuplicateUsernameException | IncorrectTokenException | InternalServerException
 union DeleteUserFromCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
 union PromoteToTAPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | UserIsNotSTDException | InternalServerException
 union DemoteToSTDPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | UserIsNotTAException | InternalServerException
 
-union UploadContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
-union EditContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | ContentNotFoundException | InternalServerException
+union UploadContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | RegexMismatchException | InternalServerException
+union EditContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | ContentNotFoundException | RegexMismatchException | InternalServerException
 union DeleteContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | ContentNotFoundException | InternalServerException
 
-union UploadAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
-union EditAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | AttachmentNotFoundException | InternalServerException
+union UploadAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | RegexMismatchException | InternalServerException
+union EditAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | AttachmentNotFoundException | RegexMismatchException | InternalServerException
 union DeleteAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AttachmentNotFoundException | InternalServerException
 
-union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
-union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | PendingNotFoundException | InternalServerException
-union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | InternalServerException
+union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | RegexMismatchException | InternalServerException
+union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | PendingNotFoundException | RegexMismatchException | OfferedContentNotPendingException | InternalServerException
+union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | OfferedContentNotPendingException | InternalServerException
 
 union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
-union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | OfferedContentNotPendingException | InternalServerException
-union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | OfferedContentNotPendingException | InternalServerException
+union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | EmptyFieldsException | CommentNotFoundException | InternalServerException
+union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
 
 
 type Mutation {

@@ -32,16 +32,12 @@ func (p *pendingController) GetPendings(courseID, uploaderUsername *string, stat
 	return pending.ReshapeAll(pr)
 }
 
-func (p *pendingController) CreatePending(authorUsername, courseID, title, description, furl string) (*model.Pending, error) {
-	np, err := pending.New(title, description, authorUsername, furl, courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
+func (p *pendingController) CreatePending(authorUsername, courseID, title string, description *string, furl string) (*model.Pending, error) {
 	cID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	pr, err := p.dbDriver.Insert(authorUsername, cID, np)
+	pr, err := p.dbDriver.Insert(authorUsername, cID, title, furl, description)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err
@@ -49,20 +45,16 @@ func (p *pendingController) CreatePending(authorUsername, courseID, title, descr
 	return pr.Reshape()
 }
 
-func (p *pendingController) UpdatePending(authorUsername, courseID, pendingID, newTitle, newDescription string) (*model.Pending, error) {
-	np, err := pending.New(newTitle, newDescription, authorUsername, "", courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
+func (p *pendingController) UpdatePending(authorUsername, courseID, pendingID string, newTitle, newDescription *string) (*model.Pending, error) {
 	cID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	np.ID, err = primitive.ObjectIDFromHex(pendingID)
+	pID, err := primitive.ObjectIDFromHex(pendingID)
 	if err != nil {
 		return nil, &model.InternalServerException{Message: err.Error()}
 	}
-	pr, err := p.dbDriver.Update(authorUsername, cID, np)
+	pr, err := p.dbDriver.Update(authorUsername, cID, pID, newTitle, newDescription)
 	err = controller.CastDBExceptionToGQLException(err)
 	if err != nil {
 		return nil, err

@@ -104,18 +104,6 @@ type UploadContentPayLoad interface {
 	IsUploadContentPayLoad()
 }
 
-type AllFieldsEmptyException struct {
-	Message string `json:"message"`
-}
-
-func (AllFieldsEmptyException) IsException()                 {}
-func (AllFieldsEmptyException) IsUpdateUserPayload()         {}
-func (AllFieldsEmptyException) IsUpdateCourseInfoPayload()   {}
-func (AllFieldsEmptyException) IsEditContentPayLoad()        {}
-func (AllFieldsEmptyException) IsEditAttachmentPayLoad()     {}
-func (AllFieldsEmptyException) IsEditOfferedContentPayLoad() {}
-func (AllFieldsEmptyException) IsEditCommentPayLoad()        {}
-
 type Attachment struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
@@ -192,7 +180,7 @@ type Course struct {
 	Title     string        `json:"title"`
 	Summary   *string       `json:"summary"`
 	CreatedAt int           `json:"createdAt"`
-	Token     *string       `json:"token"`
+	Token     string        `json:"token"`
 	Prof      *User         `json:"prof"`
 	Tas       []*User       `json:"tas"`
 	Pends     []*Pending    `json:"pends"`
@@ -234,8 +222,9 @@ type DuplicateUsernameException struct {
 	Message string `json:"message"`
 }
 
-func (DuplicateUsernameException) IsException()         {}
-func (DuplicateUsernameException) IsCreateUserPayload() {}
+func (DuplicateUsernameException) IsException()              {}
+func (DuplicateUsernameException) IsCreateUserPayload()      {}
+func (DuplicateUsernameException) IsAddUserToCoursePayload() {}
 
 type EditAttachment struct {
 	Name        *string `json:"name"`
@@ -269,6 +258,18 @@ type EditedUser struct {
 	Name     *string `json:"name"`
 	Email    *string `json:"email"`
 }
+
+type EmptyFieldsException struct {
+	Message string `json:"message"`
+}
+
+func (EmptyFieldsException) IsException()                 {}
+func (EmptyFieldsException) IsUpdateUserPayload()         {}
+func (EmptyFieldsException) IsUpdateCourseInfoPayload()   {}
+func (EmptyFieldsException) IsEditContentPayLoad()        {}
+func (EmptyFieldsException) IsEditAttachmentPayLoad()     {}
+func (EmptyFieldsException) IsEditOfferedContentPayLoad() {}
+func (EmptyFieldsException) IsEditCommentPayLoad()        {}
 
 type IncorrectTokenException struct {
 	Message string `json:"message"`
@@ -315,9 +316,9 @@ type OfferedContentNotPendingException struct {
 	Message string `json:"message"`
 }
 
-func (OfferedContentNotPendingException) IsException()            {}
-func (OfferedContentNotPendingException) IsEditCommentPayLoad()   {}
-func (OfferedContentNotPendingException) IsDeleteCommentPayLoad() {}
+func (OfferedContentNotPendingException) IsException()                   {}
+func (OfferedContentNotPendingException) IsEditOfferedContentPayLoad()   {}
+func (OfferedContentNotPendingException) IsDeleteOfferedContentPayLoad() {}
 
 type Pending struct {
 	ID          string  `json:"id"`
@@ -347,6 +348,20 @@ type PendingNotFoundException struct {
 func (PendingNotFoundException) IsException()                   {}
 func (PendingNotFoundException) IsEditOfferedContentPayLoad()   {}
 func (PendingNotFoundException) IsDeleteOfferedContentPayLoad() {}
+
+type RegexMismatchException struct {
+	Message string `json:"message"`
+}
+
+func (RegexMismatchException) IsException()                 {}
+func (RegexMismatchException) IsCreateCoursePayload()       {}
+func (RegexMismatchException) IsUpdateCourseInfoPayload()   {}
+func (RegexMismatchException) IsUploadContentPayLoad()      {}
+func (RegexMismatchException) IsEditContentPayLoad()        {}
+func (RegexMismatchException) IsUploadAttachmentPayLoad()   {}
+func (RegexMismatchException) IsEditAttachmentPayLoad()     {}
+func (RegexMismatchException) IsOfferContentPayLoad()       {}
+func (RegexMismatchException) IsEditOfferedContentPayLoad() {}
 
 type Reply struct {
 	ID        string `json:"id"`
@@ -380,7 +395,7 @@ type TargetContent struct {
 type TargetCourse struct {
 	Title   string  `json:"title"`
 	Summary *string `json:"summary"`
-	Token   *string `json:"token"`
+	Token   string  `json:"token"`
 }
 
 type TargetPending struct {

@@ -95,7 +95,7 @@ func (c *ContentMongoDriver) GetAll(courseID *primitive.ObjectID, tags []string,
 	return content.GetAll(contents, start, amount), nil
 }
 
-func (c *ContentMongoDriver) Insert(username string, courseID primitive.ObjectID, cnt *content.Content) (*content.Content, error) {
+func (c *ContentMongoDriver) Insert(username string, courseID primitive.ObjectID, title, vrul string, description *string, tags []string) (*content.Content, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
@@ -111,20 +111,22 @@ func (c *ContentMongoDriver) Insert(username string, courseID primitive.ObjectID
 	if !fc.IsUserNotStudent(username) {
 		return nil, database.ThrowUserNotAllowedException(username)
 	}
-	cnt.ID = primitive.NewObjectID()
-	cnt.CourseID = fc.ID.Hex()
+	cnt, err := content.New(primitive.NewObjectID(), title, username, vrul, fc.ID.Hex(), description, nil, tags)
+	if err != nil {
+		return nil, err
+	}
 	change := bson.M{
 		"$push": bson.M{
 			"contents": cnt,
 		},
 	}
-	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
+	if _, err = c.collection.UpdateOne(ctx, target, change); err != nil {
 		return nil, database.ThrowInternalDBException(err.Error())
 	}
 	return cnt, nil
 }
 
-func (c *ContentMongoDriver) Update(username string, courseID primitive.ObjectID, cnt *content.Content) (*content.Content, error) {
+func (c *ContentMongoDriver) Update(username string, courseID, contentID primitive.ObjectID, title, description *string, tags []string) (*content.Content, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
@@ -140,24 +142,27 @@ func (c *ContentMongoDriver) Update(username string, courseID primitive.ObjectID
 	if !fc.IsUserNotStudent(username) {
 		return nil, database.ThrowUserNotAllowedException(username)
 	}
-	ncnt := fc.GetContent(cnt.ID)
+	ncnt := fc.GetContent(contentID)
 	if ncnt == nil {
-		return nil, database.ThrowContentNotFoundException(cnt.ID.Hex())
+		return nil, database.ThrowContentNotFoundException(contentID.Hex())
 	}
-	ncnt.Update(cnt.Title, cnt.Description, cnt.Tags)
+	err := ncnt.Update(title, description, tags)
+	if err != nil {
+		return nil, err
+	}
 	target = bson.M{
 		"_id":          courseID,
-		"contents._id": cnt.ID,
+		"contents._id": ncnt.ID,
 	}
 	change := bson.M{
 		"$set": bson.M{
-			"contents.$.title":       cnt.Title,
-			"contents.$.description": cnt.Description,
-			"contents.$.tags":        cnt.Tags,
-			"contents.$.timestamp":   cnt.Timestamp,
+			"contents.$.title":       ncnt.Title,
+			"contents.$.description": ncnt.Description,
+			"contents.$.tags":        ncnt.Tags,
+			"contents.$.timestamp":   ncnt.Timestamp,
 		},
 	}
-	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
+	if _, err = c.collection.UpdateOne(ctx, target, change); err != nil {
 		return nil, database.ThrowInternalDBException(err.Error())
 	}
 	return ncnt, nil

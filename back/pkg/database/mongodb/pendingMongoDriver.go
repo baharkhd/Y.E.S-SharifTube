@@ -97,7 +97,7 @@ func (p PendingMongoDriver) GetByFilter(courseID *primitive.ObjectID, status *pe
 
 }
 
-func (p PendingMongoDriver) Insert(username string, courseID primitive.ObjectID, pnt *pending.Pending) (*pending.Pending, error) {
+func (p PendingMongoDriver) Insert(username string, courseID primitive.ObjectID, title, furl string, description *string) (*pending.Pending, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
@@ -113,20 +113,22 @@ func (p PendingMongoDriver) Insert(username string, courseID primitive.ObjectID,
 	if !fc.IsUserStudent(username) {
 		return nil, database.ThrowUserNotAllowedException(username)
 	}
-	pnt.ID = primitive.NewObjectID()
-	pnt.CourseID = fc.ID.Hex()
+	pnt, err := pending.New(primitive.NewObjectID(), title, username, furl, courseID.Hex(), description)
+	if err != nil {
+		return nil, err
+	}
 	change := bson.M{
 		"$push": bson.M{
 			"pends": pnt,
 		},
 	}
-	if _, err := p.collection.UpdateOne(ctx, target, change); err != nil {
+	if _, err = p.collection.UpdateOne(ctx, target, change); err != nil {
 		return nil, database.ThrowInternalDBException(err.Error())
 	}
 	return pnt, nil
 }
 
-func (p PendingMongoDriver) Update(username string, courseID primitive.ObjectID, pnt *pending.Pending) (*pending.Pending, error) {
+func (p PendingMongoDriver) Update(username string, courseID, pendingID primitive.ObjectID, title, description *string) (*pending.Pending, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
@@ -139,26 +141,32 @@ func (p PendingMongoDriver) Update(username string, courseID primitive.ObjectID,
 	if err := p.collection.FindOne(ctx, target).Decode(&fc); err != nil {
 		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
 	}
-	if !fc.IsUserStudent(username) || username != pnt.UploadedByUn {
+	pcnt := fc.GetPending(pendingID)
+	if pcnt == nil {
+		return nil, database.ThrowPendingNotFoundException(pendingID.Hex())
+	}
+	if !fc.IsUserStudent(username) || username != pcnt.UploadedByUn {
 		return nil, database.ThrowUserNotAllowedException(username)
 	}
-	pcnt := fc.GetPending(pnt.ID)
-	if pcnt == nil {
-		return nil, database.ThrowPendingNotFoundException(pnt.ID.Hex())
+	if pcnt.Status != pending.PENDING {
+		return nil, database.ThrowOfferedContentNotPendingException(pendingID.Hex())
 	}
-	pcnt.Update(pnt.Title, pnt.Description)
+	err := pcnt.Update(title, description)
+	if err != nil {
+		return nil, err
+	}
 	target = bson.M{
 		"_id":       courseID,
-		"pends._id": pnt.ID,
+		"pends._id": pcnt.ID,
 	}
 	change := bson.M{
 		"$set": bson.M{
-			"pends.$.title":       pnt.Title,
-			"pends.$.description": pnt.Description,
-			"pends.$.timestamp":   pnt.Timestamp,
+			"pends.$.title":       pcnt.Title,
+			"pends.$.description": pcnt.Description,
+			"pends.$.timestamp":   pcnt.Timestamp,
 		},
 	}
-	if _, err := p.collection.UpdateOne(ctx, target, change); err != nil {
+	if _, err = p.collection.UpdateOne(ctx, target, change); err != nil {
 		return nil, database.ThrowInternalDBException(err.Error())
 	}
 	return pcnt, nil
@@ -197,7 +205,7 @@ func (p PendingMongoDriver) Delete(username string, courseID, pendingID primitiv
 	return pcnt, nil
 }
 
-func (p PendingMongoDriver) Accept(username string, courseID primitive.ObjectID, pnt *pending.Pending) (*pending.Pending, error) {
+func (p PendingMongoDriver) Accept(username string, courseID, pendingID primitive.ObjectID, title, description *string) (*pending.Pending, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
@@ -213,20 +221,21 @@ func (p PendingMongoDriver) Accept(username string, courseID primitive.ObjectID,
 	if !fc.IsUserNotStudent(username) {
 		return nil, database.ThrowUserNotAllowedException(username)
 	}
-	pcnt := fc.GetPending(pnt.ID)
+	pcnt := fc.GetPending(pendingID)
 	if pcnt == nil {
-		return nil, database.ThrowPendingNotFoundException(pnt.ID.Hex())
+		return nil, database.ThrowPendingNotFoundException(pendingID.Hex())
 	}
 	if pcnt.Status != pending.PENDING {
-		return nil, database.ThrowOfferedContentNotPendingException(pnt.ID.Hex())
+		return nil, database.ThrowOfferedContentNotPendingException(pendingID.Hex())
 	}
-
-	ncnt, err := content.New(pnt.Title, pnt.Description, pcnt.UploadedByUn, pcnt.Furl, pcnt.CourseID, &username, []string{})
+	err := pcnt.Update(title, description)
 	if err != nil {
-		return nil, database.ThrowInternalDBException("error while accepting your offered content @" + pnt.ID.Hex() + "/n " + err.Error())
+		return nil, err
 	}
-	ncnt.ID = primitive.NewObjectID()
-	ncnt.CourseID = fc.ID.Hex()
+	ncnt, err := content.New(primitive.NewObjectID(), pcnt.Title, pcnt.UploadedByUn, pcnt.Furl, pcnt.CourseID, &pcnt.Description, &username, []string{})
+	if err != nil {
+		return nil, err
+	}
 	change := bson.M{
 		"$push": bson.M{
 			"contents": ncnt,
@@ -239,11 +248,14 @@ func (p PendingMongoDriver) Accept(username string, courseID primitive.ObjectID,
 	pcnt.Accept()
 	target = bson.M{
 		"_id":       courseID,
-		"pends._id": pnt.ID,
+		"pends._id": pcnt.ID,
 	}
 	change = bson.M{
 		"$set": bson.M{
-			"pends.$.status": pending.ACCEPTED,
+			"pends.$.title":       pcnt.Title,
+			"pends.$.description": pcnt.Description,
+			"pends.$.timestamp":   pcnt.Timestamp,
+			"pends.$.status":      pending.ACCEPTED,
 		},
 	}
 	if _, err = p.collection.UpdateOne(ctx, target, change); err != nil {

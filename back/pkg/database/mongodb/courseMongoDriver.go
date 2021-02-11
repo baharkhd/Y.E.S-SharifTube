@@ -87,20 +87,23 @@ func (c CourseMongoDriver) GetByFilter(keywords []string, start, amount int) ([]
 	return cours, nil
 }
 
-func (c CourseMongoDriver) Insert(username string, course *course.Course) (*course.Course, error) {
+func (c CourseMongoDriver) Insert(username string, title, token string, summery *string) (*course.Course, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
 	//todo check if the username exists in user collection
 
-	course.ID = primitive.NewObjectID()
-	if _, err := c.collection.InsertOne(ctx, course); err != nil {
+	cou, err := course.New(primitive.NewObjectID(), title, username, token, summery)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = c.collection.InsertOne(ctx, cou); err != nil {
 		return nil, database.ThrowInternalDBException(err.Error())
 	}
-	return course, nil
+	return cou, nil
 }
 
-func (c CourseMongoDriver) Update(username string, newCourse *course.Course) (*course.Course, error) {
+func (c CourseMongoDriver) Update(username string, courseID primitive.ObjectID, title, token, summery *string) (*course.Course, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
@@ -108,15 +111,18 @@ func (c CourseMongoDriver) Update(username string, newCourse *course.Course) (*c
 
 	var fc course.Course
 	target := bson.M{
-		"_id": newCourse.ID,
+		"_id": courseID,
 	}
 	if err := c.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(newCourse.ID.Hex())
+		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
 	}
 	if !fc.IsUserNotStudent(username) {
 		return nil, database.ThrowUserNotAllowedException(username)
 	}
-	fc.UpdateInfo(newCourse.Title, newCourse.Summery, newCourse.Token)
+	err := fc.Update(title, summery, token)
+	if err != nil {
+		return nil, err
+	}
 	change := bson.M{
 		"$set": bson.M{
 			"title":   fc.Title,
@@ -124,7 +130,7 @@ func (c CourseMongoDriver) Update(username string, newCourse *course.Course) (*c
 			"token":   fc.Token,
 		},
 	}
-	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
+	if _, err = c.collection.UpdateOne(ctx, target, change); err != nil {
 		return nil, database.ThrowInternalDBException(err.Error())
 	}
 	return &fc, nil
