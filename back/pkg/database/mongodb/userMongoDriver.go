@@ -94,7 +94,7 @@ func (u UserMongoDriver) Update(target string, user *user.User) status.QueryStat
 	if user.Password != ""{
 		query["password"]=user.Password
 	}
-	if updateResult, err := u.collection.UpdateOne(ctx,bson.M{"name":target}, update);
+	if updateResult, err := u.collection.UpdateOne(ctx,bson.M{"username":target}, update);
 	err != nil || updateResult.MatchedCount==0 {
 		return status.FAILED
 	}
