@@ -9,6 +9,7 @@ import (
 	"yes-sharifTube/graph/generated"
 	"yes-sharifTube/graph/model"
 	"yes-sharifTube/internal/model/user"
+	"yes-sharifTube/pkg/jwt"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, target model.TargetUser) (model.CreateUserPayload, error) {
@@ -57,11 +58,29 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (model.DeleteUserPayl
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (model.LoginPayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	token, err := user.Login(input.Username, input.Password)
+	if err != nil {
+		switch err.(type) {
+		case model.UserPassMissMatchException:
+			return err.(model.UserPassMissMatchException), nil
+		default:
+			return err.(model.InternalServerException), nil
+		}
+	}
+	return model.Token{Token: token}, nil
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context) (model.LoginPayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	username := extractUsernameFromContext(ctx)
+	if username == "" {
+		return model.InternalServerException{Message: "user not found!"}, nil
+	}
+	// generate new token
+	token, err := jwt.GenerateToken(username)
+	if err != nil {
+		return model.InternalServerException{}, nil
+	}
+	return model.Token{Token: token}, nil
 }
 
 func (r *mutationResolver) CreateCourse(ctx context.Context, username string, target model.TargetCourse) (model.CreateCoursePayload, error) {

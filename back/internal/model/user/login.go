@@ -20,7 +20,7 @@ func Login(username, password string) (string, error) {
 	}
 
 	// generate new token
-	token, err2 := jwt.GenerateToken(target.Name)
+	token, err2 := jwt.GenerateToken(target.Username)
 	if err2 != nil {
 		return "", model.InternalServerException{}
 	}
