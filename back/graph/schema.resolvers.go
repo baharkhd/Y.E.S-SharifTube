@@ -141,11 +141,13 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, username string, c
 }
 
 func (r *queryResolver) User(ctx context.Context, username *string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	target, err := user.Get(getUserName(ctx, username))
+	return reformatUser(target), err
 }
 
 func (r *queryResolver) Users(ctx context.Context, start int, amount int) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	all, err := user.GetAll(int64(start), int64(amount))
+	return reformatUsers(all), err
 }
 
 func (r *queryResolver) Courses(ctx context.Context, id []string) ([]*model.Course, error) {

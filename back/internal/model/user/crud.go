@@ -66,7 +66,7 @@ func Delete(username string) error {
 func New(name, email, username, password string) (*User, error) {
 
 	// checking for duplicate username
-	if _, stat := DBD.Get(&name); stat == status.SUCCESSFUL {
+	if _, stat := DBD.Get(&username); stat == status.SUCCESSFUL {
 		return nil, model.DuplicateUsernameException{}
 	}
 
