@@ -1,27 +1,7 @@
 import React from "react";
 import { Grid, Segment, Image, Placeholder } from "semantic-ui-react";
 
-const avatars = [
-  "https://semantic-ui.com/images/avatar/small/chris.jpg",
-  "https://semantic-ui.com/images/avatar/small/ade.jpg",
-  "https://semantic-ui.com/images/avatar/small/christian.jpg",
-  "https://semantic-ui.com/images/avatar/small/daniel.jpg",
-  "https://semantic-ui.com/images/avatar/small/elliot.jpg",
-  "https://semantic-ui.com/images/avatar/small/helen.jpg",
-  "https://semantic-ui.com/images/avatar/small/jenny.jpg",
-  "https://semantic-ui.com/images/avatar/small/joe.jpg",
-  "https://semantic-ui.com/images/avatar/small/justen.jpg",
-  "https://semantic-ui.com/images/avatar/small/laura.jpg",
-  "https://semantic-ui.com/images/avatar/small/matt.jpg",
-  "https://semantic-ui.com/images/avatar/small/nan.jpg",
-  "https://semantic-ui.com/images/avatar/small/steve.jpg",
-  "https://semantic-ui.com/images/avatar/small/stevie.jpg",
-  "https://semantic-ui.com/images/avatar/small/veronika.jpg"
-];
-
-
 function Courses(props) {
-
   return (
     <Segment
       style={{
@@ -30,10 +10,10 @@ function Courses(props) {
         right: 0,
         margin: 30,
         top: 70,
-       padding: 10
+        padding: 10
       }}
     >
-      <Grid columns={3}>
+      <Grid columns={3} stackable>
         <Grid.Column>
           <Placeholder>
             <Placeholder.Image rectangular />

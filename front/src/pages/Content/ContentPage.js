@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Embed,
   Placeholder,
@@ -6,9 +6,12 @@ import {
   Grid,
   Feed,
   Icon,
-  Divider
+  Divider,
+  Container,
+  Input
 } from "semantic-ui-react";
 import "./ContentPage.css";
+import { useParams } from "react-router-dom";
 
 const comments = [
   {
@@ -142,7 +145,7 @@ const comments = [
         timestamp: "11 Feb"
       }
     ]
-  },
+  }
 ];
 
 const Reply = ({ author, body, time }) => {
@@ -163,60 +166,101 @@ const Reply = ({ author, body, time }) => {
   );
 };
 
+const Comment = ({ comment }) => {
+  return (
+    <Feed.Event>
+      <Feed.Content>
+        <Feed.Summary>
+          {/* <Feed.Extra>
+            <Icon
+              name="comment"
+              color="green"
+              onClick={() => {
+                // Todo: add e reply to this comment
+              }}
+            />
+          </Feed.Extra> */}
+          <Feed.User>{comment.author}</Feed.User> {comment.body}
+          <Feed.Date>{comment.timestamp}</Feed.Date>
+        </Feed.Summary>
+        <Feed.Meta>
+          {comment.replies.map(reply => {
+            return (
+              <Reply
+                author={reply.author}
+                time={reply.timestamp}
+                body={reply.body}
+              />
+            );
+          })}
+        </Feed.Meta>
+      </Feed.Content>
+    </Feed.Event>
+  );
+};
+
 function ContentPage(props) {
+  let { courseID, contentID } = useParams();
+  courseID = courseID.substring(1);
+  contentID = contentID.substring(1);
+
+  const [newComment, setNewComment] = useState("");
+
+  console.log("courseID:", courseID, ", contentID:", contentID);
   return (
     <div>
       <Segment style={{ top: 70, overflow: "hidden", borderRadius: 0 }}>
-        <Grid columns={2} textAlign="center" fluid stackable >
-          <Grid.Column >
-            <Placeholder className="test" fluid>
-              <Placeholder.Image rectangular />
-            </Placeholder>
+        <Grid columns={2} textAlign="center" fluid stackable>
+          <Grid.Column>
+            <Segment>
+              <Placeholder className="test" fluid>
+                <Placeholder.Image rectangular />
+              </Placeholder>
+              <Container textAlign="left">
+                <h1>Title</h1>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+                  Aenean commodo ligula eget dolor. Aenean massa strong. Cum
+                  sociis natoque penatibus et magnis dis parturient montes,
+                  nascetur ridiculus mus. Donec quam felis, ultricies nec,
+                  pellentesque eu, pretium quis, sem. Nulla consequat massa quis
+                  enim. Donec pede justo, fringilla vel, aliquet nec, vulputate
+                  eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis
+                  vitae, justo. Nullam dictum felis eu pede link mollis pretium.
+                  Integer tincidunt. Cras dapibus. Vivamus elementum semper
+                  nisi. Aenean vulputate eleifend tellus. Aenean leo ligula,
+                  porttitor eu, consequat vitae, eleifend ac, enim. Aliquam
+                  lorem ante, dapibus in, viverra quis, feugiat a, tellus.
+                  Phasellus viverra nulla ut metus varius laoreet. Quisque
+                  rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue.
+                  Curabitur ullamcorper ultricies nisi.
+                </p>
+              </Container>
+            </Segment>
           </Grid.Column>
           <Grid.Column>
             <Segment>
+              <Input
+                fluid
+                type="string"
+                action={{
+                  color: "blue",
+                  icon: "plus"
+                }}
+                onChange={e => {
+                  setNewComment(e.target.value);
+                }}
+                actionPosition="right"
+                placeholder="Add a comment ..."
+                // defaultValue="52.03"
+              />
               <Feed>
                 {comments.map(comment => {
-                  return (
-                    <Feed.Event>
-                      {/* <Feed.Label>
-                              <img src="https://react.semantic-ui.com/images/avatar/small/elliot.jpg" />
-                            </Feed.Label> */}
-                      <Feed.Content>
-                        <Feed.Summary>
-                          <Feed.User>{comment.author}</Feed.User> {comment.body}
-                          <Feed.Date>{comment.timestamp}</Feed.Date>
-                        </Feed.Summary>
-                        <Feed.Meta>
-                          {comment.replies.map(reply => {
-                            return (
-                              <Reply
-                                author={reply.author}
-                                time={reply.timestamp}
-                                body={reply.body}
-                              />
-                            );
-                          })}
-                        </Feed.Meta>
-                      </Feed.Content>
-                    </Feed.Event>
-                  );
+                  return <Comment comment={comment} />;
                 })}
               </Feed>
             </Segment>
           </Grid.Column>
-          {/* <Grid.Row fluid>
-            <Segment >
-              <Placeholder fluid>
-                <Placeholder.Image rectangular />
-              </Placeholder>
-              <Grid columns={1} style={{ margin: 10 }} textAlign="center">
-                <Grid.Row>
-                  
-                </Grid.Row>
-              </Grid>
-            </Segment>
-          </Grid.Row> */}
         </Grid>
       </Segment>
     </div>
@@ -224,50 +268,3 @@ function ContentPage(props) {
 }
 
 export default ContentPage;
-
-// <Segment style={{ top: 70 }}>
-//         <Grid columns={1} textAlign="center" fluid className="test">
-//           <Grid.Row fluid>
-//             <Segment >
-//               <Placeholder fluid>
-//                 <Placeholder.Image rectangular />
-//               </Placeholder>
-//               <Grid columns={1} style={{ margin: 10 }} textAlign="center">
-//                 <Grid.Row>
-//                   <Segment>
-//                     <Feed>
-//                       {comments.map(comment => {
-//                         return (
-//                           <Feed.Event>
-//                             {/* <Feed.Label>
-//                               <img src="https://react.semantic-ui.com/images/avatar/small/elliot.jpg" />
-//                             </Feed.Label> */}
-//                             <Feed.Content>
-//                               <Feed.Summary>
-//                                 <Feed.User>{comment.author}</Feed.User>{" "}
-//                                 {comment.body}
-//                                 <Feed.Date>{comment.timestamp}</Feed.Date>
-//                               </Feed.Summary>
-//                               <Feed.Meta>
-//                                 {comment.replies.map(reply => {
-//                                   return (
-//                                     <Reply
-//                                       author={reply.author}
-//                                       time={reply.timestamp}
-//                                       body={reply.body}
-//                                     />
-//                                   );
-//                                 })}
-//                               </Feed.Meta>
-//                             </Feed.Content>
-//                           </Feed.Event>
-//                         );
-//                       })}
-//                     </Feed>
-//                   </Segment>
-//                 </Grid.Row>
-//               </Grid>
-//             </Segment>
-//           </Grid.Row>
-//         </Grid>
-//       </Segment>

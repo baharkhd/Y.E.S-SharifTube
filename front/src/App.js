@@ -1,8 +1,8 @@
 import logo from "./logo.svg";
 import "./App.css";
 import React, { useState } from "react";
-import { Button, Input } from "semantic-ui-react";
-import { Route, Switch } from "react-router-dom";
+import { Button, Input, Segment } from "semantic-ui-react";
+import { Route, Switch, useParams } from "react-router-dom";
 import Header from "./pages/Header.js";
 import Login from "./pages/Login/Login.js";
 import Signup from "./pages/Signup/Signup.js";
@@ -14,8 +14,23 @@ import { useMediaQuery } from "react-responsive";
 import SearchTest from "./pages/SearchTest.js";
 import SearchCourse from "./pages/Search/SearchCourse.js";
 import SearchIndex from "./pages/Search/SearchIndex.js";
-import Panel from './pages/dashboard/Panel.js'
-import Courses from './pages/dashboard/Courses.js'
+import Panel from "./pages/dashboard/Panel.js";
+import Courses from "./pages/dashboard/Courses.js";
+
+const TestComponent = props => {
+  let { id, test } = useParams();
+  console.log("????", id.substring(1), test.substring(1));
+  return (
+    <div>
+      <Segment>Test, {id}</Segment>
+      <Segment>Test, {id}</Segment>
+      <Segment>Test, {id}</Segment>
+      <Segment>Test, {id}</Segment>
+      <Segment>Test, {id}</Segment>
+      <Segment>Test, {id}</Segment>
+    </div>
+  );
+};
 
 function App() {
   const isMobile = useMediaQuery({
@@ -56,8 +71,8 @@ function App() {
           <ContentPage />
         </Route>
         {/* Todo: remove this part! */}
-        <Route exact path="/course">
-          <CourseDashboard />
+        <Route exact path="/course:id">
+          <CourseDashboard isMobile={isMobile} sidebarOpen={sidebarOpen} />
         </Route>
         <Route exact path="/">
           <Homepage />
@@ -70,6 +85,9 @@ function App() {
         </Route>
         <Route exact path="/search">
           <SearchIndex />
+        </Route>
+        <Route exact path="/course:courseID/content:contentID">
+          <ContentPage />
         </Route>
       </Switch>
     </div>

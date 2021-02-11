@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Sidebar, Menu, Button, Icon } from "semantic-ui-react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import AddCourseModal from "./AddCourse.js";
 import JoinCourseModel from "./JoinCourse.js";
 
@@ -32,6 +32,37 @@ function SideBar(props) {
         width="thin"
         style={{ width: 250, top: 70 }}
       >
+        <Link to="/dashboard/panel">
+          <Menu.Item
+            name="personal information"
+            active={state.activeItem === "personal information"}
+            // onClick={handleItemClick}
+            onClick={() => {
+              history.push("/dashboard/panel");
+              setState({ ...state, activeItem: "personal information" });
+            }}
+          >
+            <Icon name="user" />
+            Presonal Information
+          </Menu.Item>
+        </Link>
+
+        <Link to="/dashboard/courses">
+          <Menu.Item
+            name="classes"
+            active={state.activeItem === "classes"}
+            // onClick={handleItemClick}
+            onClick={() => {
+              history.push("/dashboard/courses");
+              setState({ ...state, activeItem: "classes" });
+            }}
+          >
+            <Icon name="book" />
+            Courses
+          </Menu.Item>
+        </Link>
+
+        {/* 
         <Menu.Item
           name="personal information"
           active={state.activeItem === "personal information"}
@@ -53,7 +84,7 @@ function SideBar(props) {
         >
           <Icon name="book" />
           Courses
-        </Menu.Item>
+        </Menu.Item> */}
         <Menu.Item as="a">
           <Button
             positive

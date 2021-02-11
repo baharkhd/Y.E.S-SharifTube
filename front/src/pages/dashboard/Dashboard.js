@@ -12,7 +12,7 @@ function Dashboard(props) {
 
   const handleItemClick = (e, { name }) => setState({ activeItem: name });
 
-  console.log("component:", props.component)
+  console.log("component:", props.component);
   const Component = props.component ? (
     props.component
   ) : (
@@ -23,14 +23,6 @@ function Dashboard(props) {
     <div>
       <SideBar isMobile={props.isMobile} open={props.sidebarOpen} />
       {Component}
-      {/* <Switch>
-        <Route exact path="/dashboard/panel">
-          <Panel isMobile={props.isMobile} />
-        </Route>
-        <Route exact path="/dashboard/courses">
-          <Courses isMobile={props.isMobile} />
-        </Route>
-      </Switch> */}
     </div>
   );
 }
