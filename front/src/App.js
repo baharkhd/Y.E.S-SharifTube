@@ -16,6 +16,8 @@ import SearchCourse from "./pages/Search/SearchCourse.js";
 import SearchIndex from "./pages/Search/SearchIndex.js";
 import Panel from "./pages/dashboard/Panel.js";
 import Courses from "./pages/dashboard/Courses.js";
+import PendingPage from "./pages/CoursePage/PendingPage.js";
+import UploadPage from "./pages/CoursePage/UploadPage.js";
 
 const TestComponent = props => {
   let { id, test } = useParams();
@@ -88,6 +90,12 @@ function App() {
         </Route>
         <Route exact path="/course:courseID/content:contentID">
           <ContentPage />
+        </Route>
+        <Route exact path="/course:courseID/pendings">
+          <PendingPage />
+        </Route>
+        <Route exact path="/course:courseID/upload">
+          <UploadPage />
         </Route>
       </Switch>
     </div>

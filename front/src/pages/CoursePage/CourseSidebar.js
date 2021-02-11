@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Sidebar, Menu, Button, Icon, List } from "semantic-ui-react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link, useParams } from "react-router-dom";
 
 const TAs = [
   "folan1",
@@ -16,6 +16,9 @@ function SideBar(props) {
   const [state, setState] = useState({
     activeItem: "Personal Information"
   });
+
+  let { id } = useParams();
+  id = id.substring(1);
 
   const history = useHistory();
 
@@ -36,7 +39,7 @@ function SideBar(props) {
         <Icon name="student" />
         Course Instructor: folan
       </Menu.Item>
-      <Menu.Item as="a" >
+      <Menu.Item as="a">
         <Icon name="users" />
         TAs:
         <List>
@@ -50,6 +53,18 @@ function SideBar(props) {
             );
           })}
         </List>
+      </Menu.Item>
+      <Menu.Item>
+        {/* If user is the instructor or a TA */}
+        {false ? (
+          <Link to={"/course:" + id + "/pendings"}>
+            <Button color="blue">Pending Contents</Button>
+          </Link>
+        ) : (
+          <Link to={"/course:" + id + "/upload"}>
+            <Button color="blue">Upload Videos</Button>
+          </Link>
+        )}
       </Menu.Item>
     </Sidebar>
   );
