@@ -311,11 +311,13 @@ type Login struct {
 	Password string `json:"password"`
 }
 
-type OfferedContentRejectedException struct {
+type OfferedContentNotPendingException struct {
 	Message string `json:"message"`
 }
 
-func (OfferedContentRejectedException) IsException() {}
+func (OfferedContentNotPendingException) IsException()            {}
+func (OfferedContentNotPendingException) IsEditCommentPayLoad()   {}
+func (OfferedContentNotPendingException) IsDeleteCommentPayLoad() {}
 
 type Pending struct {
 	ID          string  `json:"id"`

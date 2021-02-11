@@ -39,7 +39,7 @@ func (e AttachmentNotFoundException) Error() string {
 func (e PendingNotFoundException) Error() string {
 	return e.Message
 }
-func (e OfferedContentRejectedException) Error() string {
+func (e OfferedContentNotPendingException) Error() string {
 	return e.Message
 }
 func (e CommentNotFoundException) Error() string {

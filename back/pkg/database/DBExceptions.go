@@ -14,6 +14,7 @@ const IncorrectTokenMessage = "incorrect course token"
 const UserIsNotTAMessage = "there is no TA in this course with username: "
 const UserIsNotSTDMessage = "there is no student in this course with username: "
 const OfferedContentRejectedMessage = "there is no accepted offer @"
+const OfferedContentNotPendingMessage = "there is no pending offer @"
 
 type InternalDBError struct {
 	Message string
@@ -171,14 +172,14 @@ func ThrowCommentNotFoundException(commentID string) error {
 	return &CommentNotFound{Message: CommentNotFoundMessage + commentID}
 }
 
-type OfferedContentRejected struct {
+type OfferedContentNotPending struct {
 	Message string
 }
 
-func (e *OfferedContentRejected) Error() string {
+func (e *OfferedContentNotPending) Error() string {
 	return e.Message
 }
 
-func ThrowOfferedContentRejectedException(pendingID string) error {
-	return &OfferedContentRejected{Message: OfferedContentRejectedMessage + pendingID}
+func ThrowOfferedContentNotPendingException(pendingID string) error {
+	return &OfferedContentNotPending{Message: OfferedContentRejectedMessage + pendingID}
 }

@@ -21,3 +21,7 @@ func GetContentController() *contentController {
 func (c *contentController) SetDBDriver(dbDriver database.ContentDBDriver) {
 	contentc.dbDriver = dbDriver
 }
+
+func (c *contentController) GetDBDriver() database.ContentDBDriver {
+	return c.dbDriver
+}

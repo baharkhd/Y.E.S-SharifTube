@@ -4,8 +4,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 	"yes-sharifTube/graph/model"
-	modelUtil "yes-sharifTube/internal/model"
+	modelUtils "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/attachment"
+	"yes-sharifTube/internal/model/comment"
 	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/pending"
 )
@@ -25,7 +26,7 @@ type Course struct {
 }
 
 func New(title, summery, profUsername, token string) (*Course, error) {
-	hashedToken, err := modelUtil.HashToken([]byte(token))
+	hashedToken, err := modelUtils.HashToken([]byte(token))
 	if err != nil {
 		return nil, model.InternalServerException{Message: "internal server error: couldn't hash token"}
 	}
@@ -93,4 +94,124 @@ func ReshapeAll(courses []*Course) ([]*model.Course, error) {
 		cs = append(cs, tmp)
 	}
 	return cs, nil
+}
+
+func (c *Course) UpdateInfo(newTitle, newSummery, newToken string) {
+	c.Title = newTitle
+	c.Summery = newSummery
+	c.Token = newToken
+}
+
+func (c Course) IsUserNotStudent(username string) bool {
+	if c.ProfUn == username || modelUtils.ContainsInStringArray(c.TaUns, username) {
+		return true
+	}
+	return false
+}
+
+func (c Course) IsUserProfessor(username string) bool {
+	return c.ProfUn == username
+}
+
+func (c Course) IsUserStudent(username string) bool {
+	return modelUtils.ContainsInStringArray(c.StdUns, username)
+}
+
+func (c Course) IsUserTA(username string) bool {
+	return modelUtils.ContainsInStringArray(c.TaUns, username)
+}
+
+func (c Course) IsUserAllowedToDeleteUser(username, target string) bool {
+	// professor can remove every one except his self
+	if c.ProfUn == username && username != target {
+		return true
+	}
+	// ta can remove every one except professor
+	if modelUtils.ContainsInStringArray(c.TaUns, username) && c.ProfUn != target {
+		return true
+	}
+	// every body can remove them selves except professor
+	if modelUtils.ContainsInStringArray(c.StdUns, username) && username == target && c.ProfUn != username {
+		return true
+	}
+	return false
+}
+
+func (c Course) IsUserAllowedToDeleteUserComment(username, target string) bool {
+	// professor can remove every one except his self
+	if c.ProfUn == username {
+		return true
+	}
+	// ta can remove every one except professor
+	if modelUtils.ContainsInStringArray(c.TaUns, username) && c.ProfUn != target {
+		return true
+	}
+	// every body can remove them selves except professor
+	if modelUtils.ContainsInStringArray(c.StdUns, username) && username == target {
+		return true
+	}
+	return false
+}
+
+func (c Course) IsUserParticipateInCourse(username string) bool {
+	if c.ProfUn == username || modelUtils.ContainsInStringArray(c.TaUns, username) || modelUtils.ContainsInStringArray(c.StdUns, username) {
+		return true
+	}
+	return false
+}
+
+func (c Course) CheckCourseToken(token string) bool {
+	return modelUtils.CheckTokenHash(token, c.Token)
+}
+
+func (c Course) GetContent(contentID primitive.ObjectID) *content.Content {
+	for _, cnt := range c.Contents {
+		if cnt.ID == contentID {
+			return cnt
+		}
+	}
+	return nil
+}
+
+func (c Course) GetPending(contentID primitive.ObjectID) *pending.Pending {
+	for _, pnt := range c.Pends {
+		if pnt.ID == contentID {
+			return pnt
+		}
+	}
+	return nil
+}
+
+func (c Course) GetAttachment(attachmentID primitive.ObjectID) *attachment.Attachment {
+	for _, pnt := range c.Inventory {
+		if pnt.ID == attachmentID {
+			return pnt
+		}
+	}
+	return nil
+}
+
+func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cnt *content.Content) (*comment.Comment, *comment.Reply, error) {
+	for i, com := range cnt.Comments {
+		if com.ID == commentID {
+			if !c.IsUserAllowedToDeleteUserComment(username, com.AuthorUn) {
+				return nil, nil, &model.UserNotAllowedException{Message: "NotAllowed"}
+			}
+			rc := cnt.Comments[i]
+			cnt.Comments = append(cnt.Comments[:i], cnt.Comments[i+1:]...)
+			return rc, nil, nil
+		} else {
+			for j, rep := range cnt.Comments[i].Replies {
+				if rep.ID == commentID {
+					if !c.IsUserAllowedToDeleteUserComment(username, rep.AuthorUn) {
+						return nil, nil, &model.UserNotAllowedException{Message: "NotAllowed"}
+					}
+					rc := cnt.Comments[i].Replies[j]
+					cnt.Comments[i].Replies = append(cnt.Comments[i].Replies[:j], cnt.Comments[i].Replies[j+1:]...)
+					return nil, rc, nil
+				}
+			}
+		}
+	}
+	return nil, nil, &model.CommentNotFoundException{Message: "NotFound"}
 }

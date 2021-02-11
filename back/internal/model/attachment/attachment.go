@@ -45,3 +45,9 @@ func ReshapeAll(courses []*Attachment) []*model.Attachment {
 	}
 	return cs
 }
+
+func (a *Attachment) Update(newName, newDescription string) {
+	a.Name = newName
+	a.Description = newDescription
+	a.Timestamp = time.Now().Unix()
+}

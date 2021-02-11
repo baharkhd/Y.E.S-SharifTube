@@ -10,7 +10,7 @@ type Reply struct {
 	ID        primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Body      string             `json:"body" bson:"body"`
 	Timestamp int64              `json:"timestamp" bson:"timestamp"`
-	AuthorID  string             `json:"author" bson:"author"`
+	AuthorUn  string             `json:"author" bson:"author"`
 	CommentID string             `json:"replyTo" bson:"replyTo"`
 }
 
@@ -18,21 +18,21 @@ func NewReply(body, authorID, commentID string) *Reply {
 	return &Reply{
 		Body:      body,
 		Timestamp: time.Now().Unix(),
-		AuthorID:  authorID,
+		AuthorUn:  authorID,
 		CommentID: commentID,
 	}
 }
 
-func (c Reply) Reshape() (*model.Reply, error) {
+func (r Reply) Reshape() (*model.Reply, error) {
 	// todo get author from database by its username
 	var author *model.User
 
 	return &model.Reply{
-		ID:        c.ID.Hex(),
+		ID:        r.ID.Hex(),
 		Author:    author,
-		Body:      c.Body,
-		Timestamp: int(c.Timestamp),
-		CommentID: c.CommentID,
+		Body:      r.Body,
+		Timestamp: int(r.Timestamp),
+		CommentID: r.CommentID,
 	}, nil
 }
 
@@ -46,4 +46,9 @@ func ReshapeAllReplies(replies []*Reply) ([]*model.Reply, error) {
 		cs = append(cs, tmp)
 	}
 	return cs, nil
+}
+
+func (r *Reply) Update(newBody string) {
+	r.Body = newBody
+	r.Timestamp = time.Now().Unix()
 }

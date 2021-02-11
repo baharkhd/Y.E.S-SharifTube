@@ -150,7 +150,7 @@ type ComplexityRoot struct {
 		UploadContent        func(childComplexity int, userName string, courseID string, target model.TargetContent) int
 	}
 
-	OfferedContentRejectedException struct {
+	OfferedContentNotPendingException struct {
 		Message func(childComplexity int) int
 	}
 
@@ -878,12 +878,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UploadContent(childComplexity, args["userName"].(string), args["courseID"].(string), args["target"].(model.TargetContent)), true
 
-	case "OfferedContentRejectedException.message":
-		if e.complexity.OfferedContentRejectedException.Message == nil {
+	case "OfferedContentNotPendingException.message":
+		if e.complexity.OfferedContentNotPendingException.Message == nil {
 			break
 		}
 
-		return e.complexity.OfferedContentRejectedException.Message(childComplexity), true
+		return e.complexity.OfferedContentNotPendingException.Message(childComplexity), true
 
 	case "Pending.courseID":
 		if e.complexity.Pending.CourseID == nil {
@@ -1433,7 +1433,7 @@ type AttachmentNotFoundException implements Exception{
 type PendingNotFoundException implements Exception{
     message: String!
 }
-type OfferedContentRejectedException implements Exception{
+type OfferedContentNotPendingException implements Exception{
     message: String!
 }
 type CommentNotFoundException implements Exception{
@@ -1467,8 +1467,8 @@ union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFou
 union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | InternalServerException
 
 union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
-union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | InternalServerException
-union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
+union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | OfferedContentNotPendingException | InternalServerException
+union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | OfferedContentNotPendingException | InternalServerException
 
 
 type Mutation {
@@ -5082,7 +5082,7 @@ func (ec *executionContext) _Mutation_deleteComment(ctx context.Context, field g
 	return ec.marshalNDeleteCommentPayLoad2yesᚑsharifTubeᚋgraphᚋmodelᚐDeleteCommentPayLoad(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _OfferedContentRejectedException_message(ctx context.Context, field graphql.CollectedField, obj *model.OfferedContentRejectedException) (ret graphql.Marshaler) {
+func (ec *executionContext) _OfferedContentNotPendingException_message(ctx context.Context, field graphql.CollectedField, obj *model.OfferedContentNotPendingException) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5090,7 +5090,7 @@ func (ec *executionContext) _OfferedContentRejectedException_message(ctx context
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "OfferedContentRejectedException",
+		Object:     "OfferedContentNotPendingException",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -8209,6 +8209,13 @@ func (ec *executionContext) _DeleteCommentPayLoad(ctx context.Context, sel ast.S
 			return graphql.Null
 		}
 		return ec._CommentNotFoundException(ctx, sel, obj)
+	case model.OfferedContentNotPendingException:
+		return ec._OfferedContentNotPendingException(ctx, sel, &obj)
+	case *model.OfferedContentNotPendingException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._OfferedContentNotPendingException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -8610,6 +8617,13 @@ func (ec *executionContext) _EditCommentPayLoad(ctx context.Context, sel ast.Sel
 			return graphql.Null
 		}
 		return ec._CommentNotFoundException(ctx, sel, obj)
+	case model.OfferedContentNotPendingException:
+		return ec._OfferedContentNotPendingException(ctx, sel, &obj)
+	case *model.OfferedContentNotPendingException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._OfferedContentNotPendingException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -8833,13 +8847,13 @@ func (ec *executionContext) _Exception(ctx context.Context, sel ast.SelectionSet
 			return graphql.Null
 		}
 		return ec._PendingNotFoundException(ctx, sel, obj)
-	case model.OfferedContentRejectedException:
-		return ec._OfferedContentRejectedException(ctx, sel, &obj)
-	case *model.OfferedContentRejectedException:
+	case model.OfferedContentNotPendingException:
+		return ec._OfferedContentNotPendingException(ctx, sel, &obj)
+	case *model.OfferedContentNotPendingException:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._OfferedContentRejectedException(ctx, sel, obj)
+		return ec._OfferedContentNotPendingException(ctx, sel, obj)
 	case model.CommentNotFoundException:
 		return ec._CommentNotFoundException(ctx, sel, &obj)
 	case *model.CommentNotFoundException:
@@ -9750,19 +9764,19 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
-var offeredContentRejectedExceptionImplementors = []string{"OfferedContentRejectedException", "Exception"}
+var offeredContentNotPendingExceptionImplementors = []string{"OfferedContentNotPendingException", "Exception", "EditCommentPayLoad", "DeleteCommentPayLoad"}
 
-func (ec *executionContext) _OfferedContentRejectedException(ctx context.Context, sel ast.SelectionSet, obj *model.OfferedContentRejectedException) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, offeredContentRejectedExceptionImplementors)
+func (ec *executionContext) _OfferedContentNotPendingException(ctx context.Context, sel ast.SelectionSet, obj *model.OfferedContentNotPendingException) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, offeredContentNotPendingExceptionImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("OfferedContentRejectedException")
+			out.Values[i] = graphql.MarshalString("OfferedContentNotPendingException")
 		case "message":
-			out.Values[i] = ec._OfferedContentRejectedException_message(ctx, field, obj)
+			out.Values[i] = ec._OfferedContentNotPendingException_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

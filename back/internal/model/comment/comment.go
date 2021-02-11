@@ -59,3 +59,18 @@ func ReshapeAll(courses []*Comment) ([]*model.Comment, error) {
 	}
 	return cs, nil
 }
+
+func (c *Comment) Update(newBody string) {
+	c.Body = newBody
+	c.Timestamp = time.Now().Unix()
+}
+
+func (c *Comment) ConvertToReply(repID primitive.ObjectID) *Reply {
+	return &Reply{
+		ID:        c.ID,
+		Body:      c.Body,
+		Timestamp: c.Timestamp,
+		AuthorUn:  c.AuthorUn,
+		CommentID: repID.Hex(),
+	}
+}

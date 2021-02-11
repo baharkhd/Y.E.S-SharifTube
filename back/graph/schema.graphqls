@@ -216,7 +216,7 @@ type AttachmentNotFoundException implements Exception{
 type PendingNotFoundException implements Exception{
     message: String!
 }
-type OfferedContentRejectedException implements Exception{
+type OfferedContentNotPendingException implements Exception{
     message: String!
 }
 type CommentNotFoundException implements Exception{
@@ -250,8 +250,8 @@ union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFou
 union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | InternalServerException
 
 union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
-union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | InternalServerException
-union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
+union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | OfferedContentNotPendingException | InternalServerException
+union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | OfferedContentNotPendingException | InternalServerException
 
 
 type Mutation {

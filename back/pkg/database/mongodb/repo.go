@@ -11,6 +11,10 @@ import (
 // the uri for connecting to mongoDB
 const mongoURI = "mongodb://localhost:27017"
 
+// time outs for queries
+const ShortTimeOut = 5000
+const LongTimeOut = 100000
+
 // this client is shared for every one who wants to access to mongo
 var client *mongo.Client
 

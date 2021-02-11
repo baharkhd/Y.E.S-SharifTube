@@ -2,6 +2,7 @@ package pending
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"sort"
 	"time"
 	"yes-sharifTube/graph/model"
 )
@@ -57,4 +58,38 @@ func ReshapeAll(pendings []*Pending) ([]*model.Pending, error) {
 		ps = append(ps, tmp)
 	}
 	return ps, nil
+}
+
+func (p *Pending) Update(newTitle, newDescription string) {
+	p.Title = newTitle
+	p.Description = newDescription
+	p.Timestamp = time.Now().Unix()
+}
+
+func (p *Pending) Accept() {
+	p.Status = ACCEPTED
+}
+
+func (p *Pending) Reject() {
+	p.Status = REJECTED
+}
+
+func Sort(arr []*Pending) {
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i].Timestamp >= arr[j].Timestamp
+	})
+}
+
+func GetAll(arr []*Pending, start, amount int) []*Pending {
+	Sort(arr)
+	n := len(arr)
+	if start >= n {
+		return []*Pending{}
+	}
+	end := start + amount
+	if end >= n {
+		return arr[start:n]
+	} else {
+		return arr[start:end]
+	}
 }

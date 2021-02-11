@@ -5,7 +5,6 @@ import (
 	"yes-sharifTube/pkg/database"
 )
 
-
 // casting database errors to model.graphQL exceptions
 func CastDBExceptionToGQLException(err error) error {
 	if err != nil {
@@ -36,9 +35,18 @@ func CastDBExceptionToGQLException(err error) error {
 			return &model.PendingNotFoundException{Message: err.Error()}
 		case *database.CommentNotFound:
 			return &model.CommentNotFoundException{Message: err.Error()}
-		case *database.OfferedContentRejected:
-			return &model.OfferedContentRejectedException{Message: err.Error()}
+		case *database.OfferedContentNotPending:
+			return &model.OfferedContentNotPendingException{Message: err.Error()}
 		}
+		return err
 	}
 	return nil
+}
+
+func ConvertPSToS(ps *string) string {
+	if ps == nil {
+		return ""
+	} else {
+		return *ps
+	}
 }

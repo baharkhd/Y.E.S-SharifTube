@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"yes-sharifTube/graph/generated"
 	"yes-sharifTube/graph/model"
+	"yes-sharifTube/internal/controller"
 	attachmentController "yes-sharifTube/internal/controller/attachment"
 	commentController "yes-sharifTube/internal/controller/comment"
 	contentController "yes-sharifTube/internal/controller/content"
@@ -36,7 +37,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context) (model.LoginPayload
 }
 
 func (r *mutationResolver) CreateCourse(ctx context.Context, userName string, target model.TargetCourse) (model.CreateCoursePayload, error) {
-	return courseController.GetCourseController().CreateCourse(userName, target.Title, *target.Summary, *target.Token)
+	return courseController.GetCourseController().CreateCourse(userName, target.Title, controller.ConvertPSToS(target.Summary), controller.ConvertPSToS(target.Token))
 }
 
 func (r *mutationResolver) UpdateCourseInfo(ctx context.Context, userName string, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error) {

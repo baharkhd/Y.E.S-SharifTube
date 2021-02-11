@@ -2,6 +2,7 @@ package content
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"sort"
 	"time"
 	"yes-sharifTube/graph/model"
 	"yes-sharifTube/internal/model/comment"
@@ -74,4 +75,46 @@ func ReshapeAll(courses []*Content) ([]*model.Content, error) {
 		cs = append(cs, tmp)
 	}
 	return cs, nil
+}
+
+func Sort(arr []*Content) {
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i].Timestamp >= arr[j].Timestamp
+	})
+}
+
+func GetAll(arr []*Content, start, amount int) []*Content {
+	Sort(arr)
+	n := len(arr)
+	if start >= n {
+		return []*Content{}
+	}
+	end := start + amount
+	if end >= n {
+		return arr[start:n]
+	} else {
+		return arr[start:end]
+	}
+}
+
+func (c *Content) Update(newTitle, newDescription string, newTags []string) {
+	c.Title = newTitle
+	c.Description = newDescription
+	c.Tags = newTags
+	c.Timestamp = time.Now().Unix()
+}
+
+func (c *Content) GetComment(commentID primitive.ObjectID) (*comment.Comment, *comment.Reply) {
+	for i, com := range c.Comments {
+		if com.ID == commentID {
+			return c.Comments[i], nil
+		} else {
+			for j, rep := range c.Comments[i].Replies {
+				if rep.ID == commentID {
+					return c.Comments[i], c.Comments[i].Replies[j]
+				}
+			}
+		}
+	}
+	return nil, nil
 }
