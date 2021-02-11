@@ -32,7 +32,22 @@ func New(ID primitive.ObjectID, name, aurl, courseID string, description *string
 }
 
 func RegexValidate(name, description, aurl, courseID *string) error {
-	//todo validate fields of an Attachment
+	if name != nil && modelUtil.IsSTREmpty(*name) {
+		return model.RegexMismatchException{Message: "name field is empty"}
+	}
+	if description != nil && modelUtil.IsSTREmpty(*description) {
+		return model.RegexMismatchException{Message: "description field is empty"}
+	}
+	//todo regex definition for Aurl field
+	if aurl != nil && modelUtil.IsSTREmpty(*aurl) {
+		return model.RegexMismatchException{Message: "file URL is empty"}
+	}
+	if courseID != nil {
+		_, err := primitive.ObjectIDFromHex(*courseID)
+		if err != nil {
+			return model.RegexMismatchException{Message: "courseID field is invalid"}
+		}
+	}
 	return nil
 }
 

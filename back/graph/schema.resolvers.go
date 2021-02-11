@@ -407,6 +407,8 @@ func (r *mutationResolver) CreateComment(ctx context.Context, userName string, c
 			return err.(model.UserNotAllowedException), nil
 		case model.CommentNotFoundException:
 			return err.(model.CommentNotFoundException), nil
+		case model.RegexMismatchException:
+			return err.(model.RegexMismatchException), nil
 		default:
 			return err.(model.InternalServerException), nil
 		}
@@ -432,6 +434,8 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, userName string, c
 			return err.(model.CommentNotFoundException), nil
 		case model.EmptyFieldsException:
 			return err.(model.EmptyFieldsException), nil
+		case model.RegexMismatchException:
+			return err.(model.RegexMismatchException), nil
 		default:
 			return err.(model.InternalServerException), nil
 		}

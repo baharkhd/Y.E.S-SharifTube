@@ -42,7 +42,32 @@ func New(ID primitive.ObjectID, title, uploadedBy, vurl, courseID string, descri
 }
 
 func RegexValidate(title, description, uploadedBy, vurl, courseID, approvedBy *string, tags []string) error {
-	//todo validate fields of a Content
+	if title != nil && modelUtil.IsSTREmpty(*title) {
+		return model.RegexMismatchException{Message: "title field is empty"}
+	}
+	if description != nil && modelUtil.IsSTREmpty(*description) {
+		return model.RegexMismatchException{Message: "description field is empty"}
+	}
+	if uploadedBy != nil && modelUtil.IsSTREmpty(*uploadedBy) {
+		return model.RegexMismatchException{Message: "uploader username field is empty"}
+	}
+	if approvedBy != nil && modelUtil.IsSTREmpty(*approvedBy) {
+		return model.RegexMismatchException{Message: "approves  username field is empty"}
+	}
+	//todo regex definition for Vurl field
+	if vurl != nil && modelUtil.IsSTREmpty(*vurl) {
+		return model.RegexMismatchException{Message: "file URL is empty"}
+	}
+	if courseID != nil {
+		_, err := primitive.ObjectIDFromHex(*courseID)
+		if err != nil {
+			return model.RegexMismatchException{Message: "courseID field is invalid"}
+		}
+	}
+	//todo regex definition for Tag
+	if tags != nil && len(tags) == 0{
+		return model.RegexMismatchException{Message: "tags field is empty"}
+	}
 	return nil
 }
 

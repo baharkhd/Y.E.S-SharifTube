@@ -4,7 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 	"yes-sharifTube/graph/model"
-	modelUtils "yes-sharifTube/internal/model"
+	modelUtil "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/attachment"
 	"yes-sharifTube/internal/model/comment"
 	"yes-sharifTube/internal/model/content"
@@ -26,7 +26,7 @@ type Course struct {
 }
 
 func New(ID primitive.ObjectID, title, profUsername, token string, summery *string) (*Course, error) {
-	hashedToken, err := modelUtils.HashToken([]byte(token))
+	hashedToken, err := modelUtil.HashToken([]byte(token))
 	if err != nil {
 		return nil, model.InternalServerException{Message: "internal server error: couldn't hash token"}
 	}
@@ -37,7 +37,7 @@ func New(ID primitive.ObjectID, title, profUsername, token string, summery *stri
 	return &Course{
 		ID:        ID,
 		Title:     title,
-		Summery:   modelUtils.PtrTOStr(summery),
+		Summery:   modelUtil.PtrTOStr(summery),
 		CreatedAt: time.Now().Unix(),
 		ProfUn:    profUsername,
 		Token:     hashedToken,
@@ -50,7 +50,19 @@ func New(ID primitive.ObjectID, title, profUsername, token string, summery *stri
 }
 
 func RegexValidate(title, summery, profUsername, token *string) error {
-	//todo validate fields of a Course
+	if title != nil && modelUtil.IsSTREmpty(*title) {
+		return model.RegexMismatchException{Message: "title field is empty"}
+	}
+	if summery != nil && modelUtil.IsSTREmpty(*summery) {
+		return model.RegexMismatchException{Message: "summery field is empty"}
+	}
+	if profUsername != nil && modelUtil.IsSTREmpty(*profUsername) {
+		return model.RegexMismatchException{Message: "professor username field is empty"}
+	}
+	//todo regex definition for token field
+	if token != nil && modelUtil.IsSTREmpty(*token) {
+		return model.RegexMismatchException{Message: "file URL is empty"}
+	}
 	return nil
 }
 
@@ -120,7 +132,7 @@ func (c *Course) Update(newTitle, newSummery, newToken *string) error {
 		c.Summery = *newSummery
 	}
 	if newToken != nil {
-		hashedToken, err := modelUtils.HashToken([]byte(*newToken))
+		hashedToken, err := modelUtil.HashToken([]byte(*newToken))
 		if err != nil {
 			return model.InternalServerException{Message: "internal server error: couldn't hash token"}
 		}
@@ -130,7 +142,7 @@ func (c *Course) Update(newTitle, newSummery, newToken *string) error {
 }
 
 func (c Course) IsUserNotStudent(username string) bool {
-	if c.ProfUn == username || modelUtils.ContainsInStringArray(c.TaUns, username) {
+	if c.ProfUn == username || modelUtil.ContainsInStringArray(c.TaUns, username) {
 		return true
 	}
 	return false
@@ -141,11 +153,11 @@ func (c Course) IsUserProfessor(username string) bool {
 }
 
 func (c Course) IsUserStudent(username string) bool {
-	return modelUtils.ContainsInStringArray(c.StdUns, username)
+	return modelUtil.ContainsInStringArray(c.StdUns, username)
 }
 
 func (c Course) IsUserTA(username string) bool {
-	return modelUtils.ContainsInStringArray(c.TaUns, username)
+	return modelUtil.ContainsInStringArray(c.TaUns, username)
 }
 
 func (c Course) IsUserAllowedToDeleteUser(username, target string) bool {
@@ -154,11 +166,11 @@ func (c Course) IsUserAllowedToDeleteUser(username, target string) bool {
 		return true
 	}
 	// ta can remove every one except professor
-	if modelUtils.ContainsInStringArray(c.TaUns, username) && c.ProfUn != target {
+	if modelUtil.ContainsInStringArray(c.TaUns, username) && c.ProfUn != target {
 		return true
 	}
 	// every body can remove them selves except professor
-	if modelUtils.ContainsInStringArray(c.StdUns, username) && username == target && c.ProfUn != username {
+	if modelUtil.ContainsInStringArray(c.StdUns, username) && username == target && c.ProfUn != username {
 		return true
 	}
 	return false
@@ -170,25 +182,25 @@ func (c Course) IsUserAllowedToDeleteUserComment(username, target string) bool {
 		return true
 	}
 	// ta can remove every one except professor
-	if modelUtils.ContainsInStringArray(c.TaUns, username) && c.ProfUn != target {
+	if modelUtil.ContainsInStringArray(c.TaUns, username) && c.ProfUn != target {
 		return true
 	}
 	// every body can remove them selves except professor
-	if modelUtils.ContainsInStringArray(c.StdUns, username) && username == target {
+	if modelUtil.ContainsInStringArray(c.StdUns, username) && username == target {
 		return true
 	}
 	return false
 }
 
 func (c Course) IsUserParticipateInCourse(username string) bool {
-	if c.ProfUn == username || modelUtils.ContainsInStringArray(c.TaUns, username) || modelUtils.ContainsInStringArray(c.StdUns, username) {
+	if c.ProfUn == username || modelUtil.ContainsInStringArray(c.TaUns, username) || modelUtil.ContainsInStringArray(c.StdUns, username) {
 		return true
 	}
 	return false
 }
 
 func (c Course) CheckCourseToken(token string) bool {
-	return modelUtils.CheckTokenHash(token, c.Token)
+	return modelUtil.CheckTokenHash(token, c.Token)
 }
 
 func (c Course) GetContent(contentID primitive.ObjectID) *content.Content {

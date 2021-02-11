@@ -1480,8 +1480,8 @@ union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundExce
 union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | PendingNotFoundException | RegexMismatchException | OfferedContentNotPendingException | InternalServerException
 union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | OfferedContentNotPendingException | InternalServerException
 
-union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
-union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | EmptyFieldsException | CommentNotFoundException | InternalServerException
+union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException | RegexMismatchException
+union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | EmptyFieldsException | CommentNotFoundException | RegexMismatchException | InternalServerException
 union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
 
 
@@ -8106,6 +8106,13 @@ func (ec *executionContext) _CreateCommentPayLoad(ctx context.Context, sel ast.S
 			return graphql.Null
 		}
 		return ec._InternalServerException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -8690,6 +8697,13 @@ func (ec *executionContext) _EditCommentPayLoad(ctx context.Context, sel ast.Sel
 			return graphql.Null
 		}
 		return ec._CommentNotFoundException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -10130,7 +10144,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var regexMismatchExceptionImplementors = []string{"RegexMismatchException", "Exception", "CreateCoursePayload", "UpdateCourseInfoPayload", "UploadContentPayLoad", "EditContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad"}
+var regexMismatchExceptionImplementors = []string{"RegexMismatchException", "Exception", "CreateCoursePayload", "UpdateCourseInfoPayload", "UploadContentPayLoad", "EditContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad"}
 
 func (ec *executionContext) _RegexMismatchException(ctx context.Context, sel ast.SelectionSet, obj *model.RegexMismatchException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, regexMismatchExceptionImplementors)

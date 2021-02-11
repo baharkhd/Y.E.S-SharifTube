@@ -3,6 +3,7 @@ package model
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
 )
 
 func HashToken(pwd []byte) (string, error) {
@@ -54,4 +55,8 @@ func PtrTOStr(s *string) string {
 		return ""
 	}
 	return *s
+}
+
+func IsSTREmpty(s string) bool {
+	return strings.TrimSpace(s) == ""
 }

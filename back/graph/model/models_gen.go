@@ -362,6 +362,8 @@ func (RegexMismatchException) IsUploadAttachmentPayLoad()   {}
 func (RegexMismatchException) IsEditAttachmentPayLoad()     {}
 func (RegexMismatchException) IsOfferContentPayLoad()       {}
 func (RegexMismatchException) IsEditOfferedContentPayLoad() {}
+func (RegexMismatchException) IsCreateCommentPayLoad()      {}
+func (RegexMismatchException) IsEditCommentPayLoad()        {}
 
 type Reply struct {
 	ID        string `json:"id"`

@@ -4,6 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 	"yes-sharifTube/graph/model"
+	modelUtil "yes-sharifTube/internal/model"
 )
 
 type Comment struct {
@@ -31,7 +32,18 @@ func New(ID primitive.ObjectID, body, authorID, contentID string) (*Comment, err
 }
 
 func RegexValidate(body, authorUn, ownerID *string) error {
-	//todo validate fields of a Comment
+	if body != nil && modelUtil.IsSTREmpty(*body) {
+		return model.RegexMismatchException{Message: "body field is empty"}
+	}
+	if authorUn != nil && modelUtil.IsSTREmpty(*authorUn) {
+		return model.RegexMismatchException{Message: "author username field is empty"}
+	}
+	if ownerID != nil {
+		_, err := primitive.ObjectIDFromHex(*ownerID)
+		if err != nil {
+			return model.RegexMismatchException{Message: "courseID/commentID field is invalid"}
+		}
+	}
 	return nil
 }
 
