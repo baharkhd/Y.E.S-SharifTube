@@ -213,8 +213,8 @@ type OperationSuccessfull{
 }
 
 union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
-union UpdateUserPayload = User | UserNotFoundException | AllFieldsEmptyException | InternalServerException
-union DeleteUserPayload = User | UserNotFoundException | OperationSuccessfull    | InternalServerException
+union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
+union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | OperationSuccessfull    | InternalServerException
 union LoginPayload = Token | UserPassMissMatchException | InternalServerException
 
 union CreateCoursePayload = Course | UserNotFoundException | InternalServerException

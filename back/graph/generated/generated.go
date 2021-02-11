@@ -1414,8 +1414,8 @@ type OperationSuccessfull{
 }
 
 union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
-union UpdateUserPayload = User | UserNotFoundException | AllFieldsEmptyException | InternalServerException
-union DeleteUserPayload = User | UserNotFoundException | OperationSuccessfull    | InternalServerException
+union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
+union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | OperationSuccessfull    | InternalServerException
 union LoginPayload = Token | UserPassMissMatchException | InternalServerException
 
 union CreateCoursePayload = Course | UserNotFoundException | InternalServerException
@@ -8155,6 +8155,13 @@ func (ec *executionContext) _DeleteUserPayload(ctx context.Context, sel ast.Sele
 			return graphql.Null
 		}
 		return ec._UserNotFoundException(ctx, sel, obj)
+	case model.UserNotAllowedException:
+		return ec._UserNotAllowedException(ctx, sel, &obj)
+	case *model.UserNotAllowedException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._UserNotAllowedException(ctx, sel, obj)
 	case model.OperationSuccessfull:
 		return ec._OperationSuccessfull(ctx, sel, &obj)
 	case *model.OperationSuccessfull:
@@ -8765,6 +8772,13 @@ func (ec *executionContext) _UpdateUserPayload(ctx context.Context, sel ast.Sele
 			return graphql.Null
 		}
 		return ec._UserNotFoundException(ctx, sel, obj)
+	case model.UserNotAllowedException:
+		return ec._UserNotAllowedException(ctx, sel, &obj)
+	case *model.UserNotAllowedException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._UserNotAllowedException(ctx, sel, obj)
 	case model.AllFieldsEmptyException:
 		return ec._AllFieldsEmptyException(ctx, sel, &obj)
 	case *model.AllFieldsEmptyException:
@@ -9897,7 +9911,7 @@ func (ec *executionContext) _UserIsNotTAException(ctx context.Context, sel ast.S
 	return out
 }
 
-var userNotAllowedExceptionImplementors = []string{"UserNotAllowedException", "Exception", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
+var userNotAllowedExceptionImplementors = []string{"UserNotAllowedException", "Exception", "UpdateUserPayload", "DeleteUserPayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
 
 func (ec *executionContext) _UserNotAllowedException(ctx context.Context, sel ast.SelectionSet, obj *model.UserNotAllowedException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userNotAllowedExceptionImplementors)

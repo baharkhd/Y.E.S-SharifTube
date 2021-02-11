@@ -21,6 +21,7 @@ func GetAll(start, amount int64) ([]*User, error) {
 
 func Update(targetUsername string, toBe model.EditedUser) (*User,error) {
 
+
 	targetUser := newFrom(toBe)
 
 	// updating the database

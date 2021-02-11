@@ -26,7 +26,11 @@ func (r *mutationResolver) CreateUser(ctx context.Context, target model.TargetUs
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, toBe model.EditedUser) (model.UpdateUserPayload, error) {
-	update, err := user.Update(extractUsernameFromContext(ctx), toBe)
+	username := extractUsernameFromContext(ctx)
+	if username == "" {
+		return model.UserNotAllowedException{Message: "please login first!"}, nil
+	}
+	update, err := user.Update(username, toBe)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:

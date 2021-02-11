@@ -412,6 +412,8 @@ type UserNotAllowedException struct {
 }
 
 func (UserNotAllowedException) IsException()                   {}
+func (UserNotAllowedException) IsUpdateUserPayload()           {}
+func (UserNotAllowedException) IsDeleteUserPayload()           {}
 func (UserNotAllowedException) IsUpdateCourseInfoPayload()     {}
 func (UserNotAllowedException) IsDeleteCoursePayload()         {}
 func (UserNotAllowedException) IsAddUserToCoursePayload()      {}
