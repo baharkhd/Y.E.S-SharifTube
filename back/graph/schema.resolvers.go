@@ -87,8 +87,12 @@ func (r *mutationResolver) RefreshToken(ctx context.Context) (model.LoginPayload
 	return model.Token{Token: token}, nil
 }
 
-func (r *mutationResolver) CreateCourse(ctx context.Context, username string, target model.TargetCourse) (model.CreateCoursePayload, error) {
-	res, err := courseController.GetCourseController().CreateCourse(username, target.Title, target.Summary, target.Token)
+func (r *mutationResolver) CreateCourse(ctx context.Context, target model.TargetCourse) (model.CreateCoursePayload, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := courseController.GetCourseController().CreateCourse(*username, target.Title, target.Summary, target.Token)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -102,8 +106,12 @@ func (r *mutationResolver) CreateCourse(ctx context.Context, username string, ta
 	return res, err
 }
 
-func (r *mutationResolver) UpdateCourseInfo(ctx context.Context, username string, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error) {
-	res, err := courseController.GetCourseController().UpdateCourse(username, courseID, toBe.Title, toBe.Summary, toBe.Token)
+func (r *mutationResolver) UpdateCourseInfo(ctx context.Context, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := courseController.GetCourseController().UpdateCourse(*username, courseID, toBe.Title, toBe.Summary, toBe.Token)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -123,8 +131,12 @@ func (r *mutationResolver) UpdateCourseInfo(ctx context.Context, username string
 	return res, err
 }
 
-func (r *mutationResolver) DeleteCourse(ctx context.Context, username string, courseID string) (model.DeleteCoursePayload, error) {
-	res, err := courseController.GetCourseController().DeleteCourse(username, courseID)
+func (r *mutationResolver) DeleteCourse(ctx context.Context, courseID string) (model.DeleteCoursePayload, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := courseController.GetCourseController().DeleteCourse(*username, courseID)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -140,8 +152,12 @@ func (r *mutationResolver) DeleteCourse(ctx context.Context, username string, co
 	return res, err
 }
 
-func (r *mutationResolver) AddUserToCourse(ctx context.Context, username string, courseID string, token string) (model.AddUserToCoursePayload, error) {
-	res, err := courseController.GetCourseController().AddUserToCourse(username, courseID, token)
+func (r *mutationResolver) AddUserToCourse(ctx context.Context, courseID string, token string) (model.AddUserToCoursePayload, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := courseController.GetCourseController().AddUserToCourse(*username, courseID, token)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -161,8 +177,12 @@ func (r *mutationResolver) AddUserToCourse(ctx context.Context, username string,
 	return res, err
 }
 
-func (r *mutationResolver) DeleteUserFromCourse(ctx context.Context, username string, courseID string, targetUsername string) (model.DeleteUserFromCoursePayload, error) {
-	res, err := courseController.GetCourseController().DeleteUserFromCourse(username, courseID, targetUsername)
+func (r *mutationResolver) DeleteUserFromCourse(ctx context.Context, courseID string, targetUsername string) (model.DeleteUserFromCoursePayload, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := courseController.GetCourseController().DeleteUserFromCourse(*username, courseID, targetUsername)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -178,8 +198,12 @@ func (r *mutationResolver) DeleteUserFromCourse(ctx context.Context, username st
 	return res, err
 }
 
-func (r *mutationResolver) PromoteUserToTa(ctx context.Context, username string, courseID string, targetUsername string) (model.PromoteToTAPayload, error) {
-	res, err := courseController.GetCourseController().PromoteUserToTA(username, courseID, targetUsername)
+func (r *mutationResolver) PromoteUserToTa(ctx context.Context, courseID string, targetUsername string) (model.PromoteToTAPayload, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := courseController.GetCourseController().PromoteUserToTA(*username, courseID, targetUsername)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -197,8 +221,12 @@ func (r *mutationResolver) PromoteUserToTa(ctx context.Context, username string,
 	return res, err
 }
 
-func (r *mutationResolver) DemoteUserToStd(ctx context.Context, username string, courseID string, targetUsername string) (model.DemoteToSTDPayload, error) {
-	res, err := courseController.GetCourseController().DemoteUserToSTD(username, courseID, targetUsername)
+func (r *mutationResolver) DemoteUserToStd(ctx context.Context, courseID string, targetUsername string) (model.DemoteToSTDPayload, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := courseController.GetCourseController().DemoteUserToSTD(*username, courseID, targetUsername)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -216,8 +244,12 @@ func (r *mutationResolver) DemoteUserToStd(ctx context.Context, username string,
 	return res, err
 }
 
-func (r *mutationResolver) UploadContent(ctx context.Context, username string, courseID string, target model.TargetContent) (model.UploadContentPayLoad, error) {
-	res, err := contentController.GetContentController().CreateContent(username, courseID, target.Title, target.Description, target.Vurl, target.Tags)
+func (r *mutationResolver) UploadContent(ctx context.Context, courseID string, target model.TargetContent) (model.UploadContentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := contentController.GetContentController().CreateContent(*username, courseID, target.Title, target.Description, target.Vurl, target.Tags)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -235,8 +267,12 @@ func (r *mutationResolver) UploadContent(ctx context.Context, username string, c
 	return res, err
 }
 
-func (r *mutationResolver) EditContent(ctx context.Context, username string, courseID string, contentID string, target model.EditContent) (model.EditContentPayLoad, error) {
-	res, err := contentController.GetContentController().UpdateContent(username, courseID, contentID, target.Title, target.Description, target.Tags)
+func (r *mutationResolver) EditContent(ctx context.Context, courseID string, contentID string, target model.EditContent) (model.EditContentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := contentController.GetContentController().UpdateContent(*username, courseID, contentID, target.Title, target.Description, target.Tags)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -258,8 +294,12 @@ func (r *mutationResolver) EditContent(ctx context.Context, username string, cou
 	return res, err
 }
 
-func (r *mutationResolver) DeleteContent(ctx context.Context, username string, courseID string, contentID string) (model.DeleteContentPayLoad, error) {
-	res, err := contentController.GetContentController().DeleteContent(username, courseID, contentID)
+func (r *mutationResolver) DeleteContent(ctx context.Context, courseID string, contentID string) (model.DeleteContentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := contentController.GetContentController().DeleteContent(*username, courseID, contentID)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -277,8 +317,12 @@ func (r *mutationResolver) DeleteContent(ctx context.Context, username string, c
 	return res, err
 }
 
-func (r *mutationResolver) UploadAttachment(ctx context.Context, username string, courseID string, target model.TargetAttachment) (model.UploadAttachmentPayLoad, error) {
-	res, err := attachmentController.GetAttachmentController().CreateAttachment(username, courseID, target.Name, target.Description, target.Aurl)
+func (r *mutationResolver) UploadAttachment(ctx context.Context, courseID string, target model.TargetAttachment) (model.UploadAttachmentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := attachmentController.GetAttachmentController().CreateAttachment(*username, courseID, target.Name, target.Description, target.Aurl)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -296,8 +340,12 @@ func (r *mutationResolver) UploadAttachment(ctx context.Context, username string
 	return res, err
 }
 
-func (r *mutationResolver) EditAttachment(ctx context.Context, username string, courseID string, attachmentID string, target model.EditAttachment) (model.EditAttachmentPayLoad, error) {
-	res, err := attachmentController.GetAttachmentController().UpdateAttachment(username, courseID, attachmentID, target.Name, target.Description)
+func (r *mutationResolver) EditAttachment(ctx context.Context, courseID string, attachmentID string, target model.EditAttachment) (model.EditAttachmentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := attachmentController.GetAttachmentController().UpdateAttachment(*username, courseID, attachmentID, target.Name, target.Description)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -319,8 +367,12 @@ func (r *mutationResolver) EditAttachment(ctx context.Context, username string, 
 	return res, err
 }
 
-func (r *mutationResolver) DeleteAttachment(ctx context.Context, username string, courseID string, attachmentID string) (model.DeleteAttachmentPayLoad, error) {
-	res, err := attachmentController.GetAttachmentController().DeleteAttachment(username, courseID, attachmentID)
+func (r *mutationResolver) DeleteAttachment(ctx context.Context, courseID string, attachmentID string) (model.DeleteAttachmentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := attachmentController.GetAttachmentController().DeleteAttachment(*username, courseID, attachmentID)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -338,8 +390,12 @@ func (r *mutationResolver) DeleteAttachment(ctx context.Context, username string
 	return res, err
 }
 
-func (r *mutationResolver) OfferContent(ctx context.Context, username string, courseID string, target model.TargetPending) (model.OfferContentPayLoad, error) {
-	res, err := pendingController.GetPendingController().CreatePending(username, courseID, target.Title, target.Description, target.Furl)
+func (r *mutationResolver) OfferContent(ctx context.Context, courseID string, target model.TargetPending) (model.OfferContentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := pendingController.GetPendingController().CreatePending(*username, courseID, target.Title, target.Description, target.Furl)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -357,8 +413,12 @@ func (r *mutationResolver) OfferContent(ctx context.Context, username string, co
 	return res, err
 }
 
-func (r *mutationResolver) EditOfferedContent(ctx context.Context, username string, courseID string, pendingID string, target model.EditedPending) (model.EditOfferedContentPayLoad, error) {
-	res, err := pendingController.GetPendingController().UpdatePending(username, courseID, pendingID, target.Title, target.Description)
+func (r *mutationResolver) EditOfferedContent(ctx context.Context, courseID string, pendingID string, target model.EditedPending) (model.EditOfferedContentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := pendingController.GetPendingController().UpdatePending(*username, courseID, pendingID, target.Title, target.Description)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -382,8 +442,12 @@ func (r *mutationResolver) EditOfferedContent(ctx context.Context, username stri
 	return res, err
 }
 
-func (r *mutationResolver) DeleteOfferedContent(ctx context.Context, username string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error) {
-	res, err := pendingController.GetPendingController().DeletePending(username, courseID, pendingID)
+func (r *mutationResolver) DeleteOfferedContent(ctx context.Context, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := pendingController.GetPendingController().DeletePending(*username, courseID, pendingID)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -401,8 +465,12 @@ func (r *mutationResolver) DeleteOfferedContent(ctx context.Context, username st
 	return res, err
 }
 
-func (r *mutationResolver) AcceptOfferedContent(ctx context.Context, username string, courseID string, pendingID string, changed model.EditedPending) (model.EditOfferedContentPayLoad, error) {
-	res, err := pendingController.GetPendingController().AcceptPending(username, courseID, pendingID, changed.Title, changed.Description)
+func (r *mutationResolver) AcceptOfferedContent(ctx context.Context, courseID string, pendingID string, changed model.EditedPending) (model.EditOfferedContentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := pendingController.GetPendingController().AcceptPending(*username, courseID, pendingID, changed.Title, changed.Description)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -426,8 +494,12 @@ func (r *mutationResolver) AcceptOfferedContent(ctx context.Context, username st
 	return res, err
 }
 
-func (r *mutationResolver) RejectOfferedContent(ctx context.Context, username string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error) {
-	res, err := pendingController.GetPendingController().RejectPending(username, courseID, pendingID)
+func (r *mutationResolver) RejectOfferedContent(ctx context.Context, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	res, err := pendingController.GetPendingController().RejectPending(*username, courseID, pendingID)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -447,8 +519,12 @@ func (r *mutationResolver) RejectOfferedContent(ctx context.Context, username st
 	return res, err
 }
 
-func (r *mutationResolver) CreateComment(ctx context.Context, username string, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error) {
-	con, rep, err := commentController.GetCommentController().CreateComment(username, contentID, target.Body, repliedAtID)
+func (r *mutationResolver) CreateComment(ctx context.Context, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	con, rep, err := commentController.GetCommentController().CreateComment(*username, contentID, target.Body, repliedAtID)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -472,8 +548,12 @@ func (r *mutationResolver) CreateComment(ctx context.Context, username string, c
 	}
 }
 
-func (r *mutationResolver) UpdateComment(ctx context.Context, username string, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error) {
-	con, rep, err := commentController.GetCommentController().UpdateComment(username, contentID, commentID, target.Body)
+func (r *mutationResolver) UpdateComment(ctx context.Context, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	con, rep, err := commentController.GetCommentController().UpdateComment(*username, contentID, commentID, target.Body)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -499,8 +579,12 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, username string, c
 	}
 }
 
-func (r *mutationResolver) DeleteComment(ctx context.Context, username string, contentID string, commentID string) (model.DeleteCommentPayLoad, error) {
-	con, rep, err := commentController.GetCommentController().DeleteComment(username, contentID, commentID)
+func (r *mutationResolver) DeleteComment(ctx context.Context, contentID string, commentID string) (model.DeleteCommentPayLoad, error) {
+	username, err := fetchUsername(ctx)
+	if err != nil {
+		return err.(model.UserNotFoundException), nil
+	}
+	con, rep, err := commentController.GetCommentController().DeleteComment(*username, contentID, commentID)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:

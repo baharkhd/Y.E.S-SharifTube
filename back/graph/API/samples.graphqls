@@ -1,9 +1,67 @@
+# user queries
+mutation createUser{
+    createUser(target:{username:"ArshiA", password:"Akhavan"}){
+        __typename
+        ... on User{
+            username
+        }
+        ... on Exception{
+            message
+        }
+    }
+}
+
+mutation updateUser{
+    updateUser(toBe:{name:"mamad"}){
+        __typename
+        ... on User{
+            name
+            username
+
+        }
+    }
+}
+
+mutation delete{
+    deleteUser{
+        __typename
+    }
+}
+
+query get{
+    user(username:"ArshiA"){
+        name
+        username
+    }
+}
+
+query getAll{
+    users(start:0,amount:10){
+        name
+        username
+    }
+}
+
+mutation login{
+    login(input:{username:"ArshiA",password:"Akhavan"}){
+        __typename
+        ... on Token{
+            token
+        }
+    }
+}
+
+mutation refreshToken{
+    refreshToken{
+        ... on Token{
+            token
+        }
+    }
+}
+
 # course queries
 mutation CreateCourse {
-    createCourse(
-        userName: "Abdi"
-        target: { title: "Title", summary: "hellow", token: "1234" }
-    ) {
+    createCourse(target: { title: "Title", summary: "hellow", token: "1234" }) {
         __typename
         ... on Course {
             title
@@ -17,7 +75,6 @@ mutation CreateCourse {
 
 mutation UpdateCourse {
     updateCourseInfo(
-        userName: "Abdi"
         courseID: "6023abac22b1f3ee94f555c9"
         toBe: {
             title: "new Title"
@@ -39,7 +96,7 @@ mutation UpdateCourse {
 }
 
 mutation deleteCourse {
-    deleteCourse(userName: "Abdi", courseID: "6023abac22b1f3ee94f555c9") {
+    deleteCourse(courseID: "6023abac22b1f3ee94f555c9") {
         __typename
         ... on Course {
             id
@@ -67,7 +124,6 @@ query GetCoursesByFilter {
 
 mutation addUser {
     addUserToCourse(
-        userName: "Sagg"
         courseID: "6023e6d38cf33059f64c9001"
         token: "1234"
     ) {
@@ -86,7 +142,6 @@ mutation addUser {
 
 mutation deleteUser {
     deleteUserFromCourse(
-        userName: "Abdi"
         courseID: "6023e6d38cf33059f64c9001"
         targetUsername: "Sagg"
     ) {
@@ -105,7 +160,6 @@ mutation deleteUser {
 
 mutation promoteUserToTA {
     promoteUserToTA(
-        userName: "Abdi"
         courseID: "6023e6d38cf33059f64c9001"
         targetUsername: "Sagg"
     ) {
@@ -124,7 +178,6 @@ mutation promoteUserToTA {
 
 mutation demoteUserToSTD {
     demoteUserToSTD(
-        userName: "Abdi"
         courseID: "6023e6d38cf33059f64c9001"
         targetUsername: "Sagg"
     ) {
@@ -144,7 +197,6 @@ mutation demoteUserToSTD {
 # content queries
 mutation createContent {
     uploadContent(
-        userName: "Sagg"
         courseID: "6023e6d38cf33059f64c9001"
         target: {
             title: "Film2"
@@ -169,7 +221,6 @@ mutation createContent {
 
 mutation editContent {
     editContent(
-        userName: "Abdi"
         courseID: "6023ab5d22b1f3ee94f555c8"
         contentID: "6024114fd104d0f145988642"
         target: { title: "new title", description: "new desc", tags: [] }
@@ -191,7 +242,6 @@ mutation editContent {
 
 mutation deleteContent {
     deleteContent(
-        userName: "Abdi"
         courseID: "6023ab5d22b1f3ee94f555c8"
         contentID: "6024114fd104d0f145988642"
     ) {
@@ -253,7 +303,6 @@ query GetContents {
 # pendings queries
 mutation createPending {
     offerContent(
-        userName: "Yum"
         courseID: "6023e6d38cf33059f64c9001"
         target: {
             title: "second offer"
@@ -277,7 +326,6 @@ mutation createPending {
 
 mutation updatePending {
     editOfferedContent(
-        userName: "Yum"
         courseID: "6023e6d38cf33059f64c9001"
         pendingID: "60245184fc30124584bb496a"
         target: {
@@ -301,7 +349,6 @@ mutation updatePending {
 
 mutation deletePending {
     deleteOfferedContent(
-        userName: "Yum"
         courseID: "6023e6d38cf33059f64c9001"
         pendingID: "60245184fc30124584bb496a"
     ) {
@@ -321,7 +368,6 @@ mutation deletePending {
 
 mutation acceptPending {
     acceptOfferedContent(
-        userName: "Abdi"
         courseID: "6023e6d38cf33059f64c9001"
         pendingID: "602450a8fc30124584bb4969"
         changed: { title: "Abdi title", description: "this desc should be edited." }
@@ -342,7 +388,6 @@ mutation acceptPending {
 
 mutation rejectPending {
     rejectOfferedContent(
-        userName: "Abdi"
         courseID: "602468381e793e98efbe181b"
         pendingID: "6024698faa869df07a93a055"
     ) {
@@ -379,7 +424,6 @@ query getPendingsByFilter {
 # attachment queries
 mutation uploadJozveh {
     uploadAttachment(
-        userName: "Abdi"
         courseID: "6023d3e13643010518995f2b"
         target: { name: "attachment 1", description: "utils for fun", aurl: "AURL" }
     ) {
@@ -398,7 +442,6 @@ mutation uploadJozveh {
 
 mutation updateJozveh {
     editAttachment(
-        userName: "Abdi"
         courseID: "6023d3e13643010518995f2b"
         attachmentID: "602473d0949c1acd9c36cdb5"
         target: { name: "edited attachment", description: "utils for Yum e sagg" }
@@ -418,7 +461,6 @@ mutation updateJozveh {
 
 mutation deleteJozveh {
     deleteAttachment(
-        userName: "Abdi"
         courseID: "6023d3e13643010518995f2b"
         attachmentID: "602473d0949c1acd9c36cdb5"
     ) {
@@ -438,7 +480,6 @@ mutation deleteJozveh {
 # comment queries
 mutation writeComment {
     createComment(
-        userName: "Abdi"
         contentID: "60241156d104d0f145988643"
         target: { body: "comment 1" }
     ) {
@@ -463,7 +504,6 @@ mutation writeComment {
 
 mutation writeReply {
     createComment(
-        userName: "Yum"
         contentID: "60241156d104d0f145988643"
         repliedAtID: "6024f29c3e8a8f136a336e9f"
         target: { body: "reply comment 1" }
@@ -489,7 +529,6 @@ mutation writeReply {
 
 mutation editComment {
     updateComment(
-        userName: "Abdi"
         contentID: "60241156d104d0f145988643"
         commentID: "6024f29c3e8a8f136a336e9f"
         target: { body: "changed comment" }
@@ -515,7 +554,6 @@ mutation editComment {
 
 mutation deleteComment {
     deleteComment(
-        userName: "Yum"
         contentID: "60241156d104d0f145988643"
         commentID: "6024f3313e8a8f136a336ea1"
     ) {

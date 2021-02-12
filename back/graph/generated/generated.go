@@ -122,32 +122,32 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AcceptOfferedContent func(childComplexity int, username string, courseID string, pendingID string, changed model.EditedPending) int
-		AddUserToCourse      func(childComplexity int, username string, courseID string, token string) int
-		CreateComment        func(childComplexity int, username string, contentID string, repliedAtID *string, target model.TargetComment) int
-		CreateCourse         func(childComplexity int, username string, target model.TargetCourse) int
+		AcceptOfferedContent func(childComplexity int, courseID string, pendingID string, changed model.EditedPending) int
+		AddUserToCourse      func(childComplexity int, courseID string, token string) int
+		CreateComment        func(childComplexity int, contentID string, repliedAtID *string, target model.TargetComment) int
+		CreateCourse         func(childComplexity int, target model.TargetCourse) int
 		CreateUser           func(childComplexity int, target model.TargetUser) int
-		DeleteAttachment     func(childComplexity int, username string, courseID string, attachmentID string) int
-		DeleteComment        func(childComplexity int, username string, contentID string, commentID string) int
-		DeleteContent        func(childComplexity int, username string, courseID string, contentID string) int
-		DeleteCourse         func(childComplexity int, username string, courseID string) int
-		DeleteOfferedContent func(childComplexity int, username string, courseID string, pendingID string) int
+		DeleteAttachment     func(childComplexity int, courseID string, attachmentID string) int
+		DeleteComment        func(childComplexity int, contentID string, commentID string) int
+		DeleteContent        func(childComplexity int, courseID string, contentID string) int
+		DeleteCourse         func(childComplexity int, courseID string) int
+		DeleteOfferedContent func(childComplexity int, courseID string, pendingID string) int
 		DeleteUser           func(childComplexity int) int
-		DeleteUserFromCourse func(childComplexity int, username string, courseID string, targetUsername string) int
-		DemoteUserToStd      func(childComplexity int, username string, courseID string, targetUsername string) int
-		EditAttachment       func(childComplexity int, username string, courseID string, attachmentID string, target model.EditAttachment) int
-		EditContent          func(childComplexity int, username string, courseID string, contentID string, target model.EditContent) int
-		EditOfferedContent   func(childComplexity int, username string, courseID string, pendingID string, target model.EditedPending) int
+		DeleteUserFromCourse func(childComplexity int, courseID string, targetUsername string) int
+		DemoteUserToStd      func(childComplexity int, courseID string, targetUsername string) int
+		EditAttachment       func(childComplexity int, courseID string, attachmentID string, target model.EditAttachment) int
+		EditContent          func(childComplexity int, courseID string, contentID string, target model.EditContent) int
+		EditOfferedContent   func(childComplexity int, courseID string, pendingID string, target model.EditedPending) int
 		Login                func(childComplexity int, input model.Login) int
-		OfferContent         func(childComplexity int, username string, courseID string, target model.TargetPending) int
-		PromoteUserToTa      func(childComplexity int, username string, courseID string, targetUsername string) int
+		OfferContent         func(childComplexity int, courseID string, target model.TargetPending) int
+		PromoteUserToTa      func(childComplexity int, courseID string, targetUsername string) int
 		RefreshToken         func(childComplexity int) int
-		RejectOfferedContent func(childComplexity int, username string, courseID string, pendingID string) int
-		UpdateComment        func(childComplexity int, username string, contentID string, commentID string, target model.EditedComment) int
-		UpdateCourseInfo     func(childComplexity int, username string, courseID string, toBe model.EditedCourse) int
+		RejectOfferedContent func(childComplexity int, courseID string, pendingID string) int
+		UpdateComment        func(childComplexity int, contentID string, commentID string, target model.EditedComment) int
+		UpdateCourseInfo     func(childComplexity int, courseID string, toBe model.EditedCourse) int
 		UpdateUser           func(childComplexity int, toBe model.EditedUser) int
-		UploadAttachment     func(childComplexity int, username string, courseID string, target model.TargetAttachment) int
-		UploadContent        func(childComplexity int, username string, courseID string, target model.TargetContent) int
+		UploadAttachment     func(childComplexity int, courseID string, target model.TargetAttachment) int
+		UploadContent        func(childComplexity int, courseID string, target model.TargetContent) int
 	}
 
 	OfferedContentNotPendingException struct {
@@ -235,27 +235,27 @@ type MutationResolver interface {
 	DeleteUser(ctx context.Context) (model.DeleteUserPayload, error)
 	Login(ctx context.Context, input model.Login) (model.LoginPayload, error)
 	RefreshToken(ctx context.Context) (model.LoginPayload, error)
-	CreateCourse(ctx context.Context, username string, target model.TargetCourse) (model.CreateCoursePayload, error)
-	UpdateCourseInfo(ctx context.Context, username string, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error)
-	DeleteCourse(ctx context.Context, username string, courseID string) (model.DeleteCoursePayload, error)
-	AddUserToCourse(ctx context.Context, username string, courseID string, token string) (model.AddUserToCoursePayload, error)
-	DeleteUserFromCourse(ctx context.Context, username string, courseID string, targetUsername string) (model.DeleteUserFromCoursePayload, error)
-	PromoteUserToTa(ctx context.Context, username string, courseID string, targetUsername string) (model.PromoteToTAPayload, error)
-	DemoteUserToStd(ctx context.Context, username string, courseID string, targetUsername string) (model.DemoteToSTDPayload, error)
-	UploadContent(ctx context.Context, username string, courseID string, target model.TargetContent) (model.UploadContentPayLoad, error)
-	EditContent(ctx context.Context, username string, courseID string, contentID string, target model.EditContent) (model.EditContentPayLoad, error)
-	DeleteContent(ctx context.Context, username string, courseID string, contentID string) (model.DeleteContentPayLoad, error)
-	UploadAttachment(ctx context.Context, username string, courseID string, target model.TargetAttachment) (model.UploadAttachmentPayLoad, error)
-	EditAttachment(ctx context.Context, username string, courseID string, attachmentID string, target model.EditAttachment) (model.EditAttachmentPayLoad, error)
-	DeleteAttachment(ctx context.Context, username string, courseID string, attachmentID string) (model.DeleteAttachmentPayLoad, error)
-	OfferContent(ctx context.Context, username string, courseID string, target model.TargetPending) (model.OfferContentPayLoad, error)
-	EditOfferedContent(ctx context.Context, username string, courseID string, pendingID string, target model.EditedPending) (model.EditOfferedContentPayLoad, error)
-	DeleteOfferedContent(ctx context.Context, username string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error)
-	AcceptOfferedContent(ctx context.Context, username string, courseID string, pendingID string, changed model.EditedPending) (model.EditOfferedContentPayLoad, error)
-	RejectOfferedContent(ctx context.Context, username string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error)
-	CreateComment(ctx context.Context, username string, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error)
-	UpdateComment(ctx context.Context, username string, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error)
-	DeleteComment(ctx context.Context, username string, contentID string, commentID string) (model.DeleteCommentPayLoad, error)
+	CreateCourse(ctx context.Context, target model.TargetCourse) (model.CreateCoursePayload, error)
+	UpdateCourseInfo(ctx context.Context, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error)
+	DeleteCourse(ctx context.Context, courseID string) (model.DeleteCoursePayload, error)
+	AddUserToCourse(ctx context.Context, courseID string, token string) (model.AddUserToCoursePayload, error)
+	DeleteUserFromCourse(ctx context.Context, courseID string, targetUsername string) (model.DeleteUserFromCoursePayload, error)
+	PromoteUserToTa(ctx context.Context, courseID string, targetUsername string) (model.PromoteToTAPayload, error)
+	DemoteUserToStd(ctx context.Context, courseID string, targetUsername string) (model.DemoteToSTDPayload, error)
+	UploadContent(ctx context.Context, courseID string, target model.TargetContent) (model.UploadContentPayLoad, error)
+	EditContent(ctx context.Context, courseID string, contentID string, target model.EditContent) (model.EditContentPayLoad, error)
+	DeleteContent(ctx context.Context, courseID string, contentID string) (model.DeleteContentPayLoad, error)
+	UploadAttachment(ctx context.Context, courseID string, target model.TargetAttachment) (model.UploadAttachmentPayLoad, error)
+	EditAttachment(ctx context.Context, courseID string, attachmentID string, target model.EditAttachment) (model.EditAttachmentPayLoad, error)
+	DeleteAttachment(ctx context.Context, courseID string, attachmentID string) (model.DeleteAttachmentPayLoad, error)
+	OfferContent(ctx context.Context, courseID string, target model.TargetPending) (model.OfferContentPayLoad, error)
+	EditOfferedContent(ctx context.Context, courseID string, pendingID string, target model.EditedPending) (model.EditOfferedContentPayLoad, error)
+	DeleteOfferedContent(ctx context.Context, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error)
+	AcceptOfferedContent(ctx context.Context, courseID string, pendingID string, changed model.EditedPending) (model.EditOfferedContentPayLoad, error)
+	RejectOfferedContent(ctx context.Context, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error)
+	CreateComment(ctx context.Context, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error)
+	UpdateComment(ctx context.Context, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error)
+	DeleteComment(ctx context.Context, contentID string, commentID string) (model.DeleteCommentPayLoad, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, username *string) (*model.User, error)
@@ -589,7 +589,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AcceptOfferedContent(childComplexity, args["username"].(string), args["courseID"].(string), args["pendingID"].(string), args["changed"].(model.EditedPending)), true
+		return e.complexity.Mutation.AcceptOfferedContent(childComplexity, args["courseID"].(string), args["pendingID"].(string), args["changed"].(model.EditedPending)), true
 
 	case "Mutation.addUserToCourse":
 		if e.complexity.Mutation.AddUserToCourse == nil {
@@ -601,7 +601,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddUserToCourse(childComplexity, args["username"].(string), args["courseID"].(string), args["token"].(string)), true
+		return e.complexity.Mutation.AddUserToCourse(childComplexity, args["courseID"].(string), args["token"].(string)), true
 
 	case "Mutation.createComment":
 		if e.complexity.Mutation.CreateComment == nil {
@@ -613,7 +613,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateComment(childComplexity, args["username"].(string), args["contentID"].(string), args["repliedAtID"].(*string), args["target"].(model.TargetComment)), true
+		return e.complexity.Mutation.CreateComment(childComplexity, args["contentID"].(string), args["repliedAtID"].(*string), args["target"].(model.TargetComment)), true
 
 	case "Mutation.createCourse":
 		if e.complexity.Mutation.CreateCourse == nil {
@@ -625,7 +625,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateCourse(childComplexity, args["username"].(string), args["target"].(model.TargetCourse)), true
+		return e.complexity.Mutation.CreateCourse(childComplexity, args["target"].(model.TargetCourse)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -649,7 +649,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteAttachment(childComplexity, args["username"].(string), args["courseID"].(string), args["attachmentID"].(string)), true
+		return e.complexity.Mutation.DeleteAttachment(childComplexity, args["courseID"].(string), args["attachmentID"].(string)), true
 
 	case "Mutation.deleteComment":
 		if e.complexity.Mutation.DeleteComment == nil {
@@ -661,7 +661,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteComment(childComplexity, args["username"].(string), args["contentID"].(string), args["commentID"].(string)), true
+		return e.complexity.Mutation.DeleteComment(childComplexity, args["contentID"].(string), args["commentID"].(string)), true
 
 	case "Mutation.deleteContent":
 		if e.complexity.Mutation.DeleteContent == nil {
@@ -673,7 +673,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteContent(childComplexity, args["username"].(string), args["courseID"].(string), args["contentID"].(string)), true
+		return e.complexity.Mutation.DeleteContent(childComplexity, args["courseID"].(string), args["contentID"].(string)), true
 
 	case "Mutation.deleteCourse":
 		if e.complexity.Mutation.DeleteCourse == nil {
@@ -685,7 +685,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteCourse(childComplexity, args["username"].(string), args["courseID"].(string)), true
+		return e.complexity.Mutation.DeleteCourse(childComplexity, args["courseID"].(string)), true
 
 	case "Mutation.deleteOfferedContent":
 		if e.complexity.Mutation.DeleteOfferedContent == nil {
@@ -697,7 +697,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteOfferedContent(childComplexity, args["username"].(string), args["courseID"].(string), args["pendingID"].(string)), true
+		return e.complexity.Mutation.DeleteOfferedContent(childComplexity, args["courseID"].(string), args["pendingID"].(string)), true
 
 	case "Mutation.deleteUser":
 		if e.complexity.Mutation.DeleteUser == nil {
@@ -716,7 +716,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteUserFromCourse(childComplexity, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string)), true
+		return e.complexity.Mutation.DeleteUserFromCourse(childComplexity, args["courseID"].(string), args["targetUsername"].(string)), true
 
 	case "Mutation.demoteUserToSTD":
 		if e.complexity.Mutation.DemoteUserToStd == nil {
@@ -728,7 +728,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DemoteUserToStd(childComplexity, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string)), true
+		return e.complexity.Mutation.DemoteUserToStd(childComplexity, args["courseID"].(string), args["targetUsername"].(string)), true
 
 	case "Mutation.editAttachment":
 		if e.complexity.Mutation.EditAttachment == nil {
@@ -740,7 +740,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditAttachment(childComplexity, args["username"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditAttachment)), true
+		return e.complexity.Mutation.EditAttachment(childComplexity, args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditAttachment)), true
 
 	case "Mutation.editContent":
 		if e.complexity.Mutation.EditContent == nil {
@@ -752,7 +752,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditContent(childComplexity, args["username"].(string), args["courseID"].(string), args["contentID"].(string), args["target"].(model.EditContent)), true
+		return e.complexity.Mutation.EditContent(childComplexity, args["courseID"].(string), args["contentID"].(string), args["target"].(model.EditContent)), true
 
 	case "Mutation.editOfferedContent":
 		if e.complexity.Mutation.EditOfferedContent == nil {
@@ -764,7 +764,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditOfferedContent(childComplexity, args["username"].(string), args["courseID"].(string), args["pendingID"].(string), args["target"].(model.EditedPending)), true
+		return e.complexity.Mutation.EditOfferedContent(childComplexity, args["courseID"].(string), args["pendingID"].(string), args["target"].(model.EditedPending)), true
 
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
@@ -788,7 +788,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.OfferContent(childComplexity, args["username"].(string), args["courseID"].(string), args["target"].(model.TargetPending)), true
+		return e.complexity.Mutation.OfferContent(childComplexity, args["courseID"].(string), args["target"].(model.TargetPending)), true
 
 	case "Mutation.promoteUserToTA":
 		if e.complexity.Mutation.PromoteUserToTa == nil {
@@ -800,7 +800,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.PromoteUserToTa(childComplexity, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string)), true
+		return e.complexity.Mutation.PromoteUserToTa(childComplexity, args["courseID"].(string), args["targetUsername"].(string)), true
 
 	case "Mutation.refreshToken":
 		if e.complexity.Mutation.RefreshToken == nil {
@@ -819,7 +819,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RejectOfferedContent(childComplexity, args["username"].(string), args["courseID"].(string), args["pendingID"].(string)), true
+		return e.complexity.Mutation.RejectOfferedContent(childComplexity, args["courseID"].(string), args["pendingID"].(string)), true
 
 	case "Mutation.updateComment":
 		if e.complexity.Mutation.UpdateComment == nil {
@@ -831,7 +831,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateComment(childComplexity, args["username"].(string), args["contentID"].(string), args["commentID"].(string), args["target"].(model.EditedComment)), true
+		return e.complexity.Mutation.UpdateComment(childComplexity, args["contentID"].(string), args["commentID"].(string), args["target"].(model.EditedComment)), true
 
 	case "Mutation.updateCourseInfo":
 		if e.complexity.Mutation.UpdateCourseInfo == nil {
@@ -843,7 +843,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateCourseInfo(childComplexity, args["username"].(string), args["courseID"].(string), args["toBe"].(model.EditedCourse)), true
+		return e.complexity.Mutation.UpdateCourseInfo(childComplexity, args["courseID"].(string), args["toBe"].(model.EditedCourse)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -867,7 +867,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UploadAttachment(childComplexity, args["username"].(string), args["courseID"].(string), args["target"].(model.TargetAttachment)), true
+		return e.complexity.Mutation.UploadAttachment(childComplexity, args["courseID"].(string), args["target"].(model.TargetAttachment)), true
 
 	case "Mutation.uploadContent":
 		if e.complexity.Mutation.UploadContent == nil {
@@ -879,7 +879,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UploadContent(childComplexity, args["username"].(string), args["courseID"].(string), args["target"].(model.TargetContent)), true
+		return e.complexity.Mutation.UploadContent(childComplexity, args["courseID"].(string), args["target"].(model.TargetContent)), true
 
 	case "OfferedContentNotPendingException.message":
 		if e.complexity.OfferedContentNotPendingException.Message == nil {
@@ -1503,31 +1503,31 @@ type Mutation {
     refreshToken: LoginPayload!
 
 
-    createCourse(username:String!, target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
-    updateCourseInfo(username:String!, courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
-    deleteCourse(username:String!, courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
-    addUserToCourse(username:String!, courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
-    deleteUserFromCourse(username:String!, courseID:String!, targetUsername:String!): DeleteUserFromCoursePayload! #todo implement with authentication & jwt tokens
-    promoteUserToTA(username:String!, courseID:String!, targetUsername:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
-    demoteUserToSTD(username:String!, courseID:String!, targetUsername:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
+    createCourse(target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
+    updateCourseInfo(courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
+    deleteCourse(courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
+    addUserToCourse(courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
+    deleteUserFromCourse(courseID:String!, targetUsername:String!): DeleteUserFromCoursePayload! #todo implement with authentication & jwt tokens
+    promoteUserToTA(courseID:String!, targetUsername:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
+    demoteUserToSTD(courseID:String!, targetUsername:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
 
-    uploadContent(username:String!, courseID:String!, target:TargetContent!): UploadContentPayLoad! #todo implement with authentication & jwt tokens
-    editContent(username:String!, courseID:String!, contentID:String!, target:EditContent!): EditContentPayLoad! #todo implement with authentication & jwt tokens
-    deleteContent(username:String!, courseID:String!, contentID:String!): DeleteContentPayLoad! #todo implement with authentication & jwt tokens
+    uploadContent(courseID:String!, target:TargetContent!): UploadContentPayLoad! #todo implement with authentication & jwt tokens
+    editContent(courseID:String!, contentID:String!, target:EditContent!): EditContentPayLoad! #todo implement with authentication & jwt tokens
+    deleteContent(courseID:String!, contentID:String!): DeleteContentPayLoad! #todo implement with authentication & jwt tokens
 
-    uploadAttachment(username:String!, courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
-    editAttachment(username:String!, courseID:String!, attachmentID:String!, target:EditAttachment!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
-    deleteAttachment(username:String!, courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    uploadAttachment(courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    editAttachment(courseID:String!, attachmentID:String!, target:EditAttachment!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    deleteAttachment(courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
 
-    offerContent(username:String!, courseID:String!, target:TargetPending!): OfferContentPayLoad! #todo implement with authentication & jwt tokens
-    editOfferedContent(username:String!, courseID:String!, pendingID:String!, target:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
-    deleteOfferedContent(username:String!, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
-    acceptOfferedContent(username:String!, courseID:String!, pendingID:String!, changed:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
-    rejectOfferedContent(username:String!, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    offerContent(courseID:String!, target:TargetPending!): OfferContentPayLoad! #todo implement with authentication & jwt tokens
+    editOfferedContent(courseID:String!, pendingID:String!, target:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    deleteOfferedContent(courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    acceptOfferedContent(courseID:String!, pendingID:String!, changed:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    rejectOfferedContent(courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
 
-    createComment(username:String!, contentID:String!, repliedAtID:String, target:TargetComment!): CreateCommentPayLoad! #todo implement with authentication & jwt tokens
-    updateComment(username:String!, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad! #todo implement with authentication & jwt tokens
-    deleteComment(username:String!, contentID:String!, commentID:String!): DeleteCommentPayLoad! #todo implement with authentication & jwt tokens
+    createComment(contentID:String!, repliedAtID:String, target:TargetComment!): CreateCommentPayLoad! #todo implement with authentication & jwt tokens
+    updateComment(contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad! #todo implement with authentication & jwt tokens
+    deleteComment(contentID:String!, commentID:String!): DeleteCommentPayLoad! #todo implement with authentication & jwt tokens
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -1588,41 +1588,32 @@ func (ec *executionContext) field_Mutation_acceptOfferedContent_args(ctx context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
+	args["courseID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["pendingID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pendingID"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["pendingID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pendingID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["pendingID"] = arg2
-	var arg3 model.EditedPending
+	args["pendingID"] = arg1
+	var arg2 model.EditedPending
 	if tmp, ok := rawArgs["changed"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("changed"))
-		arg3, err = ec.unmarshalNEditedPending2yesᚑsharifTubeᚋgraphᚋmodelᚐEditedPending(ctx, tmp)
+		arg2, err = ec.unmarshalNEditedPending2yesᚑsharifTubeᚋgraphᚋmodelᚐEditedPending(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["changed"] = arg3
+	args["changed"] = arg2
 	return args, nil
 }
 
@@ -1630,32 +1621,23 @@ func (ec *executionContext) field_Mutation_addUserToCourse_args(ctx context.Cont
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
+	args["courseID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["token"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["token"] = arg2
+	args["token"] = arg1
 	return args, nil
 }
 
@@ -1663,65 +1645,47 @@ func (ec *executionContext) field_Mutation_createComment_args(ctx context.Contex
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["contentID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["contentID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["contentID"] = arg1
-	var arg2 *string
+	args["contentID"] = arg0
+	var arg1 *string
 	if tmp, ok := rawArgs["repliedAtID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("repliedAtID"))
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["repliedAtID"] = arg2
-	var arg3 model.TargetComment
+	args["repliedAtID"] = arg1
+	var arg2 model.TargetComment
 	if tmp, ok := rawArgs["target"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg3, err = ec.unmarshalNTargetComment2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetComment(ctx, tmp)
+		arg2, err = ec.unmarshalNTargetComment2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetComment(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["target"] = arg3
+	args["target"] = arg2
 	return args, nil
 }
 
 func (ec *executionContext) field_Mutation_createCourse_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["username"] = arg0
-	var arg1 model.TargetCourse
+	var arg0 model.TargetCourse
 	if tmp, ok := rawArgs["target"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg1, err = ec.unmarshalNTargetCourse2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetCourse(ctx, tmp)
+		arg0, err = ec.unmarshalNTargetCourse2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetCourse(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["target"] = arg1
+	args["target"] = arg0
 	return args, nil
 }
 
@@ -1744,32 +1708,23 @@ func (ec *executionContext) field_Mutation_deleteAttachment_args(ctx context.Con
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
+	args["courseID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["attachmentID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attachmentID"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["attachmentID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attachmentID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["attachmentID"] = arg2
+	args["attachmentID"] = arg1
 	return args, nil
 }
 
@@ -1777,14 +1732,38 @@ func (ec *executionContext) field_Mutation_deleteComment_args(ctx context.Contex
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["contentID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
+	args["contentID"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["commentID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commentID"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["commentID"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteContent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["courseID"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["contentID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
@@ -1794,48 +1773,6 @@ func (ec *executionContext) field_Mutation_deleteComment_args(ctx context.Contex
 		}
 	}
 	args["contentID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["commentID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commentID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["commentID"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteContent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["username"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["contentID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["contentID"] = arg2
 	return args, nil
 }
 
@@ -1843,23 +1780,14 @@ func (ec *executionContext) field_Mutation_deleteCourse_args(ctx context.Context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["courseID"] = arg1
+	args["courseID"] = arg0
 	return args, nil
 }
 
@@ -1867,32 +1795,23 @@ func (ec *executionContext) field_Mutation_deleteOfferedContent_args(ctx context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
+	args["courseID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["pendingID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pendingID"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["pendingID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pendingID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["pendingID"] = arg2
+	args["pendingID"] = arg1
 	return args, nil
 }
 
@@ -1900,32 +1819,23 @@ func (ec *executionContext) field_Mutation_deleteUserFromCourse_args(ctx context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
+	args["courseID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["targetUsername"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetUsername"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["targetUsername"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetUsername"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["targetUsername"] = arg2
+	args["targetUsername"] = arg1
 	return args, nil
 }
 
@@ -1933,32 +1843,23 @@ func (ec *executionContext) field_Mutation_demoteUserToSTD_args(ctx context.Cont
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
+	args["courseID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["targetUsername"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetUsername"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["targetUsername"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetUsername"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["targetUsername"] = arg2
+	args["targetUsername"] = arg1
 	return args, nil
 }
 
@@ -1966,41 +1867,32 @@ func (ec *executionContext) field_Mutation_editAttachment_args(ctx context.Conte
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
+	args["courseID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["attachmentID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attachmentID"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["attachmentID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attachmentID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["attachmentID"] = arg2
-	var arg3 model.EditAttachment
+	args["attachmentID"] = arg1
+	var arg2 model.EditAttachment
 	if tmp, ok := rawArgs["target"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg3, err = ec.unmarshalNEditAttachment2yesᚑsharifTubeᚋgraphᚋmodelᚐEditAttachment(ctx, tmp)
+		arg2, err = ec.unmarshalNEditAttachment2yesᚑsharifTubeᚋgraphᚋmodelᚐEditAttachment(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["target"] = arg3
+	args["target"] = arg2
 	return args, nil
 }
 
@@ -2008,41 +1900,32 @@ func (ec *executionContext) field_Mutation_editContent_args(ctx context.Context,
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
+	args["courseID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["contentID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["contentID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["contentID"] = arg2
-	var arg3 model.EditContent
+	args["contentID"] = arg1
+	var arg2 model.EditContent
 	if tmp, ok := rawArgs["target"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg3, err = ec.unmarshalNEditContent2yesᚑsharifTubeᚋgraphᚋmodelᚐEditContent(ctx, tmp)
+		arg2, err = ec.unmarshalNEditContent2yesᚑsharifTubeᚋgraphᚋmodelᚐEditContent(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["target"] = arg3
+	args["target"] = arg2
 	return args, nil
 }
 
@@ -2050,41 +1933,32 @@ func (ec *executionContext) field_Mutation_editOfferedContent_args(ctx context.C
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
+	args["courseID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["pendingID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pendingID"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["pendingID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pendingID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["pendingID"] = arg2
-	var arg3 model.EditedPending
+	args["pendingID"] = arg1
+	var arg2 model.EditedPending
 	if tmp, ok := rawArgs["target"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg3, err = ec.unmarshalNEditedPending2yesᚑsharifTubeᚋgraphᚋmodelᚐEditedPending(ctx, tmp)
+		arg2, err = ec.unmarshalNEditedPending2yesᚑsharifTubeᚋgraphᚋmodelᚐEditedPending(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["target"] = arg3
+	args["target"] = arg2
 	return args, nil
 }
 
@@ -2107,27 +1981,99 @@ func (ec *executionContext) field_Mutation_offerContent_args(ctx context.Context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
-	var arg1 string
+	args["courseID"] = arg0
+	var arg1 model.TargetPending
+	if tmp, ok := rawArgs["target"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
+		arg1, err = ec.unmarshalNTargetPending2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetPending(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["target"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_promoteUserToTA_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["courseID"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["targetUsername"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetUsername"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["courseID"] = arg1
-	var arg2 model.TargetPending
+	args["targetUsername"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_rejectOfferedContent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["courseID"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["pendingID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pendingID"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pendingID"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["contentID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["contentID"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["commentID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commentID"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["commentID"] = arg1
+	var arg2 model.EditedComment
 	if tmp, ok := rawArgs["target"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg2, err = ec.unmarshalNTargetPending2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetPending(ctx, tmp)
+		arg2, err = ec.unmarshalNEditedComment2yesᚑsharifTubeᚋgraphᚋmodelᚐEditedComment(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2136,144 +2082,27 @@ func (ec *executionContext) field_Mutation_offerContent_args(ctx context.Context
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_promoteUserToTA_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["username"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["targetUsername"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetUsername"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["targetUsername"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_rejectOfferedContent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["username"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["courseID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["pendingID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pendingID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["pendingID"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_updateComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["username"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["contentID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["contentID"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["commentID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commentID"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["commentID"] = arg2
-	var arg3 model.EditedComment
-	if tmp, ok := rawArgs["target"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg3, err = ec.unmarshalNEditedComment2yesᚑsharifTubeᚋgraphᚋmodelᚐEditedComment(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["target"] = arg3
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_updateCourseInfo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["courseID"] = arg1
-	var arg2 model.EditedCourse
+	args["courseID"] = arg0
+	var arg1 model.EditedCourse
 	if tmp, ok := rawArgs["toBe"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("toBe"))
-		arg2, err = ec.unmarshalNEditedCourse2yesᚑsharifTubeᚋgraphᚋmodelᚐEditedCourse(ctx, tmp)
+		arg1, err = ec.unmarshalNEditedCourse2yesᚑsharifTubeᚋgraphᚋmodelᚐEditedCourse(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["toBe"] = arg2
+	args["toBe"] = arg1
 	return args, nil
 }
 
@@ -2296,32 +2125,23 @@ func (ec *executionContext) field_Mutation_uploadAttachment_args(ctx context.Con
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["courseID"] = arg1
-	var arg2 model.TargetAttachment
+	args["courseID"] = arg0
+	var arg1 model.TargetAttachment
 	if tmp, ok := rawArgs["target"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg2, err = ec.unmarshalNTargetAttachment2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetAttachment(ctx, tmp)
+		arg1, err = ec.unmarshalNTargetAttachment2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetAttachment(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["target"] = arg2
+	args["target"] = arg1
 	return args, nil
 }
 
@@ -2329,32 +2149,23 @@ func (ec *executionContext) field_Mutation_uploadContent_args(ctx context.Contex
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["username"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["username"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["courseID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["courseID"] = arg1
-	var arg2 model.TargetContent
+	args["courseID"] = arg0
+	var arg1 model.TargetContent
 	if tmp, ok := rawArgs["target"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg2, err = ec.unmarshalNTargetContent2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetContent(ctx, tmp)
+		arg1, err = ec.unmarshalNTargetContent2yesᚑsharifTubeᚋgraphᚋmodelᚐTargetContent(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["target"] = arg2
+	args["target"] = arg1
 	return args, nil
 }
 
@@ -4222,7 +4033,7 @@ func (ec *executionContext) _Mutation_createCourse(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateCourse(rctx, args["username"].(string), args["target"].(model.TargetCourse))
+		return ec.resolvers.Mutation().CreateCourse(rctx, args["target"].(model.TargetCourse))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4264,7 +4075,7 @@ func (ec *executionContext) _Mutation_updateCourseInfo(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateCourseInfo(rctx, args["username"].(string), args["courseID"].(string), args["toBe"].(model.EditedCourse))
+		return ec.resolvers.Mutation().UpdateCourseInfo(rctx, args["courseID"].(string), args["toBe"].(model.EditedCourse))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4306,7 +4117,7 @@ func (ec *executionContext) _Mutation_deleteCourse(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteCourse(rctx, args["username"].(string), args["courseID"].(string))
+		return ec.resolvers.Mutation().DeleteCourse(rctx, args["courseID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4348,7 +4159,7 @@ func (ec *executionContext) _Mutation_addUserToCourse(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddUserToCourse(rctx, args["username"].(string), args["courseID"].(string), args["token"].(string))
+		return ec.resolvers.Mutation().AddUserToCourse(rctx, args["courseID"].(string), args["token"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4390,7 +4201,7 @@ func (ec *executionContext) _Mutation_deleteUserFromCourse(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteUserFromCourse(rctx, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string))
+		return ec.resolvers.Mutation().DeleteUserFromCourse(rctx, args["courseID"].(string), args["targetUsername"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4432,7 +4243,7 @@ func (ec *executionContext) _Mutation_promoteUserToTA(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().PromoteUserToTa(rctx, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string))
+		return ec.resolvers.Mutation().PromoteUserToTa(rctx, args["courseID"].(string), args["targetUsername"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4474,7 +4285,7 @@ func (ec *executionContext) _Mutation_demoteUserToSTD(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DemoteUserToStd(rctx, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string))
+		return ec.resolvers.Mutation().DemoteUserToStd(rctx, args["courseID"].(string), args["targetUsername"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4516,7 +4327,7 @@ func (ec *executionContext) _Mutation_uploadContent(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UploadContent(rctx, args["username"].(string), args["courseID"].(string), args["target"].(model.TargetContent))
+		return ec.resolvers.Mutation().UploadContent(rctx, args["courseID"].(string), args["target"].(model.TargetContent))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4558,7 +4369,7 @@ func (ec *executionContext) _Mutation_editContent(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditContent(rctx, args["username"].(string), args["courseID"].(string), args["contentID"].(string), args["target"].(model.EditContent))
+		return ec.resolvers.Mutation().EditContent(rctx, args["courseID"].(string), args["contentID"].(string), args["target"].(model.EditContent))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4600,7 +4411,7 @@ func (ec *executionContext) _Mutation_deleteContent(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteContent(rctx, args["username"].(string), args["courseID"].(string), args["contentID"].(string))
+		return ec.resolvers.Mutation().DeleteContent(rctx, args["courseID"].(string), args["contentID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4642,7 +4453,7 @@ func (ec *executionContext) _Mutation_uploadAttachment(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UploadAttachment(rctx, args["username"].(string), args["courseID"].(string), args["target"].(model.TargetAttachment))
+		return ec.resolvers.Mutation().UploadAttachment(rctx, args["courseID"].(string), args["target"].(model.TargetAttachment))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4684,7 +4495,7 @@ func (ec *executionContext) _Mutation_editAttachment(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditAttachment(rctx, args["username"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditAttachment))
+		return ec.resolvers.Mutation().EditAttachment(rctx, args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditAttachment))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4726,7 +4537,7 @@ func (ec *executionContext) _Mutation_deleteAttachment(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteAttachment(rctx, args["username"].(string), args["courseID"].(string), args["attachmentID"].(string))
+		return ec.resolvers.Mutation().DeleteAttachment(rctx, args["courseID"].(string), args["attachmentID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4768,7 +4579,7 @@ func (ec *executionContext) _Mutation_offerContent(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().OfferContent(rctx, args["username"].(string), args["courseID"].(string), args["target"].(model.TargetPending))
+		return ec.resolvers.Mutation().OfferContent(rctx, args["courseID"].(string), args["target"].(model.TargetPending))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4810,7 +4621,7 @@ func (ec *executionContext) _Mutation_editOfferedContent(ctx context.Context, fi
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditOfferedContent(rctx, args["username"].(string), args["courseID"].(string), args["pendingID"].(string), args["target"].(model.EditedPending))
+		return ec.resolvers.Mutation().EditOfferedContent(rctx, args["courseID"].(string), args["pendingID"].(string), args["target"].(model.EditedPending))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4852,7 +4663,7 @@ func (ec *executionContext) _Mutation_deleteOfferedContent(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteOfferedContent(rctx, args["username"].(string), args["courseID"].(string), args["pendingID"].(string))
+		return ec.resolvers.Mutation().DeleteOfferedContent(rctx, args["courseID"].(string), args["pendingID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4894,7 +4705,7 @@ func (ec *executionContext) _Mutation_acceptOfferedContent(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AcceptOfferedContent(rctx, args["username"].(string), args["courseID"].(string), args["pendingID"].(string), args["changed"].(model.EditedPending))
+		return ec.resolvers.Mutation().AcceptOfferedContent(rctx, args["courseID"].(string), args["pendingID"].(string), args["changed"].(model.EditedPending))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4936,7 +4747,7 @@ func (ec *executionContext) _Mutation_rejectOfferedContent(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RejectOfferedContent(rctx, args["username"].(string), args["courseID"].(string), args["pendingID"].(string))
+		return ec.resolvers.Mutation().RejectOfferedContent(rctx, args["courseID"].(string), args["pendingID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4978,7 +4789,7 @@ func (ec *executionContext) _Mutation_createComment(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateComment(rctx, args["username"].(string), args["contentID"].(string), args["repliedAtID"].(*string), args["target"].(model.TargetComment))
+		return ec.resolvers.Mutation().CreateComment(rctx, args["contentID"].(string), args["repliedAtID"].(*string), args["target"].(model.TargetComment))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5020,7 +4831,7 @@ func (ec *executionContext) _Mutation_updateComment(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateComment(rctx, args["username"].(string), args["contentID"].(string), args["commentID"].(string), args["target"].(model.EditedComment))
+		return ec.resolvers.Mutation().UpdateComment(rctx, args["contentID"].(string), args["commentID"].(string), args["target"].(model.EditedComment))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5062,7 +4873,7 @@ func (ec *executionContext) _Mutation_deleteComment(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteComment(rctx, args["username"].(string), args["contentID"].(string), args["commentID"].(string))
+		return ec.resolvers.Mutation().DeleteComment(rctx, args["contentID"].(string), args["commentID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

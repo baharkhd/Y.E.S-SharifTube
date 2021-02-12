@@ -7,6 +7,7 @@ import (
 	"yes-sharifTube/internal/middleware/ggcontext"
 	"yes-sharifTube/internal/model/user"
 )
+
 /* some useful functions to convert model objects from our models to graphql models
  */
 func reformatUsers(all []*user.User) []*model.User {
@@ -19,10 +20,10 @@ func reformatUsers(all []*user.User) []*model.User {
 
 func reformatUser(targetUser *user.User) *model.User {
 	var graphUser = &model.User{
-		ID:      targetUser.ID.Hex(),
-		Name:    &targetUser.Name,
-		Email:   &targetUser.Email,
-		Username: targetUser.Username,
+		ID:        targetUser.ID.Hex(),
+		Name:      &targetUser.Name,
+		Email:     &targetUser.Email,
+		Username:  targetUser.Username,
 		CourseIDs: targetUser.Courses,
 	}
 	return graphUser
@@ -44,8 +45,16 @@ func getUsername(ctx context.Context, name *string) string {
 }
 
 func deref(input *string) string {
-	if input==nil{
+	if input == nil {
 		return ""
 	}
 	return *input
+}
+
+func fetchUsername(ctx context.Context) (*string, error) {
+	username := extractUsernameFromContext(ctx)
+	if username == "" {
+		return nil, model.UserNotAllowedException{Message: "please login first!"}
+	}
+	return &username, nil
 }
