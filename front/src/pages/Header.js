@@ -1,49 +1,26 @@
 import React, { useState } from "react";
 import { Menu, Segment } from "semantic-ui-react";
+import { useHistory } from "react-router-dom";
 
 const LoggedInHeader = props => {
   return (
-    // <Menu fixed="top" inverted style={{ borderRadius: "0px" }}>
-    //   {props.isMobile && (
-    //     <Menu.Item
-    //       icon="bars"
-    //       onClick={() => {
-    //         props.setSidebarIsOpen(!props.sidebarIsOpen);
-    //       }}
-    //     />
-    //   )}
-    //   <Menu.Item
-    //     name="Logout"
-    //     active={props.state.activeItem === "Logout"}
-    //     onClick={props.handleItemClick}
-    //   />
-    //   <Menu.Menu position="right">
-    //     <Menu.Item
-    //       name="Dashboard"
-    //       active={props.state.activeItem === "Dashboard"}
-    //       onClick={props.handleItemClick}
-    //     />
-    //     <Menu.Item
-    //       name="Homepage"
-    //       active={props.state.activeItem === "Homepage"}
-    //       onClick={props.handleItemClick}
-    //     />
-    //   </Menu.Menu>
-    // </Menu>
-
-    <Segment inverted style={{ borderRadius: "0px" }}>
-      <Menu
-        inverted
-        pointing
-        secondary
-        fixed="top"
-        style={{ borderRadius: "0px" }}
-      >
+    <Segment
+      inverted
+      style={{
+        borderRadius: "0px",
+        top: "0px",
+        position: "fixed",
+        right: "0px",
+        left: "0px",
+        zIndex: 100
+      }}
+    >
+      <Menu pointing secondary inverted>
         {props.isMobile && (
           <Menu.Item
             icon="bars"
             onClick={() => {
-              props.setSidebarIsOpen(!props.sidebarIsOpen);
+              props.setSidebarOpen(!props.sidebarOpen);
             }}
           />
         )}
@@ -70,6 +47,7 @@ const LoggedInHeader = props => {
 };
 
 const MainHeader = props => {
+  console.log("active item in main header:", props.state.activeItem);
   return (
     <Segment inverted style={{ borderRadius: "0px" }}>
       <Menu inverted pointing secondary>
@@ -79,8 +57,8 @@ const MainHeader = props => {
           onClick={props.handleItemClick}
         />
         <Menu.Item
-          name="Register"
-          active={props.state.activeItem === "Register"}
+          name="Sign Up"
+          active={props.state.activeItem === "Sign Up"}
           onClick={props.handleItemClick}
         />
         <Menu.Menu position="right">
@@ -101,38 +79,44 @@ const Header = props => {
     loggedIn: false
   });
 
-  //   const history = useHistory();
+  if (state.activeItem === "") {
+    setState({ activeItem: "Homepage" });
+  }
+
+  console.log("active item:", state.activeItem);
+
+  const history = useHistory();
   //   const auth_token = localStorage.getItem(constants.AUTH_TOKEN);
 
   function handleItemClick(e, { name }) {
     setState({ activeItem: name });
-    // switch (name) {
-    //   case "Login":
-    //     history.push("/login");
-    //     break;
-    //   case "Register":
-    //     history.push("/register");
-    //     break;
-    //   case "Homepage":
-    //     history.push("/");
-    //     break;
-    //   case "Logout":
-    //     localStorage.removeItem(constants.AUTH_TOKEN);
-    //     history.push("/");
-    //     window.location.reload(false);
-    //     break;
-    //   case "Dashboard":
-    //     history.push("/dashboard");
-    //     break
-    //   case "Homepage":
-    //     history.push("/")
-    //     break
-    // }
+    switch (name) {
+      case "Login":
+        history.push("/login");
+        break;
+      case "Sign Up":
+        history.push("/signup");
+        break;
+      case "Homepage":
+        history.push("/");
+        break;
+      // case "Logout":
+      //   localStorage.removeItem(constants.AUTH_TOKEN);
+      //   history.push("/");
+      //   window.location.reload(false);
+      //   break;
+      // case "Dashboard":
+      //   history.push("/dashboard");
+      //   break
+      // case "Homepage":
+      //   history.push("/")
+      //   break
+    }
   }
 
   return (
     <div>
-      {!false ? (
+      {!true ? (
         <MainHeader
           handleItemClick={handleItemClick}
           state={state}
@@ -144,7 +128,9 @@ const Header = props => {
           state={state}
           setState={setState}
           // setToken={props.setToken}
-          // isMobile={props.isMobile}
+          isMobile={props.isMobile}
+          sidebarOpen={props.sidebarOpen}
+          setSidebarOpen={props.setSidebarOpen}
           // setSidebarIsOpen={props.setSidebarIsOpen}
           // sidebarIsOpen={props.sidebarIsOpen}
         />
