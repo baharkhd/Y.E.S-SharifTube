@@ -2,7 +2,8 @@ import React, { Component, useState } from "react";
 import { Grid, Form, Segment, Message, Input, Button } from "semantic-ui-react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/client";
-import { useHistory } from 'react-router-dom'
+import { useHistory } from "react-router-dom";
+import constants from "../../constants.js";
 
 const LOGIN_MUTATION = gql`
   mutation Login($username: String!, $password: String!) {
@@ -22,7 +23,7 @@ const LoginForm = props => {
     error: ""
   });
 
-  const history = useHistory()
+  const history = useHistory();
 
   const [login] = useMutation(LOGIN_MUTATION, {
     variables: {
@@ -30,7 +31,20 @@ const LoginForm = props => {
       password: state.password
     },
     onCompleted: ({ login }) => {
-      console.log("login response:", login);
+      if (login.__typename == "Token") {
+        console.log("token in logiin:", login.token);
+        props.setToken(login.token);
+        history.push("/dashboard");
+      } else {
+        switch (login.__typename) {
+          case "UserPassMissMatchException":
+            setState({ ...state, error: constants.USER_PASS_MISMATCH });
+            break;
+          case "InternalServerException":
+            setState({ ...state, error: constants.INTERNAL_SERVER_EXCEPTION });
+            break;
+        }
+      }
     }
   });
 
@@ -39,7 +53,7 @@ const LoginForm = props => {
       console.log("handliing login?????????");
       login();
       setState({ ...state, error: "" });
-      history.push("/dashboard")
+      history.push("/dashboard");
     }
   }
 
@@ -103,7 +117,7 @@ const LoginForm = props => {
   );
 };
 
-function Login() {
+function Login(props) {
   return (
     <div style={{ top: "80px", position: "absolute", width: "100%" }}>
       <Grid
@@ -120,7 +134,7 @@ function Login() {
               marginLeft: 20
             }}
           >
-            <LoginForm />
+            <LoginForm setToken={props.setToken} />
           </Grid.Column>
         </Grid.Row>
       </Grid>

@@ -17,6 +17,7 @@ import Panel from "./pages/dashboard/Panel.js";
 import Courses from "./pages/dashboard/Courses.js";
 import PendingPage from "./pages/CoursePage/PendingPage.js";
 import UploadPage from "./pages/CoursePage/UploadPage.js";
+import useToken from "./Token/useToken.js";
 
 const TestComponent = props => {
   let { id, test } = useParams();
@@ -38,6 +39,8 @@ function App() {
     query: "(max-device-width: 570px)"
   });
 
+  const { token, setToken } = useToken();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -56,7 +59,8 @@ function App() {
           <Dashboard
             isMobile={isMobile}
             sidebarOpen={sidebarOpen}
-            component={<Panel isMobile={isMobile} />}
+            isCourse={false}
+            // component={<Panel isMobile={isMobile} />}
           />
         </Route>
 
@@ -64,7 +68,8 @@ function App() {
           <Dashboard
             isMobile={isMobile}
             sidebarOpen={sidebarOpen}
-            component={<Courses isMobile={isMobile} />}
+            isCourse={true}
+            // component={<Courses isMobile={isMobile} />}
           />
         </Route>
 
@@ -79,7 +84,7 @@ function App() {
           <Homepage />
         </Route>
         <Route exact path="/login">
-          <Login />
+          <Login setToken={setToken} />
         </Route>
         <Route exact path="/signup">
           <Signup />
