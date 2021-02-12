@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useReducer, useCallback } from "react";
+import _ from "lodash";
 import {
   Segment,
   Card,
@@ -7,7 +8,9 @@ import {
   Icon,
   Grid,
   Divider,
-  Header
+  Header,
+  Search,
+  Button
 } from "semantic-ui-react";
 import SideBar from "./CourseSidebar.js";
 import "./CourseDashboard.css";
@@ -64,6 +67,30 @@ const contents = [
   }
 ];
 
+const initialState = {
+  loading: false,
+  results: [],
+  value: "",
+  resultsShown: []
+};
+
+function searchReducer(state, action) {
+  switch (action.type) {
+    case "CLEAN_QUERY":
+      return initialState;
+    case "START_SEARCH":
+      return { ...state, loading: true, value: action.query };
+    case "FINISH_SEARCH":
+      return { ...state, loading: false, results: action.results };
+    case "UPDATE_SELECTION":
+      return { ...state, value: action.selection };
+    case "UPDATE_SHOWN_RESULTS":
+      return { ...state, resultsShown: action.data };
+    default:
+      throw new Error();
+  }
+}
+
 const ContentCard = ({
   title,
   time,
@@ -104,6 +131,68 @@ function CourseDashboard(props) {
   id = id.substring(1);
   // Todo: use the course id to get the course information and use them
 
+  const [state, dispatch] = React.useReducer(searchReducer, initialState);
+  const { loading, results, value, resultsShown } = state;
+
+  if (resultsShown.length == 0) {
+    dispatch({ type: "UPDATE_SHOWN_RESULTS", data: contents });
+  }
+
+  const timeoutRef = React.useRef();
+  const handleSearchChange = React.useCallback((e, data) => {
+    clearTimeout(timeoutRef.current);
+    dispatch({ type: "START_SEARCH", query: data.value });
+
+    timeoutRef.current = setTimeout(() => {
+      if (data.value.length === 0) {
+        dispatch({ type: "CLEAN_QUERY" });
+        return;
+      }
+
+      const re = new RegExp(_.escapeRegExp(data.value), "i");
+      // const isMatch = result => re.test(result.title);
+
+      const isMatch = result => {
+        var tag;
+        console.log("tags:", result.tags);
+        for (tag of result.tags) {
+          let check = re.test(tag);
+          console.log("checkkkk:", check, ", tag:", tag);
+          if (check) {
+            return true;
+          }
+        }
+        return false;
+
+        // result.tags.every(tag => {
+        //   // console.log("tag:", tag)
+        //   let check = re.test(tag)f
+        //   // console.log("is match:", check)
+
+        // });
+        // return true;
+      };
+
+      let newArray = _.filter(contents, function(ss) {
+        // console.log("ss:", ss);
+        let check = isMatch(ss);
+        // console.log("check:", check);
+        return check;
+      });
+      // console.log("newArray:", newArray);
+
+      dispatch({
+        type: "FINISH_SEARCH",
+        results: newArray
+      });
+    }, 300);
+  }, []);
+  React.useEffect(() => {
+    return () => {
+      clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   return (
     <div>
       <SideBar isMobile={props.isMobile} sidebarIsOpen={props.sidebarOpen} />
@@ -116,6 +205,27 @@ function CourseDashboard(props) {
           top: 70
         }}
       >
+        <Search
+          // aligned
+          loading={loading}
+          onResultSelect={(e, data) => {
+            dispatch({
+              type: "UPDATE_SELECTION",
+              selection: data.result.title
+            });
+            // setValue(data.result.title);
+          }}
+          onSearchChange={handleSearchChange}
+          results={results}
+          value={value}
+        />
+        <Button
+          onClick={() => {
+            dispatch({ type: "UPDATE_SHOWN_RESULTS", data: results });
+          }}
+        >
+          check
+        </Button>
         <Divider horizontal>
           <Header textAlign="left">
             <Icon name="video play" />
@@ -123,7 +233,7 @@ function CourseDashboard(props) {
           </Header>
         </Divider>
         <Grid columns={2} stackable>
-          {contents.map(content => {
+          {resultsShown.map(content => {
             return (
               <Grid.Column textAlign="left">
                 <ContentCard
