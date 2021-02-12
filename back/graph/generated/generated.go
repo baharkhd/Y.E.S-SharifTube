@@ -127,50 +127,27 @@ type ComplexityRoot struct {
 		CreateComment        func(childComplexity int, username string, contentID string, repliedAtID *string, target model.TargetComment) int
 		CreateCourse         func(childComplexity int, username string, target model.TargetCourse) int
 		CreateUser           func(childComplexity int, target model.TargetUser) int
-<<<<<<< HEAD
 		DeleteAttachment     func(childComplexity int, username string, courseID string, attachmentID string) int
 		DeleteComment        func(childComplexity int, username string, contentID string, commentID string) int
 		DeleteContent        func(childComplexity int, username string, courseID string, contentID string) int
 		DeleteCourse         func(childComplexity int, username string, courseID string) int
 		DeleteOfferedContent func(childComplexity int, username string, courseID string, pendingID string) int
 		DeleteUser           func(childComplexity int) int
-		DemoteUserToStd      func(childComplexity int, username string, courseID string, targetUserID string) int
-		EditAttachment       func(childComplexity int, username string, courseID string, attachmentID string, target model.EditContent) int
+		DeleteUserFromCourse func(childComplexity int, username string, courseID string, targetUsername string) int
+		DemoteUserToStd      func(childComplexity int, username string, courseID string, targetUsername string) int
+		EditAttachment       func(childComplexity int, username string, courseID string, attachmentID string, target model.EditAttachment) int
 		EditContent          func(childComplexity int, username string, courseID string, contentID string, target model.EditContent) int
 		EditOfferedContent   func(childComplexity int, username string, courseID string, pendingID string, target model.EditedPending) int
 		Login                func(childComplexity int, input model.Login) int
 		OfferContent         func(childComplexity int, username string, courseID string, target model.TargetPending) int
-		PromoteUserToTa      func(childComplexity int, username string, courseID string, targetUserID string) int
+		PromoteUserToTa      func(childComplexity int, username string, courseID string, targetUsername string) int
 		RefreshToken         func(childComplexity int) int
 		RejectOfferedContent func(childComplexity int, username string, courseID string, pendingID string) int
 		UpdateComment        func(childComplexity int, username string, contentID string, commentID string, target model.EditedComment) int
 		UpdateCourseInfo     func(childComplexity int, username string, courseID string, toBe model.EditedCourse) int
 		UpdateUser           func(childComplexity int, toBe model.EditedUser) int
-		UploadAttachment     func(childComplexity int, username string, courseID string, target model.TargetContent) int
+		UploadAttachment     func(childComplexity int, username string, courseID string, target model.TargetAttachment) int
 		UploadContent        func(childComplexity int, username string, courseID string, target model.TargetContent) int
-=======
-		DeleteAttachment     func(childComplexity int, userName string, courseID string, attachmentID string) int
-		DeleteComment        func(childComplexity int, userName string, contentID string, commentID string) int
-		DeleteContent        func(childComplexity int, userName string, courseID string, contentID string) int
-		DeleteCourse         func(childComplexity int, userName string, courseID string) int
-		DeleteOfferedContent func(childComplexity int, userName string, courseID string, pendingID string) int
-		DeleteUser           func(childComplexity int, userName string) int
-		DeleteUserFromCourse func(childComplexity int, userName string, courseID string, targetUsername string) int
-		DemoteUserToStd      func(childComplexity int, userName string, courseID string, targetUsername string) int
-		EditAttachment       func(childComplexity int, userName string, courseID string, attachmentID string, target model.EditAttachment) int
-		EditContent          func(childComplexity int, userName string, courseID string, contentID string, target model.EditContent) int
-		EditOfferedContent   func(childComplexity int, userName string, courseID string, pendingID string, target model.EditedPending) int
-		Login                func(childComplexity int, input model.Login) int
-		OfferContent         func(childComplexity int, userName string, courseID string, target model.TargetPending) int
-		PromoteUserToTa      func(childComplexity int, userName string, courseID string, targetUsername string) int
-		RefreshToken         func(childComplexity int) int
-		RejectOfferedContent func(childComplexity int, userName string, courseID string, pendingID string) int
-		UpdateComment        func(childComplexity int, userName string, contentID string, commentID string, target model.EditedComment) int
-		UpdateCourseInfo     func(childComplexity int, userName string, courseID string, toBe model.EditedCourse) int
-		UpdateUser           func(childComplexity int, userName string, toBe model.EditedUser) int
-		UploadAttachment     func(childComplexity int, userName string, courseID string, target model.TargetAttachment) int
-		UploadContent        func(childComplexity int, userName string, courseID string, target model.TargetContent) int
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
 	}
 
 	OfferedContentNotPendingException struct {
@@ -258,18 +235,18 @@ type MutationResolver interface {
 	DeleteUser(ctx context.Context) (model.DeleteUserPayload, error)
 	Login(ctx context.Context, input model.Login) (model.LoginPayload, error)
 	RefreshToken(ctx context.Context) (model.LoginPayload, error)
-<<<<<<< HEAD
 	CreateCourse(ctx context.Context, username string, target model.TargetCourse) (model.CreateCoursePayload, error)
 	UpdateCourseInfo(ctx context.Context, username string, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error)
 	DeleteCourse(ctx context.Context, username string, courseID string) (model.DeleteCoursePayload, error)
 	AddUserToCourse(ctx context.Context, username string, courseID string, token string) (model.AddUserToCoursePayload, error)
-	PromoteUserToTa(ctx context.Context, username string, courseID string, targetUserID string) (model.PromoteToTAPayload, error)
-	DemoteUserToStd(ctx context.Context, username string, courseID string, targetUserID string) (model.DemoteToSTDPayload, error)
+	DeleteUserFromCourse(ctx context.Context, username string, courseID string, targetUsername string) (model.DeleteUserFromCoursePayload, error)
+	PromoteUserToTa(ctx context.Context, username string, courseID string, targetUsername string) (model.PromoteToTAPayload, error)
+	DemoteUserToStd(ctx context.Context, username string, courseID string, targetUsername string) (model.DemoteToSTDPayload, error)
 	UploadContent(ctx context.Context, username string, courseID string, target model.TargetContent) (model.UploadContentPayLoad, error)
 	EditContent(ctx context.Context, username string, courseID string, contentID string, target model.EditContent) (model.EditContentPayLoad, error)
 	DeleteContent(ctx context.Context, username string, courseID string, contentID string) (model.DeleteContentPayLoad, error)
-	UploadAttachment(ctx context.Context, username string, courseID string, target model.TargetContent) (model.UploadAttachmentPayLoad, error)
-	EditAttachment(ctx context.Context, username string, courseID string, attachmentID string, target model.EditContent) (model.EditAttachmentPayLoad, error)
+	UploadAttachment(ctx context.Context, username string, courseID string, target model.TargetAttachment) (model.UploadAttachmentPayLoad, error)
+	EditAttachment(ctx context.Context, username string, courseID string, attachmentID string, target model.EditAttachment) (model.EditAttachmentPayLoad, error)
 	DeleteAttachment(ctx context.Context, username string, courseID string, attachmentID string) (model.DeleteAttachmentPayLoad, error)
 	OfferContent(ctx context.Context, username string, courseID string, target model.TargetPending) (model.OfferContentPayLoad, error)
 	EditOfferedContent(ctx context.Context, username string, courseID string, pendingID string, target model.EditedPending) (model.EditOfferedContentPayLoad, error)
@@ -279,29 +256,6 @@ type MutationResolver interface {
 	CreateComment(ctx context.Context, username string, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error)
 	UpdateComment(ctx context.Context, username string, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error)
 	DeleteComment(ctx context.Context, username string, contentID string, commentID string) (model.DeleteCommentPayLoad, error)
-=======
-	CreateCourse(ctx context.Context, userName string, target model.TargetCourse) (model.CreateCoursePayload, error)
-	UpdateCourseInfo(ctx context.Context, userName string, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error)
-	DeleteCourse(ctx context.Context, userName string, courseID string) (model.DeleteCoursePayload, error)
-	AddUserToCourse(ctx context.Context, userName string, courseID string, token string) (model.AddUserToCoursePayload, error)
-	DeleteUserFromCourse(ctx context.Context, userName string, courseID string, targetUsername string) (model.DeleteUserFromCoursePayload, error)
-	PromoteUserToTa(ctx context.Context, userName string, courseID string, targetUsername string) (model.PromoteToTAPayload, error)
-	DemoteUserToStd(ctx context.Context, userName string, courseID string, targetUsername string) (model.DemoteToSTDPayload, error)
-	UploadContent(ctx context.Context, userName string, courseID string, target model.TargetContent) (model.UploadContentPayLoad, error)
-	EditContent(ctx context.Context, userName string, courseID string, contentID string, target model.EditContent) (model.EditContentPayLoad, error)
-	DeleteContent(ctx context.Context, userName string, courseID string, contentID string) (model.DeleteContentPayLoad, error)
-	UploadAttachment(ctx context.Context, userName string, courseID string, target model.TargetAttachment) (model.UploadAttachmentPayLoad, error)
-	EditAttachment(ctx context.Context, userName string, courseID string, attachmentID string, target model.EditAttachment) (model.EditAttachmentPayLoad, error)
-	DeleteAttachment(ctx context.Context, userName string, courseID string, attachmentID string) (model.DeleteAttachmentPayLoad, error)
-	OfferContent(ctx context.Context, userName string, courseID string, target model.TargetPending) (model.OfferContentPayLoad, error)
-	EditOfferedContent(ctx context.Context, userName string, courseID string, pendingID string, target model.EditedPending) (model.EditOfferedContentPayLoad, error)
-	DeleteOfferedContent(ctx context.Context, userName string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error)
-	AcceptOfferedContent(ctx context.Context, userName string, courseID string, pendingID string, changed model.EditedPending) (model.EditOfferedContentPayLoad, error)
-	RejectOfferedContent(ctx context.Context, userName string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error)
-	CreateComment(ctx context.Context, userName string, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error)
-	UpdateComment(ctx context.Context, userName string, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error)
-	DeleteComment(ctx context.Context, userName string, contentID string, commentID string) (model.DeleteCommentPayLoad, error)
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
 }
 type QueryResolver interface {
 	User(ctx context.Context, username *string) (*model.User, error)
@@ -762,7 +716,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteUserFromCourse(childComplexity, args["userName"].(string), args["courseID"].(string), args["targetUsername"].(string)), true
+		return e.complexity.Mutation.DeleteUserFromCourse(childComplexity, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string)), true
 
 	case "Mutation.demoteUserToSTD":
 		if e.complexity.Mutation.DemoteUserToStd == nil {
@@ -774,11 +728,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-<<<<<<< HEAD
-		return e.complexity.Mutation.DemoteUserToStd(childComplexity, args["username"].(string), args["courseID"].(string), args["targetUserID"].(string)), true
-=======
-		return e.complexity.Mutation.DemoteUserToStd(childComplexity, args["userName"].(string), args["courseID"].(string), args["targetUsername"].(string)), true
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
+		return e.complexity.Mutation.DemoteUserToStd(childComplexity, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string)), true
 
 	case "Mutation.editAttachment":
 		if e.complexity.Mutation.EditAttachment == nil {
@@ -790,11 +740,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-<<<<<<< HEAD
-		return e.complexity.Mutation.EditAttachment(childComplexity, args["username"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditContent)), true
-=======
-		return e.complexity.Mutation.EditAttachment(childComplexity, args["userName"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditAttachment)), true
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
+		return e.complexity.Mutation.EditAttachment(childComplexity, args["username"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditAttachment)), true
 
 	case "Mutation.editContent":
 		if e.complexity.Mutation.EditContent == nil {
@@ -854,11 +800,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-<<<<<<< HEAD
-		return e.complexity.Mutation.PromoteUserToTa(childComplexity, args["username"].(string), args["courseID"].(string), args["targetUserID"].(string)), true
-=======
-		return e.complexity.Mutation.PromoteUserToTa(childComplexity, args["userName"].(string), args["courseID"].(string), args["targetUsername"].(string)), true
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
+		return e.complexity.Mutation.PromoteUserToTa(childComplexity, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string)), true
 
 	case "Mutation.refreshToken":
 		if e.complexity.Mutation.RefreshToken == nil {
@@ -925,11 +867,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-<<<<<<< HEAD
-		return e.complexity.Mutation.UploadAttachment(childComplexity, args["username"].(string), args["courseID"].(string), args["target"].(model.TargetContent)), true
-=======
-		return e.complexity.Mutation.UploadAttachment(childComplexity, args["userName"].(string), args["courseID"].(string), args["target"].(model.TargetAttachment)), true
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
+		return e.complexity.Mutation.UploadAttachment(childComplexity, args["username"].(string), args["courseID"].(string), args["target"].(model.TargetAttachment)), true
 
 	case "Mutation.uploadContent":
 		if e.complexity.Mutation.UploadContent == nil {
@@ -950,7 +888,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OfferedContentNotPendingException.Message(childComplexity), true
 
-<<<<<<< HEAD
 	case "OperationSuccessfull.message":
 		if e.complexity.OperationSuccessfull.Message == nil {
 			break
@@ -958,12 +895,8 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OperationSuccessfull.Message(childComplexity), true
 
-	case "Pending.course":
-		if e.complexity.Pending.Course == nil {
-=======
 	case "Pending.courseID":
 		if e.complexity.Pending.CourseID == nil {
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
 			break
 		}
 
@@ -1531,13 +1464,9 @@ type OperationSuccessfull{
 }
 
 union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
-<<<<<<< HEAD
-union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
+union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | InternalServerException
 union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | OperationSuccessfull    | InternalServerException
-=======
-union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | EmptyFieldsException | InternalServerException
-union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | InternalServerException
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
+
 union LoginPayload = Token | UserPassMissMatchException | InternalServerException
 
 union CreateCoursePayload = Course | UserNotFoundException | RegexMismatchException | InternalServerException
@@ -1573,37 +1502,22 @@ type Mutation {
     login(input: Login!): LoginPayload!
     refreshToken: LoginPayload!
 
-<<<<<<< HEAD
+
     createCourse(username:String!, target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
     updateCourseInfo(username:String!, courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
     deleteCourse(username:String!, courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
-
     addUserToCourse(username:String!, courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
-    promoteUserToTA(username:String!, courseID:String!, targetUserID:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
-    demoteUserToSTD(username:String!, courseID:String!, targetUserID:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
-=======
-    createCourse(userName:String!, target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
-    updateCourseInfo(userName:String!, courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
-    deleteCourse(userName:String!, courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
-    addUserToCourse(userName:String!, courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
-    deleteUserFromCourse(userName:String!, courseID:String!, targetUsername:String!): DeleteUserFromCoursePayload! #todo implement with authentication & jwt tokens
-    promoteUserToTA(userName:String!, courseID:String!, targetUsername:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
-    demoteUserToSTD(userName:String!, courseID:String!, targetUsername:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
+    deleteUserFromCourse(username:String!, courseID:String!, targetUsername:String!): DeleteUserFromCoursePayload! #todo implement with authentication & jwt tokens
+    promoteUserToTA(username:String!, courseID:String!, targetUsername:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
+    demoteUserToSTD(username:String!, courseID:String!, targetUsername:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
 
     uploadContent(username:String!, courseID:String!, target:TargetContent!): UploadContentPayLoad! #todo implement with authentication & jwt tokens
     editContent(username:String!, courseID:String!, contentID:String!, target:EditContent!): EditContentPayLoad! #todo implement with authentication & jwt tokens
     deleteContent(username:String!, courseID:String!, contentID:String!): DeleteContentPayLoad! #todo implement with authentication & jwt tokens
 
-<<<<<<< HEAD
-    uploadAttachment(username:String!, courseID:String!, target:TargetContent!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
-    editAttachment(username:String!, courseID:String!, attachmentID:String!, target:EditContent!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    uploadAttachment(username:String!, courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    editAttachment(username:String!, courseID:String!, attachmentID:String!, target:EditAttachment!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
     deleteAttachment(username:String!, courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
-=======
-    uploadAttachment(userName:String!, courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
-    editAttachment(userName:String!, courseID:String!, attachmentID:String!, target:EditAttachment!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
-    deleteAttachment(userName:String!, courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
 
     offerContent(username:String!, courseID:String!, target:TargetPending!): OfferContentPayLoad! #todo implement with authentication & jwt tokens
     editOfferedContent(username:String!, courseID:String!, pendingID:String!, target:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
@@ -1982,20 +1896,18 @@ func (ec *executionContext) field_Mutation_deleteOfferedContent_args(ctx context
 	return args, nil
 }
 
-<<<<<<< HEAD
-=======
 func (ec *executionContext) field_Mutation_deleteUserFromCourse_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userName"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
+	if tmp, ok := rawArgs["username"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userName"] = arg0
+	args["username"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["courseID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
@@ -2017,22 +1929,6 @@ func (ec *executionContext) field_Mutation_deleteUserFromCourse_args(ctx context
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["userName"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userName"] = arg0
-	return args, nil
-}
-
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
 func (ec *executionContext) field_Mutation_demoteUserToSTD_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4494,7 +4390,7 @@ func (ec *executionContext) _Mutation_deleteUserFromCourse(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteUserFromCourse(rctx, args["userName"].(string), args["courseID"].(string), args["targetUsername"].(string))
+		return ec.resolvers.Mutation().DeleteUserFromCourse(rctx, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4536,11 +4432,7 @@ func (ec *executionContext) _Mutation_promoteUserToTA(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-<<<<<<< HEAD
-		return ec.resolvers.Mutation().PromoteUserToTa(rctx, args["username"].(string), args["courseID"].(string), args["targetUserID"].(string))
-=======
-		return ec.resolvers.Mutation().PromoteUserToTa(rctx, args["userName"].(string), args["courseID"].(string), args["targetUsername"].(string))
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
+		return ec.resolvers.Mutation().PromoteUserToTa(rctx, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4582,11 +4474,7 @@ func (ec *executionContext) _Mutation_demoteUserToSTD(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-<<<<<<< HEAD
-		return ec.resolvers.Mutation().DemoteUserToStd(rctx, args["username"].(string), args["courseID"].(string), args["targetUserID"].(string))
-=======
-		return ec.resolvers.Mutation().DemoteUserToStd(rctx, args["userName"].(string), args["courseID"].(string), args["targetUsername"].(string))
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
+		return ec.resolvers.Mutation().DemoteUserToStd(rctx, args["username"].(string), args["courseID"].(string), args["targetUsername"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4754,11 +4642,7 @@ func (ec *executionContext) _Mutation_uploadAttachment(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-<<<<<<< HEAD
-		return ec.resolvers.Mutation().UploadAttachment(rctx, args["username"].(string), args["courseID"].(string), args["target"].(model.TargetContent))
-=======
-		return ec.resolvers.Mutation().UploadAttachment(rctx, args["userName"].(string), args["courseID"].(string), args["target"].(model.TargetAttachment))
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
+		return ec.resolvers.Mutation().UploadAttachment(rctx, args["username"].(string), args["courseID"].(string), args["target"].(model.TargetAttachment))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4800,11 +4684,7 @@ func (ec *executionContext) _Mutation_editAttachment(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-<<<<<<< HEAD
-		return ec.resolvers.Mutation().EditAttachment(rctx, args["username"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditContent))
-=======
-		return ec.resolvers.Mutation().EditAttachment(rctx, args["userName"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditAttachment))
->>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
+		return ec.resolvers.Mutation().EditAttachment(rctx, args["username"].(string), args["courseID"].(string), args["attachmentID"].(string), args["target"].(model.EditAttachment))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9323,13 +9203,6 @@ func (ec *executionContext) _UpdateUserPayload(ctx context.Context, sel ast.Sele
 			return graphql.Null
 		}
 		return ec._UserNotAllowedException(ctx, sel, obj)
-	case model.EmptyFieldsException:
-		return ec._EmptyFieldsException(ctx, sel, &obj)
-	case *model.EmptyFieldsException:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._EmptyFieldsException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -9800,7 +9673,7 @@ func (ec *executionContext) _DuplicateUsernameException(ctx context.Context, sel
 	return out
 }
 
-var emptyFieldsExceptionImplementors = []string{"EmptyFieldsException", "Exception", "UpdateUserPayload", "UpdateCourseInfoPayload", "EditContentPayLoad", "EditAttachmentPayLoad", "EditOfferedContentPayLoad", "EditCommentPayLoad"}
+var emptyFieldsExceptionImplementors = []string{"EmptyFieldsException", "Exception", "UpdateCourseInfoPayload", "EditContentPayLoad", "EditAttachmentPayLoad", "EditOfferedContentPayLoad", "EditCommentPayLoad"}
 
 func (ec *executionContext) _EmptyFieldsException(ctx context.Context, sel ast.SelectionSet, obj *model.EmptyFieldsException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, emptyFieldsExceptionImplementors)

@@ -33,7 +33,7 @@ func extractUsernameFromContext(ctx context.Context) string {
 	return auth.ForContext(ginContext)
 }
 
-func getUserName(ctx context.Context, name *string) string {
+func getUsername(ctx context.Context, name *string) string {
 	var username string
 	if name == nil || *name == "" {
 		username = extractUsernameFromContext(ctx)

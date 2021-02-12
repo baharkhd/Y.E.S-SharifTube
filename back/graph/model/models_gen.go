@@ -263,7 +263,6 @@ type EmptyFieldsException struct {
 }
 
 func (EmptyFieldsException) IsException()                 {}
-func (EmptyFieldsException) IsUpdateUserPayload()         {}
 func (EmptyFieldsException) IsUpdateCourseInfoPayload()   {}
 func (EmptyFieldsException) IsEditContentPayLoad()        {}
 func (EmptyFieldsException) IsEditAttachmentPayLoad()     {}
