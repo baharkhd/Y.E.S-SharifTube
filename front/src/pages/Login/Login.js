@@ -1,11 +1,34 @@
 import React, { Component, useState } from "react";
 import { Grid, Form, Segment, Message, Input, Button } from "semantic-ui-react";
+import gql from "graphql-tag";
+import { useMutation } from "@apollo/client";
+
+const LOGIN_MUTATION = gql`
+  mutation Login($username: String!, $password: String!) {
+    login(input: { username: $username, password: $password }) {
+      __typename
+      ... on Token {
+        token
+      }
+    }
+  }
+`;
 
 const LoginForm = props => {
   const [state, setState] = useState({
     username: " ",
     password: " ",
     error: ""
+  });
+
+  const [login] = useMutation(LOGIN_MUTATION, {
+    variables: {
+      username: state.username,
+      password: state.password
+    },
+    onCompleted: ({ login }) => {
+      console.log("login response:", login);
+    }
   });
 
   // function handleLogin() {
@@ -64,6 +87,7 @@ const LoginForm = props => {
             control={Button}
             onClick={() => {
               // handleLogin();
+              login()
             }}
           />
         </Segment>

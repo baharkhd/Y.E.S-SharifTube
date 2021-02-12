@@ -1,5 +1,33 @@
 import React, { useState } from "react";
 import { Grid, Form, Segment, Message, Input, Button } from "semantic-ui-react";
+import gql from "graphql-tag";
+import { useMutation } from "@apollo/client";
+
+const SIGNUP_REGISTER = gql`
+  mutation CreateUser(
+    $username: String!
+    $password: String!
+    $name: String
+    $email: String
+  ) {
+    createUser(
+      target: {
+        username: $username
+        password: $password
+        name: $name
+        email: $email
+      }
+    ) {
+      __typename
+      ... on User {
+        username
+      }
+      ... on Exception {
+        message
+      }
+    }
+  }
+`;
 
 const RegisterForm = props => {
   const [state, setState] = useState({
@@ -9,6 +37,18 @@ const RegisterForm = props => {
     password: "",
     confirmPass: "",
     error: ""
+  });
+
+  const [signup] = useMutation(SIGNUP_REGISTER, {
+    variables: {
+      username: "bahar_khd",
+      name: "bahar",
+      email: "baharkh@gmail.com",
+      password: "baharkh"
+    },
+    onCompleted: ({ createUser }) => {
+      console.log("createUser:", createUser);
+    }
   });
 
   return (
@@ -83,6 +123,7 @@ const RegisterForm = props => {
           control={Button}
           onClick={() => {
             //   handleRegister();
+            signup();
           }}
         />
       </Segment>

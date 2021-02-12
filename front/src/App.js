@@ -1,5 +1,4 @@
-import logo from "./logo.svg";
-import "./App.css";
+import "semantic-ui-css/semantic.min.css";
 import React, { useState } from "react";
 import { Button, Input, Segment } from "semantic-ui-react";
 import { Route, Switch, useParams } from "react-router-dom";
