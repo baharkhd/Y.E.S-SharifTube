@@ -16,12 +16,12 @@ type User struct {
 
 var DBD DBDriver
 
-func (u *User) Enroll(courseID string) *User {
+func (u *User) enroll(courseID string) *User {
 	u.Courses = append(u.Courses, courseID)
 	return u
 }
 
-func (u *User) Leave(CourseID string) *User {
+func (u *User) leave(CourseID string) *User {
 	for i, course := range u.Courses {
 		if course == CourseID {
 			u.Courses = append(u.Courses[:i], u.Courses[i+1:]...)
@@ -31,16 +31,16 @@ func (u *User) Leave(CourseID string) *User {
 	return u
 }
 
-func (u *User) UpdateName(name string) *User {
+func (u *User) updateName(name string) *User {
 	u.Name = name
 	return u
 }
-func (u *User) UpdateEmail(email string) *User {
+func (u *User) updateEmail(email string) *User {
 	u.Email = email
 	return u
 }
 
-func (u *User) UpdatePassword(password string) error {
+func (u *User) updatePassword(password string) error {
 	// hashing password
 	hashedPass, err := hashAndSalt([]byte(password))
 
