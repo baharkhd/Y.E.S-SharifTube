@@ -1,9 +1,14 @@
 package model
 
+const EmptyKeyErrorMessage =  "all of your fields are empty"
+
 func (e InternalServerException) Error() string {
 	return e.Message
 }
-func (e AllFieldsEmptyException) Error() string {
+func (e EmptyFieldsException) Error() string {
+	return e.Message
+}
+func (e RegexMismatchException) Error() string {
 	return e.Message
 }
 func (e DuplicateUsernameException) Error() string {
@@ -39,7 +44,7 @@ func (e AttachmentNotFoundException) Error() string {
 func (e PendingNotFoundException) Error() string {
 	return e.Message
 }
-func (e OfferedContentRejectedException) Error() string {
+func (e OfferedContentNotPendingException) Error() string {
 	return e.Message
 }
 func (e CommentNotFoundException) Error() string {

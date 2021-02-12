@@ -1,0 +1,539 @@
+# course queries
+mutation CreateCourse {
+    createCourse(
+        userName: "Abdi"
+        target: { title: "Title", summary: "hellow", token: "1234" }
+    ) {
+        __typename
+        ... on Course {
+            title
+        }
+        __typename
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation UpdateCourse {
+    updateCourseInfo(
+        userName: "Abdi"
+        courseID: "6023abac22b1f3ee94f555c9"
+        toBe: {
+            title: "new Title"
+            summary: "new Summery for Golang"
+            token: "1221"
+        }
+    ) {
+        __typename
+        ... on Course {
+            id
+            title
+            summary
+            createdAt
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation deleteCourse {
+    deleteCourse(userName: "Abdi", courseID: "6023abac22b1f3ee94f555c9") {
+        __typename
+        ... on Course {
+            id
+            title
+            summary
+            createdAt
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+query GetCoursesByID {
+    courses(ids: ["602395b0e6980a8d57edcd2e", "602396dfe6980a8d57edcd2f"]) {
+        title
+    }
+}
+
+query GetCoursesByFilter {
+    coursesByKeyWords(keyWords: ["JS", "Golang"], amount: 3, start: 0) {
+        title
+    }
+}
+
+mutation addUser {
+    addUserToCourse(
+        userName: "Sagg"
+        courseID: "6023e6d38cf33059f64c9001"
+        token: "1234"
+    ) {
+        __typename
+        ... on Course {
+            id
+            title
+            summary
+            createdAt
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation deleteUser {
+    deleteUserFromCourse(
+        userName: "Abdi"
+        courseID: "6023e6d38cf33059f64c9001"
+        targetUsername: "Sagg"
+    ) {
+        __typename
+        ... on Course {
+            id
+            title
+            summary
+            createdAt
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation promoteUserToTA {
+    promoteUserToTA(
+        userName: "Abdi"
+        courseID: "6023e6d38cf33059f64c9001"
+        targetUsername: "Sagg"
+    ) {
+        __typename
+        ... on Course {
+            id
+            title
+            summary
+            createdAt
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation demoteUserToSTD {
+    demoteUserToSTD(
+        userName: "Abdi"
+        courseID: "6023e6d38cf33059f64c9001"
+        targetUsername: "Sagg"
+    ) {
+        __typename
+        ... on Course {
+            id
+            title
+            summary
+            createdAt
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+# content queries
+mutation createContent {
+    uploadContent(
+        userName: "Sagg"
+        courseID: "6023e6d38cf33059f64c9001"
+        target: {
+            title: "Film2"
+            description: "this is the second movie"
+            vurl: "vurl"
+            tags: ["OS", "GDP", "JS"]
+        }
+    ) {
+        ... on Content {
+            id
+            title
+            description
+            vurl
+            tags
+            timestamp
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation editContent {
+    editContent(
+        userName: "Abdi"
+        courseID: "6023ab5d22b1f3ee94f555c8"
+        contentID: "6024114fd104d0f145988642"
+        target: { title: "new title", description: "new desc", tags: [] }
+    ) {
+        ... on Content {
+            id
+            title
+            description
+            vurl
+            tags
+            timestamp
+            courseID
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation deleteContent {
+    deleteContent(
+        userName: "Abdi"
+        courseID: "6023ab5d22b1f3ee94f555c8"
+        contentID: "6024114fd104d0f145988642"
+    ) {
+        ... on Content {
+            id
+            title
+            description
+            vurl
+            tags
+            timestamp
+            courseID
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+query GetContent {
+    content(id: "602408ad3a7fa638a25eb857") {
+        id
+        title
+        description
+        vurl
+        tags
+        timestamp
+    }
+}
+
+query GetContentsFromCourse {
+    contents(
+        courseID: "6023e6d38cf33059f64c9001"
+        tags: ["JS"]
+        start: 0
+        amount: 5
+    ) {
+        id
+        title
+        description
+        vurl
+        tags
+        timestamp
+        courseID
+    }
+}
+
+query GetContents {
+    contents(tags: ["JS"], start: 0, amount: 5) {
+        id
+        title
+        description
+        vurl
+        tags
+        timestamp
+        courseID
+    }
+}
+
+# pendings queries
+mutation createPending {
+    offerContent(
+        userName: "Yum"
+        courseID: "6023e6d38cf33059f64c9001"
+        target: {
+            title: "second offer"
+            description: "this movie is about second session"
+            furl: "FURL"
+        }
+    ) {
+        ... on Pending {
+            id
+            title
+            description
+            furl
+            status
+            timestamp
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation updatePending {
+    editOfferedContent(
+        userName: "Yum"
+        courseID: "6023e6d38cf33059f64c9001"
+        pendingID: "60245184fc30124584bb496a"
+        target: {
+            title: "changed second offer"
+            description: "this movie is about third session"
+        }
+    ) {
+        ... on Pending {
+            id
+            title
+            description
+            furl
+            status
+            timestamp
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation deletePending {
+    deleteOfferedContent(
+        userName: "Yum"
+        courseID: "6023e6d38cf33059f64c9001"
+        pendingID: "60245184fc30124584bb496a"
+    ) {
+        ... on Pending {
+            id
+            title
+            description
+            furl
+            status
+            timestamp
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation acceptPending {
+    acceptOfferedContent(
+        userName: "Abdi"
+        courseID: "6023e6d38cf33059f64c9001"
+        pendingID: "602450a8fc30124584bb4969"
+        changed: { title: "Abdi title", description: "this desc should be edited." }
+    ) {
+        ... on Pending {
+            id
+            title
+            description
+            furl
+            status
+            timestamp
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation rejectPending {
+    rejectOfferedContent(
+        userName: "Abdi"
+        courseID: "602468381e793e98efbe181b"
+        pendingID: "6024698faa869df07a93a055"
+    ) {
+        ... on Pending {
+            id
+            title
+            description
+            furl
+            status
+            timestamp
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+query getPendingsByFilter {
+    pendings(
+        filter: { status: ACCEPTED, uploaderUsername: "Arshia" }
+        start: 0
+        amount: 5
+    ) {
+        id
+        title
+        description
+        furl
+        status
+        timestamp
+        courseID
+    }
+}
+
+# attachment queries
+mutation uploadJozveh {
+    uploadAttachment(
+        userName: "Abdi"
+        courseID: "6023d3e13643010518995f2b"
+        target: { name: "attachment 1", description: "utils for fun", aurl: "AURL" }
+    ) {
+        ... on Attachment {
+            id
+            name
+            description
+            aurl
+            timestamp
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation updateJozveh {
+    editAttachment(
+        userName: "Abdi"
+        courseID: "6023d3e13643010518995f2b"
+        attachmentID: "602473d0949c1acd9c36cdb5"
+        target: { name: "edited attachment", description: "utils for Yum e sagg" }
+    ) {
+        ... on Attachment {
+            id
+            name
+            description
+            aurl
+            timestamp
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation deleteJozveh {
+    deleteAttachment(
+        userName: "Abdi"
+        courseID: "6023d3e13643010518995f2b"
+        attachmentID: "602473d0949c1acd9c36cdb5"
+    ) {
+        ... on Attachment {
+            id
+            name
+            description
+            aurl
+            timestamp
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+# comment queries
+mutation writeComment {
+    createComment(
+        userName: "Abdi"
+        contentID: "60241156d104d0f145988643"
+        target: { body: "comment 1" }
+    ) {
+        __typename
+        ... on Comment {
+            id
+            body
+            timestamp
+            contentID
+        }
+        ... on Reply {
+            id
+            body
+            timestamp
+            commentID
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation writeReply {
+    createComment(
+        userName: "Yum"
+        contentID: "60241156d104d0f145988643"
+        repliedAtID: "6024f29c3e8a8f136a336e9f"
+        target: { body: "reply comment 1" }
+    ) {
+        __typename
+        ... on Comment {
+            id
+            body
+            timestamp
+            contentID
+        }
+        ... on Reply {
+            id
+            body
+            timestamp
+            commentID
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation editComment {
+    updateComment(
+        userName: "Abdi"
+        contentID: "60241156d104d0f145988643"
+        commentID: "6024f29c3e8a8f136a336e9f"
+        target: { body: "changed comment" }
+    ) {
+        __typename
+        ... on Comment {
+            id
+            body
+            timestamp
+            contentID
+        }
+        ... on Reply {
+            id
+            body
+            timestamp
+            commentID
+        }
+        ... on Exception {
+            message
+        }
+    }
+}
+
+mutation deleteComment {
+    deleteComment(
+        userName: "Yum"
+        contentID: "60241156d104d0f145988643"
+        commentID: "6024f3313e8a8f136a336ea1"
+    ) {
+        __typename
+        ... on Comment {
+            id
+            body
+            timestamp
+            contentID
+        }
+        ... on Reply {
+            id
+            body
+            timestamp
+            commentID
+        }
+        ... on Exception {
+            message
+        }
+    }
+}

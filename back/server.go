@@ -8,9 +8,20 @@ import (
 	"log"
 	"yes-sharifTube/graph"
 	"yes-sharifTube/graph/generated"
+<<<<<<< HEAD
 	"yes-sharifTube/internal/middleware/auth"
 	"yes-sharifTube/internal/middleware/ggcontext"
 	"yes-sharifTube/internal/model/user"
+=======
+	attachmentController "yes-sharifTube/internal/controller/attachment"
+	commentController "yes-sharifTube/internal/controller/comment"
+	contentController "yes-sharifTube/internal/controller/content"
+	courseController "yes-sharifTube/internal/controller/course"
+	pendingController "yes-sharifTube/internal/controller/pending"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+>>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
 	"yes-sharifTube/pkg/database/mongodb"
 )
 
@@ -18,6 +29,7 @@ const defaultPort = "8080"
 const queryComplexity = 8
 
 func main() {
+<<<<<<< HEAD
 	//setting a mongodb driver for DBDriver filed of user model
 	user.DBD = mongodb.NewUserMongoDriver("yes-shariftube", "users")
 
@@ -35,6 +47,19 @@ func main() {
 	// routing
 	r.POST("/query", graphqlHandler())
 	r.GET("/", playgroundHandler())
+=======
+
+	courseController.GetCourseController().SetDBDriver(mongodb.NewCourseMongoDriver("yes-sharifTube", "courses"))
+	contentController.GetContentController().SetDBDriver(mongodb.NewContentMongoDriver("yes-sharifTube", "courses"))
+	pendingController.GetPendingController().SetDBDriver(mongodb.NewPendingMongoDriver("yes-sharifTube", "courses"))
+	attachmentController.GetAttachmentController().SetDBDriver(mongodb.NewAttachmentMongoDriver("yes-sharifTube", "courses"))
+	commentController.GetCommentController().SetDBDriver(mongodb.NewCommentMongoDriver("yes-sharifTube", "courses"))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+>>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
 
 	//let it begin
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", defaultPort)

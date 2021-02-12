@@ -12,6 +12,7 @@ type Course {
     title: String!
     summary: String
     createdAt: Int!
+    token: String!
     prof: User!
     tas: [User!]
     pends: [Pending!]
@@ -31,10 +32,10 @@ type Pending{
     title: String!
     description: String
     status: Status!
-    timestamp: Int!
+    timestamp:Int!
     uploadedBY: User!
     furl: String! #todo better implementation for file
-    course: Course!
+    courseID: String!
 }
 
 type Content{
@@ -43,7 +44,7 @@ type Content{
     description: String
     timestamp: Int!
     uploadedBY: User!
-    approvedBY: User!
+    approvedBY: User
     vurl: String! #todo better implementation for video file
     comments(start: Int!=0, amount: Int!=5): [Comment!]
     tags: [String!]
@@ -65,7 +66,7 @@ type Comment{
     body: String!
     timestamp: Int!
     replies: [Reply!]
-    content: Content!
+    contentID: String!
 }
 
 type Reply{
@@ -73,7 +74,7 @@ type Reply{
     author: User!
     body: String!
     timestamp: Int!
-    comment: Comment!
+    commentID: String!
 }
 
 input PendingFilter{
@@ -86,11 +87,11 @@ type Query {
     user(username: String): User!
     users(start: Int!=0, amount: Int!=5): [User!]!
 
-    courses(id: [String!]!): [Course!]!
-    coursesByKeyWord(keyWord: String, start: Int!=0, amount: Int!=5): [Course!]! # search in title, summery contents
+    courses(ids: [String!]!): [Course!]!
+    coursesByKeyWords(keyWords: [String!]!, start: Int!=0, amount: Int!=5): [Course!]!
 
     content(id: String!): Content!
-    contents(tags: [String!], courseID:String, start: Int!=0, amount: Int!=5): [Content!]!
+    contents(tags: [String!]!, courseID: String, start: Int!=0, amount: Int!=5): [Content!]!
 
     pendings(filter: PendingFilter!, start: Int!=0, amount: Int!=5): [Pending!]!
 }
@@ -120,11 +121,13 @@ type Token{
 input TargetCourse{
     title: String!
     summary: String
+    token: String!
 }
 
 input EditedCourse{
     title: String
     summary: String
+    token: String
 }
 
 input TargetContent{
@@ -138,6 +141,17 @@ input EditContent{
     title: String
     description: String
     tags: [String!]
+}
+
+input TargetAttachment{
+    name: String!
+    aurl: String! # todo actual file
+    description: String
+}
+
+input EditAttachment{
+    name: String
+    description: String
 }
 
 input TargetPending{
@@ -165,7 +179,10 @@ interface Exception{
 type InternalServerException implements Exception{
     message:String!
 }
-type AllFieldsEmptyException implements Exception{
+type EmptyFieldsException implements Exception{
+    message: String!
+}
+type RegexMismatchException implements Exception{
     message: String!
 }
 type DuplicateUsernameException implements Exception{
@@ -201,7 +218,7 @@ type AttachmentNotFoundException implements Exception{
 type PendingNotFoundException implements Exception{
     message: String!
 }
-type OfferedContentRejectedException implements Exception{
+type OfferedContentNotPendingException implements Exception{
     message: String!
 }
 type CommentNotFoundException implements Exception{
@@ -213,33 +230,39 @@ type OperationSuccessfull{
 }
 
 union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
+<<<<<<< HEAD
 union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
 union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | OperationSuccessfull    | InternalServerException
+=======
+union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | EmptyFieldsException | InternalServerException
+union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | InternalServerException
+>>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
 union LoginPayload = Token | UserPassMissMatchException | InternalServerException
 
-union CreateCoursePayload = Course | UserNotFoundException | InternalServerException
-union UpdateCourseInfoPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | InternalServerException
+union CreateCoursePayload = Course | UserNotFoundException | RegexMismatchException | InternalServerException
+union UpdateCourseInfoPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | RegexMismatchException | InternalServerException
 union DeleteCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
 
-union AddUserToCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | IncorrectTokenException | InternalServerException
+union AddUserToCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | DuplicateUsernameException | IncorrectTokenException | InternalServerException
+union DeleteUserFromCoursePayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
 union PromoteToTAPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | UserIsNotSTDException | InternalServerException
 union DemoteToSTDPayload = Course | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | UserIsNotTAException | InternalServerException
 
-union UploadContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
-union EditContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | ContentNotFoundException | InternalServerException
+union UploadContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | RegexMismatchException | InternalServerException
+union EditContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | ContentNotFoundException | RegexMismatchException | InternalServerException
 union DeleteContentPayLoad = Content | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | ContentNotFoundException | InternalServerException
 
-union UploadAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
-union EditAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | AttachmentNotFoundException | InternalServerException
+union UploadAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | RegexMismatchException | InternalServerException
+union EditAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | AttachmentNotFoundException | RegexMismatchException | InternalServerException
 union DeleteAttachmentPayLoad = Attachment | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AttachmentNotFoundException | InternalServerException
 
-union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | InternalServerException
-union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | AllFieldsEmptyException | PendingNotFoundException | InternalServerException
-union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | InternalServerException
+union OfferContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | RegexMismatchException | InternalServerException
+union EditOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | EmptyFieldsException | PendingNotFoundException | RegexMismatchException | OfferedContentNotPendingException | InternalServerException
+union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotFoundException | UserNotAllowedException | PendingNotFoundException | OfferedContentNotPendingException | InternalServerException
 
-union CreateCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException
-union EditCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | AllFieldsEmptyException | CommentNotFoundException | InternalServerException
-union DeleteCommentPayLoad = Comment | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
+union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException | RegexMismatchException
+union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | EmptyFieldsException | CommentNotFoundException | RegexMismatchException | InternalServerException
+union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
 
 
 type Mutation {
@@ -249,6 +272,7 @@ type Mutation {
     login(input: Login!): LoginPayload!
     refreshToken: LoginPayload!
 
+<<<<<<< HEAD
     createCourse(username:String!, target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
     updateCourseInfo(username:String!, courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
     deleteCourse(username:String!, courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
@@ -256,14 +280,29 @@ type Mutation {
     addUserToCourse(username:String!, courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
     promoteUserToTA(username:String!, courseID:String!, targetUserID:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
     demoteUserToSTD(username:String!, courseID:String!, targetUserID:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
+=======
+    createCourse(userName:String!, target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
+    updateCourseInfo(userName:String!, courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
+    deleteCourse(userName:String!, courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
+    addUserToCourse(userName:String!, courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
+    deleteUserFromCourse(userName:String!, courseID:String!, targetUsername:String!): DeleteUserFromCoursePayload! #todo implement with authentication & jwt tokens
+    promoteUserToTA(userName:String!, courseID:String!, targetUsername:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
+    demoteUserToSTD(userName:String!, courseID:String!, targetUsername:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
+>>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
 
     uploadContent(username:String!, courseID:String!, target:TargetContent!): UploadContentPayLoad! #todo implement with authentication & jwt tokens
     editContent(username:String!, courseID:String!, contentID:String!, target:EditContent!): EditContentPayLoad! #todo implement with authentication & jwt tokens
     deleteContent(username:String!, courseID:String!, contentID:String!): DeleteContentPayLoad! #todo implement with authentication & jwt tokens
 
+<<<<<<< HEAD
     uploadAttachment(username:String!, courseID:String!, target:TargetContent!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
     editAttachment(username:String!, courseID:String!, attachmentID:String!, target:EditContent!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
     deleteAttachment(username:String!, courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
+=======
+    uploadAttachment(userName:String!, courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    editAttachment(userName:String!, courseID:String!, attachmentID:String!, target:EditAttachment!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    deleteAttachment(userName:String!, courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
+>>>>>>> 043c35eb175ffb6ecd653cd6d899f17bbdba1c40
 
     offerContent(username:String!, courseID:String!, target:TargetPending!): OfferContentPayLoad! #todo implement with authentication & jwt tokens
     editOfferedContent(username:String!, courseID:String!, pendingID:String!, target:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
