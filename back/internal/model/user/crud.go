@@ -21,9 +21,11 @@ func GetAll(start, amount int64) ([]*User, error) {
 
 func Update(targetUsername string, toBe model.EditedUser) (*User,error) {
 
-
 	targetUser := newFrom(toBe)
+	return update(targetUsername, targetUser)
+}
 
+func update(targetUsername string, targetUser User) (*User, error) {
 	// updating the database
 	if stat := DBD.Update(targetUsername, &targetUser); stat == status.FAILED {
 
@@ -43,13 +45,13 @@ func newFrom(toBe model.EditedUser) User {
 	// filling the update fields of the user
 	var targetUser = User{}
 	if toBe.Name != nil {
-		targetUser.UpdateName(*toBe.Name)
+		targetUser.updateName(*toBe.Name)
 	}
 	if toBe.Password != nil {
-		_ = targetUser.UpdatePassword(*(toBe.Password))
+		_ = targetUser.updatePassword(*(toBe.Password))
 	}
 	if toBe.Email != nil {
-		targetUser.UpdateEmail(*toBe.Name)
+		targetUser.updateEmail(*toBe.Name)
 	}
 	return targetUser
 }
@@ -100,3 +102,30 @@ func Get(username string) (*User, error) {
 		return target, nil
 	}
 }
+
+func (u *User) Enroll(courseID string) *User {
+	u.enroll(courseID)
+	return u
+}
+
+func (u *User) Leave(CourseID string) *User {
+	u.leave(CourseID)
+	return u
+}
+
+func (u *User) UpdateName(name string) (*User, error) {
+	u.updateName(name)
+	return update(u.Username,User{Name: u.Name})
+}
+func (u *User) UpdateEmail(email string) (*User, error) {
+	u.updateEmail(email)
+	return update(u.Username, User{Email: u.Email})
+}
+
+func (u *User) UpdatePassword(password string) (*User, error) {
+	if err := u.updatePassword(password); err!=nil{
+		return nil, err
+	}
+	return update(u.Username,User{Password: u.Password})
+}
+
