@@ -2,6 +2,7 @@ import React, { Component, useState } from "react";
 import { Grid, Form, Segment, Message, Input, Button } from "semantic-ui-react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/client";
+import { useHistory } from 'react-router-dom'
 
 const LOGIN_MUTATION = gql`
   mutation Login($username: String!, $password: String!) {
@@ -21,6 +22,8 @@ const LoginForm = props => {
     error: ""
   });
 
+  const history = useHistory()
+
   const [login] = useMutation(LOGIN_MUTATION, {
     variables: {
       username: state.username,
@@ -31,13 +34,14 @@ const LoginForm = props => {
     }
   });
 
-  // function handleLogin() {
-  //   if (state.username && state.password) {
-  //     console.log("handliing login?????????");
-  //     login();
-  //     setState({ ...state, error: "" });
-  //   }
-  // }
+  function handleLogin() {
+    if (state.username && state.password) {
+      console.log("handliing login?????????");
+      login();
+      setState({ ...state, error: "" });
+      history.push("/dashboard")
+    }
+  }
 
   return (
     <div>
@@ -86,8 +90,7 @@ const LoginForm = props => {
             content="Login"
             control={Button}
             onClick={() => {
-              // handleLogin();
-              login()
+              handleLogin();
             }}
           />
         </Segment>

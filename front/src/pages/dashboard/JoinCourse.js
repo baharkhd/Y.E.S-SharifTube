@@ -64,7 +64,6 @@ function JoinCourseModel({ joiningCourse, setState }) {
       <Modal.Content scrolling>
         <Grid columns={2}>
           {otherClasses.map((course, i) => {
-            console.log("here ", i);
             return (
               <Grid.Column>
                 <Card
@@ -92,7 +91,7 @@ function JoinCourseModel({ joiningCourse, setState }) {
           onClick={() => {
             // Join class
             setState({ joiningCourse: false });
-            alert(newCourses)
+            alert(newCourses);
           }}
         >
           Join
