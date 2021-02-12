@@ -25,7 +25,7 @@ const queryComplexity = 8
 
 func main() {
 	//setting a mongodb driver for DBDriver filed of user model
-	user.DBD = mongodb.NewUserMongoDriver("yes-shariftube", "users")
+	user.DBD = mongodb.NewUserMongoDriver("yes-sharifTube", "users")
 	courseController.GetCourseController().SetDBDriver(mongodb.NewCourseMongoDriver("yes-sharifTube", "courses"))
 	contentController.GetContentController().SetDBDriver(mongodb.NewContentMongoDriver("yes-sharifTube", "courses"))
 	pendingController.GetPendingController().SetDBDriver(mongodb.NewPendingMongoDriver("yes-sharifTube", "courses"))
