@@ -46,6 +46,7 @@ function App() {
   return (
     <div className="App">
       <Header
+        token={token}
         isMobile={isMobile}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}

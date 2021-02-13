@@ -32,6 +32,7 @@ const LoginForm = props => {
     },
     onCompleted: ({ login }) => {
       if (login.__typename == "Token") {
+        console.log("login:", login)
         console.log("token in logiin:", login.token);
         props.setToken(login.token);
         history.push("/dashboard");

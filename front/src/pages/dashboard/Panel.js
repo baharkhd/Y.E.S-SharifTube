@@ -80,25 +80,25 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user }) => {
       //   return post.id === updatePost.id ? updatePost : post;
       // });
 
-      let newName = updateUser.name == "" ? localData.name : updateUser.name;
+      let newName = updateUser.name == "" ? localData.user.name : updateUser.name;
       let newPassword =
-        updateUser.password == "" ? localData.password : updateUser.password;
+        updateUser.password == "" ? localData.user.password : updateUser.password;
       let newEmail =
-        updateUser.email == "" ? localData.email : updateUser.email;
+        updateUser.email == "" ? localData.user.email : updateUser.email;
 
       console.log("?????", {
         name: newName,
         password: newPassword,
         email: newEmail,
-        username: localData.username
+        username: localData.user.username
       });
 
       cache.writeQuery({
         query: GET_USER_QUERY,
         data: {
           user: {
+            __typename: "User",
             name: newName,
-            password: newPassword,
             email: newEmail,
             username: localData.username
           }
@@ -210,7 +210,7 @@ const PanelInfo = props => {
             placeholder={props.user.name}
           />
 
-          <Form.Field
+          {/* <Form.Field
             control={Select}
             options={genderOptions}
             label={{
@@ -220,7 +220,7 @@ const PanelInfo = props => {
             placeholder="Gender"
             search
             searchInput={{ id: "form-select-control-gender" }}
-          />
+          /> */}
         </Form.Group>
         <Form.Group widths="equal">
           <Form.Field
@@ -229,10 +229,10 @@ const PanelInfo = props => {
             label="User name"
             placeholder={props.user.username}
           />
-          <Form.Field>
+          {/* <Form.Field>
             <label>Password</label>
             <Input type="password" placeholder={props.user.password} />
-          </Form.Field>
+          </Form.Field> */}
         </Form.Group>
         <Form.Field>
           <label>Email</label>

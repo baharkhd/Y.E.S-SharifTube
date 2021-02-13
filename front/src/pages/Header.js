@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Menu, Segment } from "semantic-ui-react";
-import { useHistory, Link } from "react-router-dom";
-import constants from '../constants'
+import { useHistory, Link, useLocation } from "react-router-dom";
+import constants from "../constants";
 
 const LoggedInHeader = props => {
   return (
@@ -81,6 +81,8 @@ const Header = props => {
     loggedIn: false
   });
 
+  const pathname = useLocation();
+
   if (state.activeItem === "") {
     setState({ activeItem: "Homepage" });
   }
@@ -118,7 +120,7 @@ const Header = props => {
 
   return (
     <div>
-      {!true ? (
+      {!props.token ? (
         <MainHeader
           handleItemClick={handleItemClick}
           state={state}
