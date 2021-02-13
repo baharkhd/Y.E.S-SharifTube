@@ -1,7 +1,6 @@
 type User {
     id: ID!
     username: String! # uniqe
-    password: String!
     name: String
     email: String
     courseIDs: [String!]
