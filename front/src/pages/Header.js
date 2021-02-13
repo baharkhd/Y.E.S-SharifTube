@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Menu, Segment } from "semantic-ui-react";
 import { useHistory, Link } from "react-router-dom";
+import constants from '../constants'
 
 const LoggedInHeader = props => {
   return (
@@ -102,7 +103,7 @@ const Header = props => {
         history.push("/");
         break;
       case "Logout":
-        // localStorage.removeItem(constants.AUTH_TOKEN);
+        localStorage.removeItem(constants.AUTH_TOKEN);
         history.push("/login");
         // window.location.reload(false);
         break;

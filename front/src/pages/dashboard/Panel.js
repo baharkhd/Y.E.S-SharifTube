@@ -25,7 +25,8 @@ const UPDATE_USER_MUTATION = gql`
       __typename
       ... on User {
         name
-        username
+        password
+        email
       }
     }
   }
@@ -49,6 +50,7 @@ const genderOptions = [
 ];
 
 const UpdatePanelModal = ({ modalOpen, setModalOpen, user }) => {
+  console.log("user in update modal:", user);
   const [state, setState] = useState({
     newName: user.name,
     newGender: "",
@@ -65,6 +67,7 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user }) => {
     },
     onCompleted: ({ updateUser }) => {
       console.log("updateUser", updateUser);
+      console.log("new state:", state);
     },
     update(cache, { data: { updateUser } }) {
       const data = cache.readQuery({
@@ -77,17 +80,27 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user }) => {
       //   return post.id === updatePost.id ? updatePost : post;
       // });
 
+      let newName = updateUser.name == "" ? localData.name : updateUser.name;
+      let newPassword =
+        updateUser.password == "" ? localData.password : updateUser.password;
+      let newEmail =
+        updateUser.email == "" ? localData.email : updateUser.email;
+
       console.log("?????", {
-        ...localData.user,
-        ...updateUser
+        name: newName,
+        password: newPassword,
+        email: newEmail,
+        username: localData.username
       });
 
       cache.writeQuery({
         query: GET_USER_QUERY,
         data: {
           user: {
-            ...localData.user,
-            ...updateUser
+            name: newName,
+            password: newPassword,
+            email: newEmail,
+            username: localData.username
           }
         }
       });

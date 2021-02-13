@@ -41,10 +41,10 @@ const RegisterForm = props => {
 
   const [signup] = useMutation(SIGNUP_REGISTER, {
     variables: {
-      username: "bahar_khd",
-      name: "bahar",
-      email: "baharkh@gmail.com",
-      password: "baharkh"
+      username: state.username,
+      name: state.name,
+      email: state.email,
+      password: state.password
     },
     onCompleted: ({ createUser }) => {
       console.log("createUser:", createUser);
