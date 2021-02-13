@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Label, Input, TextArea } from "semantic-ui-react";
 import { useMutation, gql } from "@apollo/client";
+import _ from "lodash";
 // import { gql } from "graphql-tag";
 
 const CREATE_COURSE_MUTATION = gql`
@@ -8,12 +9,30 @@ const CREATE_COURSE_MUTATION = gql`
     createCourse(target: { title: $title, summary: $summary, token: $token }) {
       __typename
       ... on Course {
+        id
         title
+        summary
+        createdAt
       }
       __typename
       ... on Exception {
         message
       }
+    }
+  }
+`;
+
+const COURSES_QUERY = gql`
+  query GetCoursesByFilter($keyWords: [String!]!, $amount: Int!, $start: Int!) {
+    coursesByKeyWords(keyWords: $keyWords, amount: $amount, start: $start) {
+      id
+      title
+      summary
+      createdAt
+      # prof {
+      #   username
+      #   name
+      # }
     }
   }
 `;
@@ -27,8 +46,41 @@ function AddCourseModal({ addingCourse, setState }) {
 
   const [createCourse] = useMutation(CREATE_COURSE_MUTATION, {
     variables: inputs,
+    update(cache, { data: { createCourse } }) {
+      const data = cache.readQuery({
+        query: COURSES_QUERY,
+        variables: {
+          keyWords: [],
+          amount: 100,
+          start: 0
+        }
+      });
+
+      const localData = _.cloneDeep(data);
+      console.log("course added in add course:", createCourse);
+      console.log("local data in add course:", localData);
+
+      localData.coursesByKeyWords = [
+        ...localData.coursesByKeyWords,
+        createCourse
+      ];
+
+      console.log("local data after chaning?:", localData);
+
+      cache.writeQuery({
+        query: COURSES_QUERY,
+        data: {
+          ...localData
+        }
+      });
+    },
     onCompleted: ({ createCourse }) => {
       console.log("createCourse:", createCourse);
+      if (createCourse.__typename == "Course") {
+        alert("you successfully created your own class :D");
+      } else {
+        alert(createCourse.message);
+      }
     }
   });
 

@@ -12,6 +12,7 @@ function useToken() {
   const saveToken = userToken => {
     if (userToken == undefined) {
       localStorage.removeItem(constants.AUTH_TOKEN);
+      setToken(undefined);
     } else {
       localStorage.setItem(constants.AUTH_TOKEN, JSON.stringify(userToken));
       setToken(userToken);

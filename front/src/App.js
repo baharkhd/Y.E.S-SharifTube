@@ -39,7 +39,10 @@ function App() {
     query: "(max-device-width: 570px)"
   });
 
+
+
   const { token, setToken } = useToken();
+  console.log("token in app:", token)
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -47,6 +50,7 @@ function App() {
     <div className="App">
       <Header
         token={token}
+        setToken={setToken}
         isMobile={isMobile}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -102,7 +106,7 @@ function App() {
         <Route exact path="/course:courseID/upload">
           <UploadPage />
         </Route>
-      </Switch>
+      </Switch> 
     </div>
   );
 }

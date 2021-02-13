@@ -11,49 +11,6 @@ import {
 } from "semantic-ui-react";
 import { useMutation, gql, useQuery } from "@apollo/client";
 
-// const otherClasses = [
-//   {
-//     title: "class1",
-//     summary: "summary1",
-//     id: "ID1"
-//   },
-//   {
-//     title: "class2",
-//     summary: "summary2",
-//     id: "ID2"
-//   },
-//   {
-//     title: "class3",
-//     summary: "summary3",
-//     id: "ID3"
-//   },
-//   {
-//     title: "class4",
-//     summary: "summary4",
-//     id: "ID4"
-//   },
-//   {
-//     title: "class5",
-//     summary: "summary5",
-//     id: "ID5"
-//   },
-//   {
-//     title: "class6",
-//     summary: "summary6",
-//     id: "ID6"
-//   },
-//   {
-//     title: "class7",
-//     summary: "summary7",
-//     id: "ID7"
-//   },
-//   {
-//     title: "class8",
-//     summary: "summary8",
-//     id: "ID8"
-//   }
-// ];
-
 const COURSES_QUERY = gql`
   query GetCoursesByFilter($keyWords: [String!]!, $amount: Int!, $start: Int!) {
     coursesByKeyWords(keyWords: $keyWords, amount: $amount, start: $start) {
@@ -61,7 +18,6 @@ const COURSES_QUERY = gql`
       title
       summary
       createdAt
-      token
       # prof {
       #   username
       #   name
@@ -88,8 +44,6 @@ const JOIN_COURSE_MUTATION = gql`
 `;
 
 function JoinCourseModel({ joiningCourse, setState }) {
-  const [newCourses, setNewCourses] = useState(new Array(10).fill(0));
-
   const [courseInfo, setCourseInfo] = useState({
     courseID: "",
     token: ""
@@ -112,7 +66,12 @@ function JoinCourseModel({ joiningCourse, setState }) {
       token: courseInfo.token
     },
     onCompleted: ({ addUserToCourse }) => {
-      console.log("add user to course completed:", addUserToCourse);
+      console.log("add user to coure:", addUserToCourse)
+      if (addUserToCourse.__typename == "Course") {
+        alert("you successfully added to the class :D");
+      } else {
+        alert(addUserToCourse.message);
+      }
     }
   });
 
@@ -170,7 +129,9 @@ function JoinCourseModel({ joiningCourse, setState }) {
           positive
           onClick={() => {
             // Join class
-            addUserToCourse();
+            if (courseInfo.courseID !== "" && courseInfo.token !== "") {
+              addUserToCourse();
+            }
             setState({ joiningCourse: false });
           }}
         >

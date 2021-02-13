@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Menu, Segment } from "semantic-ui-react";
 import { useHistory, Link, useLocation } from "react-router-dom";
 import constants from "../constants";
+import { async } from "q";
 
 const LoggedInHeader = props => {
   return (
@@ -92,6 +93,11 @@ const Header = props => {
   const history = useHistory();
   //   const auth_token = localStorage.getItem(constants.AUTH_TOKEN);
 
+  async function changeToken() {
+    await props.setToken(undefined);
+    history.push("/login");
+  }
+
   function handleItemClick(e, { name }) {
     setState({ activeItem: name });
     switch (name) {
@@ -105,8 +111,10 @@ const Header = props => {
         history.push("/");
         break;
       case "Logout":
-        localStorage.removeItem(constants.AUTH_TOKEN);
-        history.push("/login");
+        // localStorage.removeItem(constants.AUTH_TOKEN);
+        // props.setToken(undefined)
+        // history.push("/login");
+        changeToken();
         // window.location.reload(false);
         break;
       // case "Dashboard":

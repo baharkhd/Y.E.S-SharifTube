@@ -14,6 +14,7 @@ const GET_USER_QUERY = gql`
       name
       password
       email
+      courseIDs
     }
   }
 `;
