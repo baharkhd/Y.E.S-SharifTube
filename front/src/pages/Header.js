@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Menu, Segment } from "semantic-ui-react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
+import constants from '../constants'
 
 const LoggedInHeader = props => {
   return (
@@ -29,6 +30,7 @@ const LoggedInHeader = props => {
           active={props.state.activeItem === "Logout"}
           onClick={props.handleItemClick}
         />
+
         <Menu.Menu position="right">
           <Menu.Item
             name="Dashboard"
@@ -100,11 +102,11 @@ const Header = props => {
       case "Homepage":
         history.push("/");
         break;
-      // case "Logout":
-      //   localStorage.removeItem(constants.AUTH_TOKEN);
-      //   history.push("/");
-      //   window.location.reload(false);
-      //   break;
+      case "Logout":
+        localStorage.removeItem(constants.AUTH_TOKEN);
+        history.push("/login");
+        // window.location.reload(false);
+        break;
       // case "Dashboard":
       //   history.push("/dashboard");
       //   break

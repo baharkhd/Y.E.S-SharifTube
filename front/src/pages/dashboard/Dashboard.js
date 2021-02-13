@@ -4,25 +4,44 @@ import SideBar from "./Sidebar.js";
 import Panel from "./Panel.js";
 import Courses from "./Courses.js";
 import { Route, Switch, Link } from "react-router-dom";
+import { gql, useQuery } from "@apollo/client";
+import constants from "../../constants.js";
+
+const GET_USER_QUERY = gql`
+  {
+    user {
+      username
+      name
+      password
+      email
+    }
+  }
+`;
 
 function Dashboard(props) {
   const [state, setState] = useState({
     activeItem: "Personal Information"
   });
 
-  const handleItemClick = (e, { name }) => setState({ activeItem: name });
-
-  console.log("component:", props.component);
-  const Component = props.component ? (
-    props.component
-  ) : (
-    <Panel isMobile={props.isMobile} />
+  console.log(
+    "token in dashboard:",
+    localStorage.getItem(constants.AUTH_TOKEN)
   );
+  const { data, loading, error } = useQuery(GET_USER_QUERY);
+
+  console.log("data:", data);
+  console.log("loading:", loading);
+  console.log("error:", error);
 
   return (
     <div>
       <SideBar isMobile={props.isMobile} open={props.sidebarOpen} />
-      {Component}
+      {!loading &&
+        (!props.isCourse ? (
+          <Panel isMobile={props.isMobile} user={data.user} />
+        ) : (
+          <Courses isMobile={props.isMobile} user={data.user} />
+        ))}
     </div>
   );
 }

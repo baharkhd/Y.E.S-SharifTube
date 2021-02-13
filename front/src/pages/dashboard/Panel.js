@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import _ from "lodash";
 import {
   Grid,
   Input,
@@ -15,6 +16,32 @@ import {
   List,
   Header
 } from "semantic-ui-react";
+import gql from "graphql-tag";
+import { useMutation } from "@apollo/client";
+
+const UPDATE_USER_MUTATION = gql`
+  mutation UpdateUser($name: String, $password: String, $email: String) {
+    updateUser(toBe: { name: $name, password: $password, email: $email }) {
+      __typename
+      ... on User {
+        name
+        password
+        email
+      }
+    }
+  }
+`;
+
+const GET_USER_QUERY = gql`
+  {
+    user {
+      username
+      name
+      password
+      email
+    }
+  }
+`;
 
 const genderOptions = [
   { key: "m", text: "Male", value: "male" },
@@ -22,13 +49,62 @@ const genderOptions = [
   { key: "o", text: "Other", value: "other" }
 ];
 
-const UpdatePanelModal = ({ modalOpen, setModalOpen }) => {
+const UpdatePanelModal = ({ modalOpen, setModalOpen, user }) => {
+  console.log("user in update modal:", user);
   const [state, setState] = useState({
-    newName: "",
+    newName: user.name,
     newGender: "",
-    newUsername: "",
-    newPass: "",
-    newEmail: ""
+    newUsername: user.username,
+    newPass: user.password,
+    newEmail: user.email
+  });
+
+  const [updateUser] = useMutation(UPDATE_USER_MUTATION, {
+    variables: {
+      name: state.newName,
+      password: state.newPass,
+      email: state.newEmail
+    },
+    onCompleted: ({ updateUser }) => {
+      console.log("updateUser", updateUser);
+      console.log("new state:", state);
+    },
+    update(cache, { data: { updateUser } }) {
+      const data = cache.readQuery({
+        query: GET_USER_QUERY
+      });
+
+      const localData = _.cloneDeep(data);
+      console.log("localData:", localData);
+      // localData.user = localData.user.map(post => {
+      //   return post.id === updatePost.id ? updatePost : post;
+      // });
+
+      let newName = updateUser.name == "" ? localData.name : updateUser.name;
+      let newPassword =
+        updateUser.password == "" ? localData.password : updateUser.password;
+      let newEmail =
+        updateUser.email == "" ? localData.email : updateUser.email;
+
+      console.log("?????", {
+        name: newName,
+        password: newPassword,
+        email: newEmail,
+        username: localData.username
+      });
+
+      cache.writeQuery({
+        query: GET_USER_QUERY,
+        data: {
+          user: {
+            name: newName,
+            password: newPassword,
+            email: newEmail,
+            username: localData.username
+          }
+        }
+      });
+    }
   });
 
   return (
@@ -41,9 +117,13 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen }) => {
               id="form-input-control-first-name-update"
               control={Input}
               label="Name"
-              placeholder="First name"
+              placeholder="Enter new name"
+              value={state.newName}
+              onChange={e => {
+                setState({ ...state, newName: e.target.value });
+              }}
             />
-
+            {/* 
             <Form.Field
               control={Select}
               options={genderOptions}
@@ -54,23 +134,39 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen }) => {
               placeholder="Gender"
               search
               searchInput={{ id: "form-select-control-gender-update" }}
-            />
+            /> */}
           </Form.Group>
           <Form.Group widths="equal">
             <Form.Field
               id="form-input-control-user-name-update"
               control={Input}
-              label="User name"
-              placeholder="User name"
+              label="Username"
+              placeholder="Username"
+              value={state.newUsername}
+              readOnly
             />
             <Form.Field>
               <label>Password</label>
-              <Input type="password" />
+              <Input
+                type="string"
+                value={state.newPass}
+                placeholder="Enter new password"
+                onChange={e => {
+                  setState({ ...state, newPass: e.target.value });
+                }}
+              />
             </Form.Field>
           </Form.Group>
           <Form.Field>
             <label>Email</label>
-            <Input type="email" placeholder="Email" />
+            <Input
+              type="email"
+              placeholder="Enter new email"
+              value={state.newEmail}
+              onChange={e => {
+                setState({ ...state, newEmail: e.target.value });
+              }}
+            />
           </Form.Field>
         </Form>
       </Modal.Content>
@@ -80,6 +176,7 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen }) => {
           primary
           onClick={() => {
             // Todo: update information
+            updateUser();
             setModalOpen(false);
           }}
         >
@@ -110,7 +207,7 @@ const PanelInfo = props => {
             id="form-input-control-first-name"
             control={Input}
             label="Name"
-            placeholder="First name"
+            placeholder={props.user.name}
           />
 
           <Form.Field
@@ -130,16 +227,16 @@ const PanelInfo = props => {
             id="form-input-control-user-name"
             control={Input}
             label="User name"
-            placeholder="User name"
+            placeholder={props.user.username}
           />
           <Form.Field>
             <label>Password</label>
-            <Input type="password" />
+            <Input type="password" placeholder={props.user.password} />
           </Form.Field>
         </Form.Group>
         <Form.Field>
           <label>Email</label>
-          <Input type="email" placeholder="Email" />
+          <Input type="email" placeholder={props.user.email} />
         </Form.Field>
 
         <Form.Field>
@@ -161,8 +258,16 @@ function Panel(props) {
   const [modalOpen, setModalOpen] = useState(false);
   return (
     <div>
-      <UpdatePanelModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
-      <PanelInfo setModalOpen={setModalOpen} isMobile={props.isMobile} />
+      <UpdatePanelModal
+        modalOpen={modalOpen}
+        setModalOpen={setModalOpen}
+        user={props.user}
+      />
+      <PanelInfo
+        setModalOpen={setModalOpen}
+        isMobile={props.isMobile}
+        user={props.user}
+      />
     </div>
   );
 }
