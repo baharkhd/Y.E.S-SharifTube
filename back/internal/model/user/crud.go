@@ -51,7 +51,7 @@ func newFrom(toBe model.EditedUser) User {
 		_ = targetUser.updatePassword(*(toBe.Password))
 	}
 	if toBe.Email != nil {
-		targetUser.updateEmail(*toBe.Name)
+		targetUser.updateEmail(*toBe.Email)
 	}
 	return targetUser
 }
