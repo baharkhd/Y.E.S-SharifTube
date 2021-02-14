@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Menu, Segment } from "semantic-ui-react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link, useLocation } from "react-router-dom";
+import constants from "../constants";
+import { async } from "q";
 
 const LoggedInHeader = props => {
   return (
@@ -29,6 +31,7 @@ const LoggedInHeader = props => {
           active={props.state.activeItem === "Logout"}
           onClick={props.handleItemClick}
         />
+
         <Menu.Menu position="right">
           <Menu.Item
             name="Dashboard"
@@ -79,6 +82,8 @@ const Header = props => {
     loggedIn: false
   });
 
+  const pathname = useLocation();
+
   if (state.activeItem === "") {
     setState({ activeItem: "Homepage" });
   }
@@ -87,6 +92,11 @@ const Header = props => {
 
   const history = useHistory();
   //   const auth_token = localStorage.getItem(constants.AUTH_TOKEN);
+
+  async function changeToken() {
+    await props.setToken(undefined);
+    history.push("/login");
+  }
 
   function handleItemClick(e, { name }) {
     setState({ activeItem: name });
@@ -100,23 +110,18 @@ const Header = props => {
       case "Homepage":
         history.push("/");
         break;
-      // case "Logout":
-      //   localStorage.removeItem(constants.AUTH_TOKEN);
-      //   history.push("/");
-      //   window.location.reload(false);
-      //   break;
-      // case "Dashboard":
-      //   history.push("/dashboard");
-      //   break
-      // case "Homepage":
-      //   history.push("/")
-      //   break
+      case "Logout":
+        changeToken();
+        break;
+      case "Dashboard":
+        history.push("/dashboard");
+        break;
     }
   }
 
   return (
     <div>
-      {!true ? (
+      {!props.token ? (
         <MainHeader
           handleItemClick={handleItemClick}
           state={state}

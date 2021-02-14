@@ -1,5 +1,21 @@
 import React, { Component, useState } from "react";
 import { Grid, Form, Segment, Message, Input, Button } from "semantic-ui-react";
+import gql from "graphql-tag";
+import { useMutation } from "@apollo/client";
+import { useHistory } from "react-router-dom";
+import constants from "../../constants.js";
+import { async } from "q";
+
+const LOGIN_MUTATION = gql`
+  mutation Login($username: String!, $password: String!) {
+    login(input: { username: $username, password: $password }) {
+      __typename
+      ... on Token {
+        token
+      }
+    }
+  }
+`;
 
 const LoginForm = props => {
   const [state, setState] = useState({
@@ -8,13 +24,48 @@ const LoginForm = props => {
     error: ""
   });
 
-  // function handleLogin() {
-  //   if (state.username && state.password) {
-  //     console.log("handliing login?????????");
-  //     login();
-  //     setState({ ...state, error: "" });
-  //   }
-  // }
+  const history = useHistory();
+
+  async function changeToken(token) {
+    await props.setToken(token);
+    history.push("/dashboard");
+  }
+
+  const [login] = useMutation(LOGIN_MUTATION, {
+    variables: {
+      username: state.username,
+      password: state.password
+    },
+    onCompleted: ({ login }) => {
+      if (login.__typename == "Token") {
+        console.log("login:", login);
+        console.log("token in logiin:", login.token);
+        // props.setToken(login.token);
+        // history.push("/dashboard");
+        changeToken(login.token);
+      } else {
+        switch (login.__typename) {
+          case "UserPassMissMatchException":
+            alert(constants.USER_PASS_MISMATCH);
+            setState({ ...state, error: constants.USER_PASS_MISMATCH });
+            break;
+          case "InternalServerException":
+            alert(constants.INTERNAL_SERVER_EXCEPTION);
+            setState({ ...state, error: constants.INTERNAL_SERVER_EXCEPTION });
+            break;
+        }
+      }
+    }
+  });
+
+  function handleLogin() {
+    if (state.username && state.password) {
+      // console.log("handliing login?????????");
+      login();
+      // setState({ ...state, error: "" });
+      // history.push("/dashboard");
+    }
+  }
 
   return (
     <div>
@@ -63,7 +114,7 @@ const LoginForm = props => {
             content="Login"
             control={Button}
             onClick={() => {
-              // handleLogin();
+              handleLogin();
             }}
           />
         </Segment>
@@ -76,7 +127,7 @@ const LoginForm = props => {
   );
 };
 
-function Login() {
+function Login(props) {
   return (
     <div style={{ top: "80px", position: "absolute", width: "100%" }}>
       <Grid
@@ -93,7 +144,7 @@ function Login() {
               marginLeft: 20
             }}
           >
-            <LoginForm />
+            <LoginForm setToken={props.setToken} />
           </Grid.Column>
         </Grid.Row>
       </Grid>

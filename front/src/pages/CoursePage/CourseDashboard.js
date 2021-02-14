@@ -15,6 +15,7 @@ import {
 import SideBar from "./CourseSidebar.js";
 import "./CourseDashboard.css";
 import { useParams, Link } from "react-router-dom";
+import { gql, useQuery } from "@apollo/client";
 
 const contents = [
   {
@@ -66,6 +67,31 @@ const contents = [
     id: "videoID6"
   }
 ];
+
+const COURSE_QUERY = gql`
+  query GetCoursesByID($ids: [String!]!) {
+    courses(ids: $ids) {
+      id
+      title
+      summary
+      # contents {
+      #   id
+      #   title
+      #   description
+      # }
+      # prof {
+      #   name
+      #   username
+      #   email
+      # }
+      # tas {
+      #   name
+      #   username
+      #   email
+      # }
+    }
+  }
+`;
 
 const initialState = {
   loading: false,
@@ -130,6 +156,14 @@ function CourseDashboard(props) {
   let { id } = useParams();
   id = id.substring(1);
   // Todo: use the course id to get the course information and use them
+
+  const response = useQuery(COURSE_QUERY, {
+    variables: {
+      ids: [id]
+    }
+  })
+
+  console.log("data in course dashboard", response.data, response.loading, response.error)
 
   const [state, dispatch] = React.useReducer(searchReducer, initialState);
   const { loading, results, value, resultsShown } = state;
