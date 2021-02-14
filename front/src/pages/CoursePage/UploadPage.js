@@ -33,29 +33,28 @@ import { useParams } from "react-router-dom";
 //   courseID: String!
 // }
 
-const UPLOAD_CONTENT_MUTATION = gql`
-  mutation UploadContent(
+const OFFER_CONTENT_MUTATION = gql`
+  mutation OfferContent(
     $courseID: String!
     $title: String!
     $description: String
-    $vurl: String!
-    $tags: [String!]
+    $furl: String!
   ) {
-    uploadContent(
+    offerContent(
       courseID: $courseID
       target: {
         title: $title
         description: $description
-        vurl: $vurl
-        tags: $tags
+        furl: $furl
+        # tags: $tags
       }
     ) {
-      ... on Content {
+      ... on Pending {
         id
         title
         description
-        vurl
-        tags
+        furl
+        status
         timestamp
       }
       ... on Exception {
@@ -69,7 +68,7 @@ function UploadPage(props) {
   const [state, setState] = useState({
     title: "",
     description: "",
-    vurl: "",
+    furl: "",
     tags: [],
     tagInput: ""
   });
@@ -77,16 +76,16 @@ function UploadPage(props) {
   let { courseID } = useParams();
   courseID = courseID.substring(1);
 
-  const [uploadContent] = useMutation(UPLOAD_CONTENT_MUTATION, {
+  const [offerContent] = useMutation(OFFER_CONTENT_MUTATION, {
     variables: {
       courseID: courseID,
       title: state.title,
       description: state.description,
-      vurl: state.vurl,
-      tags: state.tags
+      furl: state.furl,
+      // tags: state.tags
     },
-    onCompleted: ({ uploadContent }) => {
-      console.log("*** uploadContent:", uploadContent);
+    onCompleted: ({ offerContent }) => {
+      console.log("*** offerContent:", offerContent);
     }
   });
 
@@ -100,7 +99,7 @@ function UploadPage(props) {
             label="URL of this content"
             placeholder="URL"
             onChange={e => {
-              setState({ ...state, vurl: e.target.value });
+              setState({ ...state, furl: e.target.value });
             }}
           />
         </Form.Group>
@@ -123,7 +122,7 @@ function UploadPage(props) {
           }}
         />
 
-        <Form.Group>
+        {/* <Form.Group>
           <Form.Field
             control={Input}
             placeholder="Add a tag"
@@ -154,11 +153,11 @@ function UploadPage(props) {
               );
             })}
           </Label.Group>
-        </Form.Field>
+        </Form.Field> */}
         <Form.Button
           color="blue"
           onClick={() => {
-            uploadContent();
+            offerContent();
           }}
         >
           Upload
