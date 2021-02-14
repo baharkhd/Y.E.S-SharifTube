@@ -1,54 +1,96 @@
 package controller
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal/controller"
+	"yes-sharifTube/internal/model/attachment"
+	"yes-sharifTube/internal/model/course"
+	"yes-sharifTube/internal/model/user"
 )
 
-func (a *attachmentController) CreateAttachment(authorUsername, courseID, name string, description *string, aurl string) (*model.Attachment, error) {
-	cID, err := primitive.ObjectIDFromHex(courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
+func CreateAttachment(authorUsername, courseID, name string, description *string, aurl string) (*attachment.Attachment, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, err
 	}
-	ar, err := a.dbDriver.Insert(authorUsername, cID, name, aurl, description)
-	err = controller.CastDBExceptionToGQLException(err)
+	// get the course from database
+	cr, err := course.Get(courseID)
 	if err != nil {
 		return nil, err
 	}
-	return ar.Reshape(), nil
+	// check if user can insert attachment
+	err = cr.IsUserAllowedToInsertAttachment(authorUsername)
+	if err != nil {
+		return nil, err
+	}
+	// create an attachment
+	an, err := attachment.New(name, aurl, courseID, description)
+	if err != nil {
+		return nil, err
+	}
+	// insert the attachment into database
+	an, err = attachment.Insert(courseID, an)
+	if err != nil {
+		return nil, err
+	}
+	return an, nil
 }
 
-func (a *attachmentController) UpdateAttachment(authorUsername, courseID, attachmentID string, newName, newDescription *string) (*model.Attachment, error) {
-	cID, err := primitive.ObjectIDFromHex(courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
+func UpdateAttachment(authorUsername, courseID, attachmentID string, newName, newDescription *string) (*attachment.Attachment, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, err
 	}
-	aID, err := primitive.ObjectIDFromHex(attachmentID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
-	ar, err := a.dbDriver.Update(authorUsername, cID, aID, newName, newDescription)
-	err = controller.CastDBExceptionToGQLException(err)
+	// get the course from database
+	cr, err := course.Get(courseID)
 	if err != nil {
 		return nil, err
 	}
-	return ar.Reshape(), nil
+	// get the attachment from database
+	an, err := attachment.Get(&courseID, attachmentID)
+	if err != nil {
+		return nil, err
+	}
+	// check if user can update attachment
+	err = cr.IsUserAllowedToUpdateAttachment(authorUsername)
+	if err != nil {
+		return nil, err
+	}
+	// update the attachment
+	err = an.Update(newName, newDescription)
+	if err != nil {
+		return nil, err
+	}
+	// update the attachment in database
+	err = attachment.Update(courseID, an)
+	if err != nil {
+		return nil, err
+	}
+	return an, nil
 }
 
-func (a *attachmentController) DeleteAttachment(authorUsername, courseID, attachmentID string) (*model.Attachment, error) {
-	cID, err := primitive.ObjectIDFromHex(courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
+func DeleteAttachment(authorUsername, courseID, attachmentID string) (*attachment.Attachment, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, err
 	}
-	aID, err := primitive.ObjectIDFromHex(attachmentID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
-	ar, err := a.dbDriver.Delete(authorUsername, cID, aID)
-	err = controller.CastDBExceptionToGQLException(err)
+	// get the course from database
+	cr, err := course.Get(courseID)
 	if err != nil {
 		return nil, err
 	}
-	return ar.Reshape(), nil
+	// get the attachment from database
+	an, err := attachment.Get(&courseID, attachmentID)
+	if err != nil {
+		return nil, err
+	}
+	// check if user can delete attachment
+	err = cr.IsUserAllowedToDeleteAttachment(authorUsername)
+	if err != nil {
+		return nil, err
+	}
+	// delete the attachment from database
+	err = attachment.Delete(courseID, an)
+	if err != nil {
+		return nil, err
+	}
+	return an, nil
 }

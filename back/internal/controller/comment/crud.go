@@ -3,79 +3,153 @@ package controller
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal/controller"
+	"yes-sharifTube/internal/model/comment"
+	"yes-sharifTube/internal/model/content"
+	"yes-sharifTube/internal/model/course"
+	"yes-sharifTube/internal/model/user"
 )
 
-func (c *commentController) CreateComment(authorUsername, contentID, body string, repliedID *string) (*model.Comment, *model.Reply, error) {
-	cID, err := primitive.ObjectIDFromHex(contentID)
-	if err != nil {
-		return nil, nil, &model.InternalServerException{Message: err.Error()}
+func CreateComment(authorUsername, contentID, body string, repliedID *string) (*comment.Comment, *comment.Reply, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, nil, err
 	}
-	var rpID *primitive.ObjectID = nil
-	var rID primitive.ObjectID
-	if repliedID != nil {
-		rID, err = primitive.ObjectIDFromHex(*repliedID)
+	// get the content from database
+	con, err := content.Get(nil, contentID)
+	if err != nil {
+		return nil, nil, err
+	}
+	// get the course from database
+	cr, err := course.Get(con.CourseID)
+	if err != nil {
+		return nil, nil, err
+	}
+	// can user insert any comments
+	err = cr.IsUserAllowedToInsertComment(authorUsername)
+	if err != nil {
+		return nil, nil, err
+	}
+	// create comment or reply
+	var cmd *comment.Comment = nil
+	var rep *comment.Reply = nil
+	if repliedID == nil {
+		cmd, err = comment.New(body, authorUsername, contentID)
 		if err != nil {
-			return nil, nil, &model.InternalServerException{Message: err.Error()}
+			return nil, nil, err
 		}
-		rpID = &rID
-	}
-	cr, rr, err := c.dbDriver.Insert(authorUsername, cID, rpID, body)
-	err = controller.CastDBExceptionToGQLException(err)
-	if err != nil {
-		return nil, nil, err
-	}
-	if cr != nil {
-		fc, err := cr.Reshape()
-		return fc, nil, err
+		// insert comment in database
+		cmd, err = comment.InsertComment(con.CourseID, contentID, cmd)
+		if err != nil {
+			return nil, nil, err
+		}
 	} else {
-		fc, err := rr.Reshape()
-		return nil, fc, err
+		// check if the comment exists in the
+		repID, err := primitive.ObjectIDFromHex(*repliedID)
+		if err != nil {
+			return nil, nil, model.InternalServerException{Message: err.Error()}
+		}
+		if ccmt, _ := con.GetComment(repID); ccmt == nil {
+			return nil, nil, model.CommentNotFoundException{Message: "comment not found"}
+		}
+		// create new rely
+		rep, err = comment.NewReply(body, authorUsername, *repliedID)
+		if err != nil {
+			return nil, nil, err
+		}
+		// insert reply in database
+		rep, err = comment.InsertReply(con.CourseID, contentID, *repliedID, rep)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
+	return cmd, rep, err
 }
 
-func (c *commentController) UpdateComment(authorUsername, contentID, commentID string, newBody *string) (*model.Comment, *model.Reply, error) {
-	cID, err := primitive.ObjectIDFromHex(contentID)
-	if err != nil {
-		return nil, nil, &model.InternalServerException{Message: err.Error()}
+func UpdateComment(authorUsername, contentID, commentID string, newBody *string) (*comment.Comment, *comment.Reply, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, nil, err
 	}
-	cmID, err := primitive.ObjectIDFromHex(commentID)
-	if err != nil {
-		return nil, nil, &model.InternalServerException{Message: err.Error()}
-	}
-	cr, rr, err := c.dbDriver.Update(authorUsername, cID, cmID, newBody)
-	err = controller.CastDBExceptionToGQLException(err)
+	// get the content from database
+	con, err := content.Get(nil, contentID)
 	if err != nil {
 		return nil, nil, err
 	}
-	if cr != nil {
-		fc, err := cr.Reshape()
-		return fc, nil, err
-	} else {
-		fc, err := rr.Reshape()
-		return nil, fc, err
+	// get the course from database
+	cr, err := course.Get(con.CourseID)
+	if err != nil {
+		return nil, nil, err
 	}
+	cmdID, err := primitive.ObjectIDFromHex(commentID)
+	if err != nil {
+		return nil, nil, model.InternalServerException{Message: err.Error()}
+	}
+	ccmt, rcmt := con.GetComment(cmdID)
+	if ccmt == nil {
+		return nil, nil, model.CommentNotFoundException{Message: "the target comment not found"}
+	}
+	if rcmt == nil {
+		// get the comments
+		err = cr.IsUserAllowedToUpdateComment(authorUsername, ccmt.AuthorUn)
+		if err != nil {
+			return nil, nil, err
+		}
+		err = ccmt.Update(newBody)
+		if err != nil {
+			return nil, nil, err
+		}
+	} else {
+		err = cr.IsUserAllowedToUpdateComment(authorUsername, rcmt.AuthorUn)
+		if err != nil {
+			return nil, nil, err
+		}
+		err = rcmt.Update(newBody)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+	// update the comments in database
+	err = comment.Update(con.CourseID, contentID, con.Comments)
+	if err != nil {
+		return nil, nil, err
+	}
+	if rcmt != nil {
+		return nil, rcmt, nil
+	}
+	return ccmt, nil, nil
 }
 
-func (c *commentController) DeleteComment(authorUsername, contentID, commentID string) (*model.Comment, *model.Reply, error) {
-	coID, err := primitive.ObjectIDFromHex(contentID)
-	if err != nil {
-		return nil, nil, &model.InternalServerException{Message: err.Error()}
+func DeleteComment(authorUsername, contentID, commentID string) (*comment.Comment, *comment.Reply, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, nil, err
 	}
-	cnID, err := primitive.ObjectIDFromHex(commentID)
-	if err != nil {
-		return nil, nil, &model.InternalServerException{Message: err.Error()}
-	}
-	cr, rr, err := c.dbDriver.Delete(authorUsername, coID, cnID)
-	err = controller.CastDBExceptionToGQLException(err)
+	// get the content from database
+	con, err := content.Get(nil, contentID)
 	if err != nil {
 		return nil, nil, err
 	}
-	if cr != nil {
-		fc, err := cr.Reshape()
-		return fc, nil, err
-	} else {
-		fc, err := rr.Reshape()
-		return nil, fc, err
+	// get the course from database
+	cr, err := course.Get(con.CourseID)
+	if err != nil {
+		return nil, nil, err
 	}
+	// get comments
+	cmdID, err := primitive.ObjectIDFromHex(commentID)
+	if err != nil {
+		return nil, nil, model.InternalServerException{Message: err.Error()}
+	}
+	ccmt, rcmt, err := cr.RemoveComment(authorUsername, cmdID, con)
+	if err != nil {
+		return nil, nil, err
+	}
+	// update the comments in database
+	err = comment.Update(con.CourseID, contentID, con.Comments)
+	if err != nil {
+		return nil, nil, err
+	}
+	if rcmt != nil {
+		return nil, rcmt, nil
+	}
+	return ccmt, nil, nil
 }

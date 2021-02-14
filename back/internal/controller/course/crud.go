@@ -1,66 +1,162 @@
 package controller
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal/controller"
-	modelUtil "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/course"
+	"yes-sharifTube/internal/model/user"
 )
 
-func (c *courseController) GetCourses(courseIDs []string) ([]*model.Course, error) {
-	objIDs, err := modelUtil.ConvertStringsToObjectIDs(courseIDs)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
-	courses, err := c.dbDriver.GetAll(objIDs)
-	err = controller.CastDBExceptionToGQLException(err)
+func GetCourses(courseIDs []string) ([]*course.Course, error) {
+	// get courses from database
+	courses, err := course.GetAll(courseIDs)
 	if err != nil {
 		return nil, err
 	}
-	return course.ReshapeAll(courses)
+	return courses, nil
 }
 
-func (c *courseController) GetCoursesByKeyWords(keywords []string, startIdx, amount int) ([]*model.Course, error) {
-	courses, err := c.dbDriver.GetByFilter(keywords, startIdx, amount)
-	err = controller.CastDBExceptionToGQLException(err)
+func GetCoursesByKeyWords(keywords []string, startIdx, amount int) ([]*course.Course, error) {
+	// get courses from database
+	courses, err := course.GetByFilter(keywords, startIdx, amount)
 	if err != nil {
 		return nil, err
 	}
-	return course.ReshapeAll(courses)
+	return courses, nil
 }
 
-func (c *courseController) CreateCourse(authorUsername, title string, summery *string, token string) (*model.Course, error) {
-	cr, err := c.dbDriver.Insert(authorUsername, title, token, summery)
-	err = controller.CastDBExceptionToGQLException(err)
+func CreateCourse(authorUsername, title string, summery *string, token string) (*course.Course, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, err
+	}
+	// create a user
+	cr, err := course.New(title, authorUsername, token, summery)
 	if err != nil {
 		return nil, err
 	}
-	return cr.Reshape()
+	// insert the user into database
+	cr, err = course.Insert(cr)
+	if err != nil {
+		return nil, err
+	}
+	return cr, nil
 }
 
-func (c *courseController) UpdateCourse(authorUsername, courseID string, newTitle, newSummery, newToken *string) (*model.Course, error) {
-	cID, err := primitive.ObjectIDFromHex(courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
+func UpdateCourse(authorUsername, courseID string, newTitle, newSummery, newToken *string) (*course.Course, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, err
 	}
-	cr, err := c.dbDriver.Update(authorUsername, cID, newTitle, newToken, newSummery)
-	err = controller.CastDBExceptionToGQLException(err)
+	// get the course from database
+	cr, err := course.Get(courseID)
 	if err != nil {
 		return nil, err
 	}
-	return cr.Reshape()
+	// update the course
+	err = cr.Update(newTitle, newSummery, newToken)
+	if err != nil {
+		return nil, err
+	}
+	// update the course in database
+	if err = course.Update(authorUsername, cr); err != nil {
+		return nil, err
+	}
+	return cr, nil
 }
 
-func (c *courseController) DeleteCourse(authorUsername, courseID string) (*model.Course, error) {
-	cID, err := primitive.ObjectIDFromHex(courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
+func DeleteCourse(authorUsername, courseID string) (*course.Course, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, err
 	}
-	cr, err := c.dbDriver.Delete(authorUsername, cID)
-	err = controller.CastDBExceptionToGQLException(err)
+	// get the course from database
+	cr, err := course.Get(courseID)
 	if err != nil {
 		return nil, err
 	}
-	return cr.Reshape()
+	// delete the course from database
+	if err = course.Delete(authorUsername, cr); err != nil {
+		return nil, err
+	}
+	return cr, nil
+}
+
+func AddUserToCourse(username, courseID, token string) (*course.Course, error) {
+	// check if user exists in database
+	if _, err := user.Get(username); err != nil {
+		return nil, err
+	}
+	// get the course from database
+	cr, err := course.Get(courseID)
+	if err != nil {
+		return nil, err
+	}
+	// add the user to course in database
+	cr, err = course.AddUser(username, token, cr)
+	if err != nil {
+		return nil, err
+	}
+	return cr, nil
+}
+
+func DeleteUserFromCourse(username, courseID, targetUsername string) (*course.Course, error) {
+	// check if user exists in database
+	if _, err := user.Get(username); err != nil {
+		return nil, err
+	}
+	if _, err := user.Get(targetUsername); err != nil {
+		return nil, err
+	}
+	// get the course from database
+	cr, err := course.Get(courseID)
+	if err != nil {
+		return nil, err
+	}
+	// delete the user from course in database
+	cr, err = course.DeleteUser(username, targetUsername, cr)
+	if err != nil {
+		return nil, err
+	}
+	return cr, nil
+}
+
+func PromoteUserToTA(username, courseID, targetUsername string) (*course.Course, error) {
+	// check if user exists in database
+	if _, err := user.Get(username); err != nil {
+		return nil, err
+	}
+	if _, err := user.Get(targetUsername); err != nil {
+		return nil, err
+	}
+	// get the course from database
+	cr, err := course.Get(courseID)
+	if err != nil {
+		return nil, err
+	}
+	// promote user to ta in database
+	cr, err = course.PromoteUser(username, targetUsername, cr)
+	if err != nil {
+		return nil, err
+	}
+	return cr, nil
+}
+
+func DemoteUserToSTD(username, courseID, targetUsername string) (*course.Course, error) {
+	// check if user exists in database
+	if _, err := user.Get(username); err != nil {
+		return nil, err
+	}
+	if _, err := user.Get(targetUsername); err != nil {
+		return nil, err
+	}
+	// get the course from database
+	cr, err := course.Get(courseID)
+	if err != nil {
+		return nil, err
+	}
+	// demote at to student in database
+	cr, err = course.DemoteUser(username, targetUsername, cr)
+	if err != nil {
+		return nil, err
+	}
+	return cr, nil
 }

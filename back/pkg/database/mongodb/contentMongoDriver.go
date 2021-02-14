@@ -7,32 +7,53 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
+	"yes-sharifTube/graph/model"
 	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/course"
-	"yes-sharifTube/pkg/database"
 )
 
 type ContentMongoDriver struct {
 	collection *mongo.Collection
 }
 
-func (c *ContentMongoDriver) Get(contentID primitive.ObjectID) (*content.Content, error) {
+func (c *ContentMongoDriver) Get(courseID *primitive.ObjectID, contentID primitive.ObjectID) (*content.Content, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
 	var res course.Course
-	target := bson.M{
-		"contents": bson.M{
-			"$elemMatch": bson.M{
-				"_id": contentID,
+	var target bson.M
+	if courseID == nil {
+		target = bson.M{
+			"contents": bson.M{
+				"$elemMatch": bson.M{
+					"_id": contentID,
+				},
 			},
-		},
+		}
+	} else {
+		target = bson.M{
+			"_id": courseID,
+			"contents": bson.M{
+				"$elemMatch": bson.M{
+					"_id": contentID,
+				},
+			},
+		}
 	}
 	projection := bson.M{
+		"created_at": 1,
+		"inventory":  1,
+		"pends":      1,
+		"prof":       1,
+		"students":   1,
+		"summery":    1,
+		"tas":        1,
+		"title":      1,
+		"token":      1,
 		"contents.$": 1,
 	}
 	if err := c.collection.FindOne(ctx, target, options.FindOne().SetProjection(projection)).Decode(&res); err != nil {
-		return nil, database.ThrowContentNotFoundException(contentID.Hex())
+		return nil, model.ContentNotFoundException{Message: "content couldn't found."}
 	}
 	return res.Contents[0], nil
 }
@@ -79,7 +100,7 @@ func (c *ContentMongoDriver) GetAll(courseID *primitive.ObjectID, tags []string,
 
 	courr, err := c.collection.Aggregate(ctx, pipeline)
 	if err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+		return nil, model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
 	defer courr.Close(ctx)
 	var contents []*content.Content
@@ -95,98 +116,53 @@ func (c *ContentMongoDriver) GetAll(courseID *primitive.ObjectID, tags []string,
 	return content.GetAll(contents, start, amount), nil
 }
 
-func (c *ContentMongoDriver) Insert(username string, courseID primitive.ObjectID, title, vrul string, description *string, tags []string) (*content.Content, error) {
+func (c *ContentMongoDriver) Insert(courseID primitive.ObjectID, content *content.Content) (*content.Content, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-
-	var fc course.Course
+	content.ID = primitive.NewObjectID()
 	target := bson.M{
 		"_id": courseID,
-	}
-	if err := c.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserNotStudent(username) {
-		return nil, database.ThrowUserNotAllowedException(username)
-	}
-	cnt, err := content.New(primitive.NewObjectID(), title, username, vrul, fc.ID.Hex(), description, nil, tags)
-	if err != nil {
-		return nil, err
 	}
 	change := bson.M{
 		"$push": bson.M{
-			"contents": cnt,
+			"contents": content,
 		},
 	}
-	if _, err = c.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
+		return nil, model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return cnt, nil
+	return content, nil
 }
 
-func (c *ContentMongoDriver) Update(username string, courseID, contentID primitive.ObjectID, title, description *string, tags []string) (*content.Content, error) {
+func (c *ContentMongoDriver) UpdateInfo(courseID, contentID primitive.ObjectID, title, description string, tags []string, timestamp int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-
-	var fc course.Course
 	target := bson.M{
-		"_id": courseID,
-	}
-	if err := c.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserNotStudent(username) {
-		return nil, database.ThrowUserNotAllowedException(username)
-	}
-	ncnt := fc.GetContent(contentID)
-	if ncnt == nil {
-		return nil, database.ThrowContentNotFoundException(contentID.Hex())
-	}
-	err := ncnt.Update(title, description, tags)
-	if err != nil {
-		return nil, err
-	}
-	target = bson.M{
 		"_id":          courseID,
-		"contents._id": ncnt.ID,
+		"contents._id": contentID,
 	}
 	change := bson.M{
 		"$set": bson.M{
-			"contents.$.title":       ncnt.Title,
-			"contents.$.description": ncnt.Description,
-			"contents.$.tags":        ncnt.Tags,
-			"contents.$.timestamp":   ncnt.Timestamp,
+			"contents.$.title":       title,
+			"contents.$.description": description,
+			"contents.$.tags":        tags,
+			"contents.$.timestamp":   timestamp,
 		},
 	}
-	if _, err = c.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return ncnt, nil
+	return nil
 }
 
-func (c *ContentMongoDriver) Delete(username string, courseID, contentID primitive.ObjectID) (*content.Content, error) {
+func (c *ContentMongoDriver) Delete(courseID, contentID primitive.ObjectID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-
-	var fc course.Course
 	target := bson.M{
 		"_id": courseID,
-	}
-	if err := c.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserNotStudent(username) {
-		return nil, database.ThrowUserNotAllowedException(username)
-	}
-	ncnt := fc.GetContent(contentID)
-	if ncnt == nil {
-		return nil, database.ThrowContentNotFoundException(contentID.Hex())
 	}
 	change := bson.M{
 		"$pull": bson.M{
@@ -196,9 +172,9 @@ func (c *ContentMongoDriver) Delete(username string, courseID, contentID primiti
 		},
 	}
 	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return ncnt, nil
+	return nil
 }
 
 func NewContentMongoDriver(db, collection string) *ContentMongoDriver {

@@ -7,181 +7,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
+	"yes-sharifTube/graph/model"
 	"yes-sharifTube/internal/model/comment"
-	"yes-sharifTube/internal/model/course"
-	"yes-sharifTube/pkg/database"
 )
 
 type CommentMongoDriver struct {
 	collection *mongo.Collection
 }
 
-func (c CommentMongoDriver) Insert(username string, contentID primitive.ObjectID, repliedAtID *primitive.ObjectID, body string) (*comment.Comment, *comment.Reply, error) {
+func (c CommentMongoDriver) UpdateCommentsForContent(courseID, contentID primitive.ObjectID, comments []*comment.Comment) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-
-	var fc course.Course
-	target := bson.M{
-		"contents": bson.M{
-			"$elemMatch": bson.M{
-				"_id": contentID,
-			},
-		},
-	}
-	projection := bson.M{
-		"created_at": 1,
-		"inventory":  1,
-		"pends":      1,
-		"prof":       1,
-		"students":   1,
-		"summery":    1,
-		"tas":        1,
-		"title":      1,
-		"token":      1,
-		"contents.$": 1,
-	}
-	if err := c.collection.FindOne(ctx, target, options.FindOne().SetProjection(projection)).Decode(&fc); err != nil {
-		return nil, nil, database.ThrowContentNotFoundException(contentID.Hex())
-	}
-	cnt := fc.Contents[0]
-	if !fc.IsUserParticipateInCourse(username) {
-		return nil, nil, database.ThrowUserNotAllowedException(username)
-	}
-	var cmd *comment.Comment = nil
-	var rep *comment.Reply = nil
-	var err error
-	if repliedAtID == nil {
-		cmd, err = comment.New(primitive.NewObjectID(), body, username, cnt.ID.Hex())
-		if err != nil {
-			return nil, nil, err
-		}
-		cnt.Comments = append(cnt.Comments, cmd)
-	} else {
-		ctmd, _ := cnt.GetComment(*repliedAtID)
-		if ctmd == nil {
-			return nil, nil, database.ThrowCommentNotFoundException(repliedAtID.Hex())
-		}
-		rep, err = comment.NewReply(primitive.NewObjectID(), body, username, repliedAtID.Hex())
-		if err != nil {
-			return nil, nil, err
-		}
-		ctmd.Replies = append(ctmd.Replies, rep)
-	}
-	if err = c.UpdateCommentsForContent(ctx, fc.ID, cnt.ID, cnt.Comments); err != nil {
-		return nil, nil, err
-	}
-	if rep != nil {
-		return nil, rep, nil
-	}
-	return cmd, rep, nil
-}
-
-func (c CommentMongoDriver) Update(username string, contentID, commentID primitive.ObjectID, body *string) (*comment.Comment, *comment.Reply, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
-	defer cancel()
-
-	//todo check if the username exists in user collection
-
-	var fc course.Course
-	target := bson.M{
-		"contents": bson.M{
-			"$elemMatch": bson.M{
-				"_id": contentID,
-			},
-		},
-	}
-	projection := bson.M{
-		"created_at": 1,
-		"inventory":  1,
-		"pends":      1,
-		"prof":       1,
-		"students":   1,
-		"summery":    1,
-		"tas":        1,
-		"title":      1,
-		"token":      1,
-		"contents.$": 1,
-	}
-	if err := c.collection.FindOne(ctx, target, options.FindOne().SetProjection(projection)).Decode(&fc); err != nil {
-		return nil, nil, database.ThrowContentNotFoundException(contentID.Hex())
-	}
-	cnt := fc.Contents[0]
-	ccmt, rcmt := cnt.GetComment(commentID)
-	if ccmt == nil {
-		return nil, nil, database.ThrowCommentNotFoundException(commentID.Hex())
-	}
-	if rcmt == nil {
-		if username != ccmt.AuthorUn {
-			return nil, nil, database.ThrowUserNotAllowedException(username)
-		}
-		err := ccmt.Update(body)
-		if err != nil {
-			return nil, nil, err
-		}
-	} else {
-		if username != rcmt.AuthorUn {
-			return nil, nil, database.ThrowUserNotAllowedException(username)
-		}
-		err := rcmt.Update(body)
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-	if err := c.UpdateCommentsForContent(ctx, fc.ID, cnt.ID, cnt.Comments); err != nil {
-		return nil, nil, err
-	}
-	if rcmt != nil {
-		return nil, rcmt, nil
-	}
-	return ccmt, rcmt, nil
-}
-
-func (c CommentMongoDriver) Delete(username string, contentID, commentID primitive.ObjectID) (*comment.Comment, *comment.Reply, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
-	defer cancel()
-
-	//todo check if the username exists in user collection
-
-	var fc course.Course
-	target := bson.M{
-		"contents": bson.M{
-			"$elemMatch": bson.M{
-				"_id": contentID,
-			},
-		},
-	}
-	projection := bson.M{
-		"created_at": 1,
-		"inventory":  1,
-		"pends":      1,
-		"prof":       1,
-		"students":   1,
-		"summery":    1,
-		"tas":        1,
-		"title":      1,
-		"token":      1,
-		"contents.$": 1,
-	}
-	if err := c.collection.FindOne(ctx, target, options.FindOne().SetProjection(projection)).Decode(&fc); err != nil {
-		return nil, nil, database.ThrowContentNotFoundException(contentID.Hex())
-	}
-	cnt := fc.Contents[0]
-	ccmt, rcmt, err := fc.RemoveComment(username, commentID, cnt)
-	if err != nil {
-		return nil, nil, err
-	}
-	if err = c.UpdateCommentsForContent(ctx, fc.ID, cnt.ID, cnt.Comments); err != nil {
-		return nil, nil, err
-	}
-	if rcmt != nil {
-		return nil, rcmt, nil
-	}
-	return ccmt, rcmt, nil
-}
-
-func (c CommentMongoDriver) UpdateCommentsForContent(ctx context.Context, courseID, contentID primitive.ObjectID, comments []*comment.Comment) error {
 	target := bson.M{
 		"_id":          courseID,
 		"contents._id": contentID,
@@ -192,8 +29,76 @@ func (c CommentMongoDriver) UpdateCommentsForContent(ctx context.Context, course
 		},
 	}
 	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
-		return database.ThrowInternalDBException(err.Error())
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
+	return nil
+}
+
+func (c CommentMongoDriver) InsertComment(courseID, contentID primitive.ObjectID, comment *comment.Comment) (*comment.Comment, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
+	defer cancel()
+
+	comment.ID = primitive.NewObjectID()
+	target := bson.M{
+		"_id":          courseID,
+		"contents._id": contentID,
+	}
+	change := bson.M{
+		"$push": bson.M{
+			"contents.$.comments": comment,
+		},
+	}
+	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
+		return nil, model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
+	}
+	return comment, nil
+}
+
+func (c CommentMongoDriver) UpdateComment(courseID, contentID, commentID primitive.ObjectID, newBody string, timestamp int64) error {
+	//todo implementation
+	return nil
+}
+
+func (c CommentMongoDriver) DeleteComment(courseID, contentID primitive.ObjectID, comment *comment.Comment) error {
+	//todo implementation
+	return nil
+}
+
+func (c CommentMongoDriver) InsertReply(courseID, contentID, repliedAtID primitive.ObjectID, reply *comment.Reply) (*comment.Reply, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
+	defer cancel()
+
+	reply.ID = primitive.NewObjectID()
+	target := bson.D{
+		{"_id", courseID},
+		{"contents._id", contentID},
+		//{"contents.comments._id", repliedAtID},
+	}
+	change := bson.M{
+		"$push": bson.M{
+			"contents.$[con].comments.$[elem].replies": reply,
+		},
+	}
+	//todo error handling?
+	_ = c.collection.FindOneAndUpdate(ctx, target, change, options.FindOneAndUpdate().SetArrayFilters(
+		options.ArrayFilters{
+			Filters: []interface{}{
+				bson.M{"con._id": contentID},
+				bson.M{"elem._id": repliedAtID,
+				},
+			},
+		},
+	))
+	return reply, nil
+}
+
+func (c CommentMongoDriver) UpdateReply(courseID, contentID, replyID primitive.ObjectID, newBody string, timestamp int64) error {
+	//todo implementation
+	return nil
+}
+
+func (c CommentMongoDriver) DeleteReply(courseID, contentID, replyID primitive.ObjectID) error {
+	//todo implementation
 	return nil
 }
 

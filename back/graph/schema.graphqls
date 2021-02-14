@@ -263,35 +263,35 @@ union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNo
 
 type Mutation {
     createUser(target:TargetUser!): CreateUserPayload!
-    updateUser(toBe:EditedUser!): UpdateUserPayload! #todo implement with authentication & jwt tokens
-    deleteUser: DeleteUserPayload! #todo implement with authentication & jwt tokens
+    updateUser(toBe:EditedUser!): UpdateUserPayload!
+    deleteUser: DeleteUserPayload!
     login(input: Login!): LoginPayload!
     refreshToken: LoginPayload!
 
 
-    createCourse(target:TargetCourse!): CreateCoursePayload!  #todo implement with authentication & jwt tokens
-    updateCourseInfo(courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload! #todo implement with authentication & jwt tokens
-    deleteCourse(courseID:String!): DeleteCoursePayload! #todo implement with authentication & jwt tokens
-    addUserToCourse(courseID:String!, token:String!): AddUserToCoursePayload! #todo implement with authentication & jwt tokens
-    deleteUserFromCourse(courseID:String!, targetUsername:String!): DeleteUserFromCoursePayload! #todo implement with authentication & jwt tokens
-    promoteUserToTA(courseID:String!, targetUsername:String!): PromoteToTAPayload! #todo implement with authentication & jwt tokens
-    demoteUserToSTD(courseID:String!, targetUsername:String!): DemoteToSTDPayload! #todo implement with authentication & jwt tokens
+    createCourse(username:String, target:TargetCourse!): CreateCoursePayload!
+    updateCourseInfo(username:String, courseID:String!, toBe:EditedCourse!): UpdateCourseInfoPayload!
+    deleteCourse(username:String, courseID:String!): DeleteCoursePayload!
+    addUserToCourse(username:String, courseID:String!, token:String!): AddUserToCoursePayload!
+    deleteUserFromCourse(username:String, courseID:String!, targetUsername:String!): DeleteUserFromCoursePayload!
+    promoteUserToTA(username:String, courseID:String!, targetUsername:String!): PromoteToTAPayload!
+    demoteUserToSTD(username:String, courseID:String!, targetUsername:String!): DemoteToSTDPayload!
 
-    uploadContent(courseID:String!, target:TargetContent!): UploadContentPayLoad! #todo implement with authentication & jwt tokens
-    editContent(courseID:String!, contentID:String!, target:EditContent!): EditContentPayLoad! #todo implement with authentication & jwt tokens
-    deleteContent(courseID:String!, contentID:String!): DeleteContentPayLoad! #todo implement with authentication & jwt tokens
+    uploadContent(username:String, courseID:String!, target:TargetContent!): UploadContentPayLoad!
+    editContent(username:String, courseID:String!, contentID:String!, target:EditContent!): EditContentPayLoad!
+    deleteContent(username:String, courseID:String!, contentID:String!): DeleteContentPayLoad!
 
-    uploadAttachment(courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad! #todo implement with authentication & jwt tokens
-    editAttachment(courseID:String!, attachmentID:String!, target:EditAttachment!): EditAttachmentPayLoad! #todo implement with authentication & jwt tokens
-    deleteAttachment(courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad! #todo implement with authentication & jwt tokens
+    uploadAttachment(username:String, courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad!
+    editAttachment(username:String, courseID:String!, attachmentID:String!, target:EditAttachment!): EditAttachmentPayLoad!
+    deleteAttachment(username:String, courseID:String!, attachmentID:String!): DeleteAttachmentPayLoad!
 
-    offerContent(courseID:String!, target:TargetPending!): OfferContentPayLoad! #todo implement with authentication & jwt tokens
-    editOfferedContent(courseID:String!, pendingID:String!, target:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
-    deleteOfferedContent(courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
-    acceptOfferedContent(courseID:String!, pendingID:String!, changed:EditedPending!): EditOfferedContentPayLoad! #todo implement with authentication & jwt tokens
-    rejectOfferedContent(courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad! #todo implement with authentication & jwt tokens
+    offerContent(username:String, courseID:String!, target:TargetPending!): OfferContentPayLoad!
+    editOfferedContent(username:String, courseID:String!, pendingID:String!, target:EditedPending!): EditOfferedContentPayLoad!
+    deleteOfferedContent(username:String, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad!
+    acceptOfferedContent(username:String, courseID:String!, pendingID:String!, changed:EditedPending!): EditOfferedContentPayLoad!
+    rejectOfferedContent(username:String, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad!
 
-    createComment(contentID:String!, repliedAtID:String, target:TargetComment!): CreateCommentPayLoad! #todo implement with authentication & jwt tokens
-    updateComment(contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad! #todo implement with authentication & jwt tokens
-    deleteComment(contentID:String!, commentID:String!): DeleteCommentPayLoad! #todo implement with authentication & jwt tokens
+    createComment(username:String, contentID:String!, repliedAtID:String, target:TargetComment!): CreateCommentPayLoad!
+    updateComment(username:String, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad!
+    deleteComment(username:String, contentID:String!, commentID:String!): DeleteCommentPayLoad!
 }

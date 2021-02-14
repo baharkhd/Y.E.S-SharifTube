@@ -10,9 +10,10 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"yes-sharifTube/internal/model"
+	"yes-sharifTube/graph/model"
 	"yes-sharifTube/internal/model/course"
-	"yes-sharifTube/pkg/database"
+	"yes-sharifTube/internal/model/user"
+	"yes-sharifTube/pkg/database/status"
 )
 
 type CourseMongoDriver struct {
@@ -21,19 +22,18 @@ type CourseMongoDriver struct {
 
 var doOnce sync.Once
 
-func (c CourseMongoDriver) GetAll(courseIDs []primitive.ObjectID) ([]*course.Course, error) {
+func (c CourseMongoDriver) Get(courseID primitive.ObjectID) (*course.Course, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	res := make([]*course.Course, len(courseIDs))
-	for i, cID := range courseIDs {
-		target := bson.M{"_id": cID}
-		res[i] = &course.Course{}
-		if err := c.collection.FindOne(ctx, target).Decode(res[i]); err != nil {
-			return nil, database.ThrowCourseNotFoundException(courseIDs[i].Hex())
-		}
+	target := bson.M{
+		"_id": courseID,
 	}
-	return res, nil
+	var res course.Course
+	if err := c.collection.FindOne(ctx, target).Decode(&res); err != nil {
+		return nil, model.CourseNotFoundException{Message: "course couldn't found."}
+	}
+	return &res, nil
 }
 
 func (c CourseMongoDriver) GetByFilter(keywords []string, start, amount int) ([]*course.Course, error) {
@@ -54,7 +54,7 @@ func (c CourseMongoDriver) GetByFilter(keywords []string, start, amount int) ([]
 		})
 	})
 	if err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+		return nil, model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
 
 	opts := options.Find()
@@ -73,7 +73,7 @@ func (c CourseMongoDriver) GetByFilter(keywords []string, start, amount int) ([]
 	}
 	courr, err := c.collection.Find(ctx, target, opts)
 	if err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+		return nil, model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
 	defer courr.Close(ctx)
 	var cours []*course.Course
@@ -87,216 +87,178 @@ func (c CourseMongoDriver) GetByFilter(keywords []string, start, amount int) ([]
 	return cours, nil
 }
 
-func (c CourseMongoDriver) Insert(username string, title, token string, summery *string) (*course.Course, error) {
+// todo fix inconsistency
+func (c CourseMongoDriver) Insert(course *course.Course) (*course.Course, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-
-	cou, err := course.New(primitive.NewObjectID(), title, username, token, summery)
-	if err != nil {
-		return nil, err
+	course.ID = primitive.NewObjectID()
+	if _, err := c.collection.InsertOne(ctx, course); err != nil {
+		return nil, model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	if _, err = c.collection.InsertOne(ctx, cou); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+	if stat := user.DBD.Enroll(course.ProfUn, course.ID.Hex()); stat == status.FAILED {
+		return nil, model.InternalServerException{Message: "database couldn't add user"}
 	}
-	return cou, nil
+	return course, nil
 }
 
-func (c CourseMongoDriver) Update(username string, courseID primitive.ObjectID, title, token, summery *string) (*course.Course, error) {
+func (c CourseMongoDriver) UpdateInfo(courseID primitive.ObjectID, title, summery, token string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-
-	var fc course.Course
 	target := bson.M{
 		"_id": courseID,
-	}
-	if err := c.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserNotStudent(username) {
-		return nil, database.ThrowUserNotAllowedException(username)
-	}
-	err := fc.Update(title, summery, token)
-	if err != nil {
-		return nil, err
 	}
 	change := bson.M{
 		"$set": bson.M{
-			"title":   fc.Title,
-			"summery": fc.Summery,
-			"token":   fc.Token,
+			"title":   title,
+			"summery": summery,
+			"token":   token,
 		},
 	}
-	if _, err = c.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return &fc, nil
+	return nil
 }
 
-func (c CourseMongoDriver) Delete(username string, courseID primitive.ObjectID) (*course.Course, error) {
+// todo fix inconsistency
+func (c CourseMongoDriver) Delete(courseID primitive.ObjectID, members []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-
-	var fc course.Course
 	target := bson.M{
 		"_id": courseID,
-	}
-	if err := c.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserProfessor(username) {
-		return nil, database.ThrowUserNotAllowedException(username)
 	}
 	if _, err := c.collection.DeleteOne(ctx, target); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return &fc, nil
+	for i := range members {
+		//Ignoring the non existed users
+		user.DBD.Leave(members[i], courseID.Hex())
+	}
+	return nil
 }
 
-func (c CourseMongoDriver) AddUser(username, token string, courseID primitive.ObjectID) (*course.Course, error) {
+func (c CourseMongoDriver) UpdateStdList(course *course.Course) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-
-	var fc course.Course
 	target := bson.M{
-		"_id": courseID,
+		"_id": course.ID,
 	}
-	if err := c.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if fc.IsUserParticipateInCourse(username) {
-		return nil, database.ThrowDuplicateUsernameException()
-	}
-	if !fc.CheckCourseToken(token) {
-		return nil, database.ThrowIncorrectTokenException()
-	}
-	fc.StdUns = append(fc.StdUns, username)
 	change := bson.M{
 		"$set": bson.M{
-			"students": fc.StdUns,
+			"students": course.StdUns,
 		},
 	}
 	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return &fc, nil
+	return nil
 }
 
-func (c CourseMongoDriver) DeleteUser(username, targetUsername string, courseID primitive.ObjectID) (*course.Course, error) {
+func (c CourseMongoDriver) UpdateTaList(course *course.Course) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-	//todo check if the targetUsername exists in user collection
-
-	var fc course.Course
 	target := bson.M{
-		"_id": courseID,
+		"_id": course.ID,
 	}
-	if err := c.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserParticipateInCourse(targetUsername) {
-		return nil, database.ThrowUserNotFoundException(targetUsername)
-	}
-	if !fc.IsUserAllowedToDeleteUser(username, targetUsername) {
-		return nil, database.ThrowUserNotAllowedException(username)
-	}
-	var change bson.M
-	if model.ContainsInStringArray(fc.TaUns, targetUsername) {
-		fc.TaUns = model.RemoveFromStringArray(fc.TaUns, targetUsername)
-		change = bson.M{
-			"$set": bson.M{
-				"tas": fc.TaUns,
-			},
-		}
-	} else {
-		fc.StdUns = model.RemoveFromStringArray(fc.StdUns, targetUsername)
-		change = bson.M{
-			"$set": bson.M{
-				"students": fc.StdUns,
-			},
-		}
-	}
-	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
-	}
-	return &fc, nil
-}
-
-func (c CourseMongoDriver) PromoteToTA(username, targetUsername string, courseID primitive.ObjectID) (*course.Course, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
-	defer cancel()
-
-	//todo check if the username exists in user collection
-	//todo check if the targetUsername exists in user collection
-
-	var fc course.Course
-	target := bson.M{
-		"_id": courseID,
-	}
-	if err := c.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserNotStudent(username) {
-		return nil, database.ThrowUserNotAllowedException(username)
-	}
-	if !fc.IsUserStudent(targetUsername) {
-		return nil, database.ThrowUserIsNotSTDException(targetUsername)
-	}
-	fc.StdUns = model.RemoveFromStringArray(fc.StdUns, targetUsername)
-	fc.TaUns = append(fc.TaUns, targetUsername)
 	change := bson.M{
 		"$set": bson.M{
-			"tas":      fc.TaUns,
-			"students": fc.StdUns,
+			"tas": course.TaUns,
 		},
 	}
 	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return &fc, nil
+	return nil
 }
 
-func (c CourseMongoDriver) DemoteToSTD(username, targetUsername string, courseID primitive.ObjectID) (*course.Course, error) {
+//todo fix Inconsistency
+func (c CourseMongoDriver) AddStd(username string, courseID primitive.ObjectID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-	//todo check if the targetUsername exists in user collection
-
-	var fc course.Course
 	target := bson.M{
 		"_id": courseID,
 	}
-	if err := c.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserNotStudent(username) {
-		return nil, database.ThrowUserNotAllowedException(username)
-	}
-	if !fc.IsUserTA(targetUsername) {
-		return nil, database.ThrowUserIsNotTAException(targetUsername)
-	}
-	fc.TaUns = model.RemoveFromStringArray(fc.TaUns, targetUsername)
-	fc.StdUns = append(fc.StdUns, targetUsername)
 	change := bson.M{
-		"$set": bson.M{
-			"tas":      fc.TaUns,
-			"students": fc.StdUns,
+		"$push": bson.M{
+			"students": username,
 		},
 	}
 	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return &fc, nil
+	if stat := user.DBD.Enroll(username, courseID.Hex()); stat == status.FAILED {
+		return model.InternalServerException{Message: "database couldn't add user"}
+	}
+	return nil
+}
+
+//todo fix Inconsistency
+func (c CourseMongoDriver) DelStd(username string, courseID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
+	defer cancel()
+
+	target := bson.M{
+		"_id": courseID,
+	}
+	change := bson.M{
+		"$pull": bson.M{
+			"students": username,
+		},
+	}
+	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
+	}
+	if stat := user.DBD.Leave(username, courseID.Hex()); stat == status.FAILED {
+		return model.InternalServerException{Message: "database couldn't add user"}
+	}
+	return nil
+}
+
+//todo fix Inconsistency
+func (c CourseMongoDriver) DelTa(username string, courseID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
+	defer cancel()
+
+	target := bson.M{
+		"_id": courseID,
+	}
+	change := bson.M{
+		"$pull": bson.M{
+			"tas": username,
+		},
+	}
+	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
+	}
+	if stat := user.DBD.Leave(username, courseID.Hex()); stat == status.FAILED {
+		return model.InternalServerException{Message: "database couldn't add user"}
+	}
+	return nil
+}
+
+func (c CourseMongoDriver) PromoteDemoteUser(course *course.Course) error {
+	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
+	defer cancel()
+
+	target := bson.M{
+		"_id": course.ID,
+	}
+	change := bson.M{
+		"$set": bson.M{
+			"students": course.StdUns,
+			"tas":      course.TaUns,
+		},
+	}
+	if _, err := c.collection.UpdateOne(ctx, target, change); err != nil {
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
+	}
+	return nil
 }
 
 func NewCourseMongoDriver(db, collection string) *CourseMongoDriver {

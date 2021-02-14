@@ -8,13 +8,13 @@ import (
 	"log"
 	"yes-sharifTube/graph"
 	"yes-sharifTube/graph/generated"
-	attachmentController "yes-sharifTube/internal/controller/attachment"
-	commentController "yes-sharifTube/internal/controller/comment"
-	contentController "yes-sharifTube/internal/controller/content"
-	courseController "yes-sharifTube/internal/controller/course"
-	pendingController "yes-sharifTube/internal/controller/pending"
 	"yes-sharifTube/internal/middleware/auth"
 	"yes-sharifTube/internal/middleware/ggcontext"
+	"yes-sharifTube/internal/model/attachment"
+	"yes-sharifTube/internal/model/comment"
+	"yes-sharifTube/internal/model/content"
+	"yes-sharifTube/internal/model/course"
+	"yes-sharifTube/internal/model/pending"
 	"yes-sharifTube/internal/model/user"
 
 	"yes-sharifTube/pkg/database/mongodb"
@@ -26,12 +26,11 @@ const queryComplexity = 8
 func main() {
 	//setting a mongodb driver for DBDriver filed of user model
 	user.DBD = mongodb.NewUserMongoDriver("yes-sharifTube", "users")
-	courseController.GetCourseController().SetDBDriver(mongodb.NewCourseMongoDriver("yes-sharifTube", "courses"))
-	contentController.GetContentController().SetDBDriver(mongodb.NewContentMongoDriver("yes-sharifTube", "courses"))
-	pendingController.GetPendingController().SetDBDriver(mongodb.NewPendingMongoDriver("yes-sharifTube", "courses"))
-	attachmentController.GetAttachmentController().SetDBDriver(mongodb.NewAttachmentMongoDriver("yes-sharifTube", "courses"))
-	commentController.GetCommentController().SetDBDriver(mongodb.NewCommentMongoDriver("yes-sharifTube", "courses"))
-
+	course.DBD = mongodb.NewCourseMongoDriver("yes-sharifTube", "courses")
+	content.DBD = mongodb.NewContentMongoDriver("yes-sharifTube", "courses")
+	pending.DBD = mongodb.NewPendingMongoDriver("yes-sharifTube", "courses")
+	attachment.DBD = mongodb.NewAttachmentMongoDriver("yes-sharifTube", "courses")
+	comment.DBD = mongodb.NewCommentMongoDriver("yes-sharifTube", "courses")
 
 	// Setting up Gin
 	r := gin.Default()

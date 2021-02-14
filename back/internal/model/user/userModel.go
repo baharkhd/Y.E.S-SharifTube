@@ -11,7 +11,7 @@ type User struct {
 	Email    string
 	Username string
 	Password string
-	Courses  []string
+	Courses  []string `bson:"courses" json:"courses"`
 }
 
 var DBD DBDriver

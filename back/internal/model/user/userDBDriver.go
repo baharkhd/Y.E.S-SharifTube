@@ -11,4 +11,6 @@ type DBDriver interface {
 	Update(target string, user *User) status.QueryStatus
 	GetAll(start, amount int64) ([]*User, status.QueryStatus)
 	Replace(target *string,toBe *User) status.QueryStatus
+    Enroll(username, courseID string) status.QueryStatus
+    Leave(username, courseID string) status.QueryStatus
 }

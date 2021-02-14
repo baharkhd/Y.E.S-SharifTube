@@ -1,87 +1,110 @@
 package controller
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal/controller"
 	"yes-sharifTube/internal/model/content"
+	"yes-sharifTube/internal/model/course"
+	"yes-sharifTube/internal/model/user"
 )
 
-func (c *contentController) GetContent(contentID string) (*model.Content, error) {
-	cID, err := primitive.ObjectIDFromHex(contentID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
-	cr, err := c.dbDriver.Get(cID)
-	err = controller.CastDBExceptionToGQLException(err)
+func GetContent(contentID string) (*content.Content, error) {
+	cn, err := content.Get(nil, contentID)
 	if err != nil {
 		return nil, err
 	}
-	return cr.Reshape()
+	return cn, nil
 }
 
-func (c *contentController) GetContents(tags []string, courseID *string, startIdx, amount int) ([]*model.Content, error) {
-	var cpID *primitive.ObjectID = nil
-	var cID primitive.ObjectID
-	var err error
-	if courseID != nil {
-		cID, err = primitive.ObjectIDFromHex(*courseID)
-		if err != nil {
-			return nil, &model.InternalServerException{Message: err.Error()}
-		}
-		cpID = &cID
-	}
-	contents, err := c.dbDriver.GetAll(cpID, tags, startIdx, amount)
-	err = controller.CastDBExceptionToGQLException(err)
+func GetContents(tags []string, courseID *string, startIdx, amount int) ([]*content.Content, error) {
+	contents, err := content.GetByFilter(courseID, tags, startIdx, amount)
 	if err != nil {
 		return nil, err
 	}
-	return content.ReshapeAll(contents)
+	return contents, nil
 }
 
-func (c *contentController) CreateContent(authorUsername, courseID, title string, description *string, vurl string, tags []string) (*model.Content, error) {
-	cID, err := primitive.ObjectIDFromHex(courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
+func CreateContent(authorUsername, courseID, title string, description *string, vurl string, tags []string) (*content.Content, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, err
 	}
-	cr, err := c.dbDriver.Insert(authorUsername, cID, title, vurl, description, tags)
-	err = controller.CastDBExceptionToGQLException(err)
+	// get the course from database
+	cr, err := course.Get(courseID)
 	if err != nil {
 		return nil, err
 	}
-	return cr.Reshape()
+	// create a content
+	cn, err := content.New(title, authorUsername, vurl, courseID, description, nil, tags)
+	if err != nil {
+		return nil, err
+	}
+	//check if user can insert content
+	err = cr.IsUserAllowedToInsertContent(authorUsername)
+	if err != nil {
+		return nil, err
+	}
+	// insert the content into database
+	cn, err = content.Insert(courseID, cn)
+	if err != nil {
+		return nil, err
+	}
+	return cn, nil
 }
 
-func (c *contentController) UpdateContent(authorUsername, courseID, contentID string, newTitle, newDescription *string, newTags []string) (*model.Content, error) {
-	cID, err := primitive.ObjectIDFromHex(courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
+func UpdateContent(authorUsername, courseID, contentID string, newTitle, newDescription *string, newTags []string) (*content.Content, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, err
 	}
-	cnID, err := primitive.ObjectIDFromHex(contentID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
-	cr, err := c.dbDriver.Update(authorUsername, cID, cnID, newTitle, newDescription, newTags)
-	err = controller.CastDBExceptionToGQLException(err)
+	// get the course from database
+	cr, err := course.Get(courseID)
 	if err != nil {
 		return nil, err
 	}
-	return cr.Reshape()
+	// get the content & course from database
+	cn, err := content.Get(&courseID, contentID)
+	if err != nil {
+		return nil, err
+	}
+	//check if user can update content
+	err = cr.IsUserAllowedToUpdateContent(authorUsername,cn)
+	if err != nil {
+		return nil, err
+	}
+	// update the content
+	err = cn.Update(newTitle, newDescription, newTags)
+	if err != nil {
+		return nil, err
+	}
+	// update the content in database
+	if err = content.Update(courseID, cn); err != nil {
+		return nil, err
+	}
+	return cn, nil
 }
 
-func (c *contentController) DeleteContent(authorUsername, courseID, contentID string) (*model.Content, error) {
-	crID, err := primitive.ObjectIDFromHex(courseID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
+func DeleteContent(authorUsername, courseID, contentID string) (*content.Content, error) {
+	// check if user exists in database
+	if _, err := user.Get(authorUsername); err != nil {
+		return nil, err
 	}
-	coID, err := primitive.ObjectIDFromHex(contentID)
-	if err != nil {
-		return nil, &model.InternalServerException{Message: err.Error()}
-	}
-	cr, err := c.dbDriver.Delete(authorUsername, crID, coID)
-	err = controller.CastDBExceptionToGQLException(err)
+	// get the course from database
+	cr, err := course.Get(courseID)
 	if err != nil {
 		return nil, err
 	}
-	return cr.Reshape()
+	// get the content & course from database
+	cn, err := content.Get(&courseID, contentID)
+	if err != nil {
+		return nil, err
+	}
+	//check if user can delete content
+	err = cr.IsUserAllowedToDeleteContent(authorUsername,cn)
+	if err != nil {
+		return nil, err
+	}
+	// delete the content from database
+	if err = content.Delete(courseID, cn); err != nil {
+		return nil, err
+	}
+	return cn, nil
 }

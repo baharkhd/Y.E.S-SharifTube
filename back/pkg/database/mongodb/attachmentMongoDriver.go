@@ -5,107 +5,105 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
+	"yes-sharifTube/graph/model"
 	"yes-sharifTube/internal/model/attachment"
 	"yes-sharifTube/internal/model/course"
-	"yes-sharifTube/pkg/database"
 )
 
 type AttachmentMongoDriver struct {
 	collection *mongo.Collection
 }
 
-func (a AttachmentMongoDriver) Insert(username string, courseID primitive.ObjectID, name, arul string, description *string) (*attachment.Attachment, error) {
+func (a AttachmentMongoDriver) Get(courseID *primitive.ObjectID, attachmentID primitive.ObjectID) (*attachment.Attachment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
+	var res course.Course
+	var target bson.M
+	if courseID == nil {
+		target = bson.M{
+			"inventory": bson.M{
+				"$elemMatch": bson.M{
+					"_id": attachmentID,
+				},
+			},
+		}
+	} else {
+		target = bson.M{
+			"_id": courseID,
+			"inventory": bson.M{
+				"$elemMatch": bson.M{
+					"_id": attachmentID,
+				},
+			},
+		}
+	}
+	projection := bson.M{
+		"created_at":  1,
+		"contents":    1,
+		"pends":       1,
+		"prof":        1,
+		"students":    1,
+		"summery":     1,
+		"tas":         1,
+		"title":       1,
+		"token":       1,
+		"inventory.$": 1,
+	}
+	if err := a.collection.FindOne(ctx, target, options.FindOne().SetProjection(projection)).Decode(&res); err != nil {
+		return nil, model.AttachmentNotFoundException{Message: "attachment couldn't found."}
+	}
+	return res.Inventory[0], nil
+}
 
-	var fc course.Course
+func (a AttachmentMongoDriver) Insert(courseID primitive.ObjectID, attachment *attachment.Attachment) (*attachment.Attachment, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
+	defer cancel()
+
+	attachment.ID = primitive.NewObjectID()
 	target := bson.M{
 		"_id": courseID,
-	}
-	if err := a.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserNotStudent(username) {
-		return nil, database.ThrowUserNotAllowedException(username)
-	}
-	atch, err := attachment.New(primitive.NewObjectID(), name, arul, fc.ID.Hex(), description)
-	if err != nil {
-		return nil, err
 	}
 	change := bson.M{
 		"$push": bson.M{
-			"inventory": atch,
+			"inventory": attachment,
 		},
 	}
-	if _, err = a.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+	if _, err := a.collection.UpdateOne(ctx, target, change); err != nil {
+		return nil, model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return atch, nil
+	return attachment, nil
 }
 
-func (a AttachmentMongoDriver) Update(username string, courseID, attachmentID primitive.ObjectID, name, description *string) (*attachment.Attachment, error) {
+func (a AttachmentMongoDriver) UpdateInfo(courseID, attachmentID primitive.ObjectID, name, description string, timestamp int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-
-	var fc course.Course
 	target := bson.M{
-		"_id": courseID,
-	}
-	if err := a.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserNotStudent(username) {
-		return nil, database.ThrowUserNotAllowedException(username)
-	}
-	natch := fc.GetAttachment(attachmentID)
-	if natch == nil {
-		return nil, database.ThrowAttachmentNotFoundException(attachmentID.Hex())
-	}
-	err := natch.Update(name, description)
-	if err != nil {
-		return nil, err
-	}
-	target = bson.M{
 		"_id":           courseID,
-		"inventory._id": natch.ID,
+		"inventory._id": attachmentID,
 	}
 	change := bson.M{
 		"$set": bson.M{
-			"inventory.$.name":        natch.Name,
-			"inventory.$.description": natch.Description,
-			"inventory.$.timestamp":   natch.Timestamp,
+			"inventory.$.name":        name,
+			"inventory.$.description": description,
+			"inventory.$.timestamp":   timestamp,
 		},
 	}
-	if _, err = a.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+	if _, err := a.collection.UpdateOne(ctx, target, change); err != nil {
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return natch, nil
+	return nil
 }
 
-func (a AttachmentMongoDriver) Delete(username string, courseID, attachmentID primitive.ObjectID) (*attachment.Attachment, error) {
+func (a AttachmentMongoDriver) Delete(courseID, attachmentID primitive.ObjectID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
-	//todo check if the username exists in user collection
-
-	var fc course.Course
 	target := bson.M{
 		"_id": courseID,
-	}
-	if err := a.collection.FindOne(ctx, target).Decode(&fc); err != nil {
-		return nil, database.ThrowCourseNotFoundException(courseID.Hex())
-	}
-	if !fc.IsUserNotStudent(username) {
-		return nil, database.ThrowUserNotAllowedException(username)
-	}
-	natch := fc.GetAttachment(attachmentID)
-	if natch == nil {
-		return nil, database.ThrowAttachmentNotFoundException(attachmentID.Hex())
 	}
 	change := bson.M{
 		"$pull": bson.M{
@@ -115,9 +113,9 @@ func (a AttachmentMongoDriver) Delete(username string, courseID, attachmentID pr
 		},
 	}
 	if _, err := a.collection.UpdateOne(ctx, target, change); err != nil {
-		return nil, database.ThrowInternalDBException(err.Error())
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
 	}
-	return natch, nil
+	return nil
 }
 
 func NewAttachmentMongoDriver(db, collection string) *AttachmentMongoDriver {

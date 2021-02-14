@@ -16,13 +16,14 @@ type Attachment struct {
 	CourseID    string             `json:"course" bson:"course"`
 }
 
-func New(ID primitive.ObjectID, name, aurl, courseID string, description *string) (*Attachment, error) {
+var DBD DBDriver
+
+func New(name, aurl, courseID string, description *string) (*Attachment, error) {
 	err := RegexValidate(&name, description, &aurl, &courseID)
 	if err != nil {
 		return nil, err
 	}
 	return &Attachment{
-		ID:          ID,
 		Name:        name,
 		Description: modelUtil.PtrTOStr(description),
 		Timestamp:   time.Now().Unix(),
@@ -49,25 +50,6 @@ func RegexValidate(name, description, aurl, courseID *string) error {
 		}
 	}
 	return nil
-}
-
-func (a Attachment) Reshape() *model.Attachment {
-	return &model.Attachment{
-		ID:          a.ID.Hex(),
-		Name:        a.Name,
-		Aurl:        a.Aurl,
-		Description: &a.Description,
-		Timestamp:   int(a.Timestamp),
-		CourseID:    a.CourseID,
-	}
-}
-
-func ReshapeAll(courses []*Attachment) []*model.Attachment {
-	var cs []*model.Attachment
-	for _, c := range courses {
-		cs = append(cs, c.Reshape())
-	}
-	return cs
 }
 
 func (a *Attachment) Update(newName, newDescription *string) error {
