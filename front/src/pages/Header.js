@@ -111,18 +111,11 @@ const Header = props => {
         history.push("/");
         break;
       case "Logout":
-        // localStorage.removeItem(constants.AUTH_TOKEN);
-        // props.setToken(undefined)
-        // history.push("/login");
         changeToken();
-        // window.location.reload(false);
         break;
-      // case "Dashboard":
-      //   history.push("/dashboard");
-      //   break
-      // case "Homepage":
-      //   history.push("/")
-      //   break
+      case "Dashboard":
+        history.push("/dashboard");
+        break;
     }
   }
 
