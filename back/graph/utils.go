@@ -67,18 +67,9 @@ func fetchUsername(ctx context.Context) (*string, error) {
 }
 
 func reformatCourse(c *course.Course) (*model.Course, error) {
-	prof, err := user.Get(c.ProfUn)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "user not found while reshape course: /n" + err.Error()}
-	}
-	tas, err := user.GetS(c.TaUns)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "user not found while reshape course: /n" + err.Error()}
-	}
-	students, err := user.GetS(c.StdUns)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "user not found while reshape course: /n" + err.Error()}
-	}
+	prof, _ := user.Get(c.ProfUn)
+	tas, _ := user.GetS(c.TaUns)
+	students, _ := user.GetS(c.StdUns)
 
 	res := &model.Course{
 		ID:        c.ID.Hex(),
@@ -126,10 +117,7 @@ func reformatCourses(courses []*course.Course) ([]*model.Course, error) {
 }
 
 func reformatPending(p *pending.Pending) (*model.Pending, error) {
-	uploader, err := user.Get(p.UploadedByUn)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "user not found while reshape pending: /n" + err.Error()}
-	}
+	uploader, _ := user.Get(p.UploadedByUn)
 
 	return &model.Pending{
 		ID:          p.ID.Hex(),
@@ -156,10 +144,7 @@ func reformatPendings(pendings []*pending.Pending) ([]*model.Pending, error) {
 }
 
 func reformatContent(c *content.Content) (*model.Content, error) {
-	uploader, err := user.Get(c.UploadedByUn)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "user not found while reshape content: /n" + err.Error()}
-	}
+	uploader, _ := user.Get(c.UploadedByUn)
 	approver, _ := user.Get(c.ApprovedByUn)
 
 	res := &model.Content{
@@ -217,10 +202,7 @@ func reformatAttachments(attachments []*attachment.Attachment) []*model.Attachme
 }
 
 func reformatComment(c *comment.Comment) (*model.Comment, error) {
-	author, err := user.Get(c.AuthorUn)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "user not found while reshape comment: /n" + err.Error()}
-	}
+	author, _ := user.Get(c.AuthorUn)
 
 	res := &model.Comment{
 		ID:        c.ID.Hex(),
@@ -254,10 +236,7 @@ func reformatComments(courses []*comment.Comment) ([]*model.Comment, error) {
 }
 
 func reformatReply(r *comment.Reply) (*model.Reply, error) {
-	author, err := user.Get(r.AuthorUn)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "user not found while reshape reply: /n" + err.Error()}
-	}
+	author, _ := user.Get(r.AuthorUn)
 
 	return &model.Reply{
 		ID:        r.ID.Hex(),

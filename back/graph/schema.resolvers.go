@@ -763,16 +763,16 @@ func (r *queryResolver) Users(ctx context.Context, start int, amount int) ([]*mo
 	return reformatUsers(all), err
 }
 
-func (r *queryResolver) Courses(ctx context.Context, ids []string) ([]*model.Course, error) {
-	res, err := courseController.GetCourses(ids)
+func (r *queryResolver) Courses(ctx context.Context, username *string, ids []string) ([]*model.Course, error) {
+	res, err := courseController.GetCourses(username, ids)
 	if err != nil {
 		return nil, err
 	}
 	return reformatCourses(res)
 }
 
-func (r *queryResolver) CoursesByKeyWords(ctx context.Context, keyWords []string, start int, amount int) ([]*model.Course, error) {
-	res, err := courseController.GetCoursesByKeyWords(keyWords, start, amount)
+func (r *queryResolver) CoursesByKeyWords(ctx context.Context, username *string, keyWords []string, start int, amount int) ([]*model.Course, error) {
+	res, err := courseController.GetCoursesByKeyWords(username, keyWords, start, amount)
 	if err != nil {
 		return nil, err
 	}
@@ -795,8 +795,8 @@ func (r *queryResolver) Contents(ctx context.Context, tags []string, courseID *s
 	return reformatContents(res)
 }
 
-func (r *queryResolver) Pendings(ctx context.Context, filter model.PendingFilter, start int, amount int) ([]*model.Pending, error) {
-	res, err := pendingController.GetPendings(filter.CourseID, filter.UploaderUsername, filter.Status, start, amount)
+func (r *queryResolver) Pendings(ctx context.Context, username *string, filter model.PendingFilter, start int, amount int) ([]*model.Pending, error) {
+	res, err := pendingController.GetPendings(username, filter.CourseID, filter.UploaderUsername, filter.Status, start, amount)
 	if err != nil {
 		return nil, err
 	}

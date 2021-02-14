@@ -8,12 +8,17 @@ import (
 	"yes-sharifTube/internal/model/user"
 )
 
-func GetPendings(courseID, uploaderUsername *string, status *model.Status, startIdx, amount int) ([]*pending.Pending, error) {
-	pr, err := pending.GetByFilter(courseID, uploaderUsername, status, startIdx, amount)
+func GetPendings(username *string, courseID, uploaderUsername *string, status *model.Status, startIdx, amount int) ([]*pending.Pending, error) {
+	prs, err := pending.GetByFilter(courseID, uploaderUsername, status, startIdx, amount)
 	if err != nil {
 		return nil, err
 	}
-	return pr, nil
+	var fpr []*pending.Pending
+	for _, pr := range prs {
+		c, _ := course.Get(pr.CourseID)
+		fpr = append(fpr, c.FilterPending(username, pr))
+	}
+	return prs, nil
 }
 
 func CreatePending(authorUsername, courseID, title string, description *string, furl string) (*pending.Pending, error) {

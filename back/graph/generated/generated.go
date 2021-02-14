@@ -176,9 +176,9 @@ type ComplexityRoot struct {
 	Query struct {
 		Content           func(childComplexity int, id string) int
 		Contents          func(childComplexity int, tags []string, courseID *string, start int, amount int) int
-		Courses           func(childComplexity int, ids []string) int
-		CoursesByKeyWords func(childComplexity int, keyWords []string, start int, amount int) int
-		Pendings          func(childComplexity int, filter model.PendingFilter, start int, amount int) int
+		Courses           func(childComplexity int, username *string, ids []string) int
+		CoursesByKeyWords func(childComplexity int, username *string, keyWords []string, start int, amount int) int
+		Pendings          func(childComplexity int, username *string, filter model.PendingFilter, start int, amount int) int
 		User              func(childComplexity int, username *string) int
 		Users             func(childComplexity int, start int, amount int) int
 	}
@@ -259,11 +259,11 @@ type MutationResolver interface {
 type QueryResolver interface {
 	User(ctx context.Context, username *string) (*model.User, error)
 	Users(ctx context.Context, start int, amount int) ([]*model.User, error)
-	Courses(ctx context.Context, ids []string) ([]*model.Course, error)
-	CoursesByKeyWords(ctx context.Context, keyWords []string, start int, amount int) ([]*model.Course, error)
+	Courses(ctx context.Context, username *string, ids []string) ([]*model.Course, error)
+	CoursesByKeyWords(ctx context.Context, username *string, keyWords []string, start int, amount int) ([]*model.Course, error)
 	Content(ctx context.Context, id string) (*model.Content, error)
 	Contents(ctx context.Context, tags []string, courseID *string, start int, amount int) ([]*model.Content, error)
-	Pendings(ctx context.Context, filter model.PendingFilter, start int, amount int) ([]*model.Pending, error)
+	Pendings(ctx context.Context, username *string, filter model.PendingFilter, start int, amount int) ([]*model.Pending, error)
 }
 
 type executableSchema struct {
@@ -991,7 +991,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Courses(childComplexity, args["ids"].([]string)), true
+		return e.complexity.Query.Courses(childComplexity, args["username"].(*string), args["ids"].([]string)), true
 
 	case "Query.coursesByKeyWords":
 		if e.complexity.Query.CoursesByKeyWords == nil {
@@ -1003,7 +1003,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.CoursesByKeyWords(childComplexity, args["keyWords"].([]string), args["start"].(int), args["amount"].(int)), true
+		return e.complexity.Query.CoursesByKeyWords(childComplexity, args["username"].(*string), args["keyWords"].([]string), args["start"].(int), args["amount"].(int)), true
 
 	case "Query.pendings":
 		if e.complexity.Query.Pendings == nil {
@@ -1015,7 +1015,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Pendings(childComplexity, args["filter"].(model.PendingFilter), args["start"].(int), args["amount"].(int)), true
+		return e.complexity.Query.Pendings(childComplexity, args["username"].(*string), args["filter"].(model.PendingFilter), args["start"].(int), args["amount"].(int)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -1312,13 +1312,13 @@ type Query {
     user(username: String): User!
     users(start: Int!=0, amount: Int!=5): [User!]!
 
-    courses(ids: [String!]!): [Course!]!
-    coursesByKeyWords(keyWords: [String!]!, start: Int!=0, amount: Int!=5): [Course!]!
+    courses(username:String, ids: [String!]!): [Course!]!
+    coursesByKeyWords(username:String, keyWords: [String!]!, start: Int!=0, amount: Int!=5): [Course!]!
 
     content(id: String!): Content!
     contents(tags: [String!]!, courseID: String, start: Int!=0, amount: Int!=5): [Content!]!
 
-    pendings(filter: PendingFilter!, start: Int!=0, amount: Int!=5): [Pending!]!
+    pendings(username:String, filter: PendingFilter!, start: Int!=0, amount: Int!=5): [Pending!]!
 }
 
 input TargetUser{
@@ -2424,81 +2424,108 @@ func (ec *executionContext) field_Query_contents_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_coursesByKeyWords_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []string
+	var arg0 *string
+	if tmp, ok := rawArgs["username"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["username"] = arg0
+	var arg1 []string
 	if tmp, ok := rawArgs["keyWords"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyWords"))
-		arg0, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["keyWords"] = arg0
-	var arg1 int
+	args["keyWords"] = arg1
+	var arg2 int
 	if tmp, ok := rawArgs["start"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["start"] = arg1
-	var arg2 int
-	if tmp, ok := rawArgs["amount"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
 		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["amount"] = arg2
+	args["start"] = arg2
+	var arg3 int
+	if tmp, ok := rawArgs["amount"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+		arg3, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["amount"] = arg3
 	return args, nil
 }
 
 func (ec *executionContext) field_Query_courses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []string
-	if tmp, ok := rawArgs["ids"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
-		arg0, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
+	var arg0 *string
+	if tmp, ok := rawArgs["username"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["ids"] = arg0
+	args["username"] = arg0
+	var arg1 []string
+	if tmp, ok := rawArgs["ids"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
+		arg1, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ids"] = arg1
 	return args, nil
 }
 
 func (ec *executionContext) field_Query_pendings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PendingFilter
+	var arg0 *string
+	if tmp, ok := rawArgs["username"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["username"] = arg0
+	var arg1 model.PendingFilter
 	if tmp, ok := rawArgs["filter"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalNPendingFilter2yesᚑsharifTubeᚋgraphᚋmodelᚐPendingFilter(ctx, tmp)
+		arg1, err = ec.unmarshalNPendingFilter2yesᚑsharifTubeᚋgraphᚋmodelᚐPendingFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["filter"] = arg0
-	var arg1 int
+	args["filter"] = arg1
+	var arg2 int
 	if tmp, ok := rawArgs["start"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["start"] = arg1
-	var arg2 int
-	if tmp, ok := rawArgs["amount"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
 		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["amount"] = arg2
+	args["start"] = arg2
+	var arg3 int
+	if tmp, ok := rawArgs["amount"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+		arg3, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["amount"] = arg3
 	return args, nil
 }
 
@@ -5561,7 +5588,7 @@ func (ec *executionContext) _Query_courses(ctx context.Context, field graphql.Co
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Courses(rctx, args["ids"].([]string))
+		return ec.resolvers.Query().Courses(rctx, args["username"].(*string), args["ids"].([]string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5603,7 +5630,7 @@ func (ec *executionContext) _Query_coursesByKeyWords(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CoursesByKeyWords(rctx, args["keyWords"].([]string), args["start"].(int), args["amount"].(int))
+		return ec.resolvers.Query().CoursesByKeyWords(rctx, args["username"].(*string), args["keyWords"].([]string), args["start"].(int), args["amount"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5729,7 +5756,7 @@ func (ec *executionContext) _Query_pendings(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Pendings(rctx, args["filter"].(model.PendingFilter), args["start"].(int), args["amount"].(int))
+		return ec.resolvers.Query().Pendings(rctx, args["username"].(*string), args["filter"].(model.PendingFilter), args["start"].(int), args["amount"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

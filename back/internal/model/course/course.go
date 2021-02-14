@@ -217,56 +217,56 @@ func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cn
 	return nil, nil, model.CommentNotFoundException{Message: "there is no comment @" + commentID.Hex()}
 }
 
-func (c *Course) IsUserAllowedToInsertAttachment(username string) error{
+func (c *Course) IsUserAllowedToInsertAttachment(username string) error {
 	if !c.IsUserProfOrTA(username) {
 		return model.UserNotAllowedException{Message: "you are not professor or ta"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToUpdateAttachment(username string) error{
+func (c *Course) IsUserAllowedToUpdateAttachment(username string) error {
 	if !c.IsUserProfOrTA(username) {
 		return model.UserNotAllowedException{Message: "you are not professor or ta"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToDeleteAttachment(username string) error{
+func (c *Course) IsUserAllowedToDeleteAttachment(username string) error {
 	if !c.IsUserProfOrTA(username) {
 		return model.UserNotAllowedException{Message: "you are not professor or ta"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToInsertContent(username string) error{
+func (c *Course) IsUserAllowedToInsertContent(username string) error {
 	if !c.IsUserProfOrTA(username) {
 		return model.UserNotAllowedException{Message: "you are not professor or ta"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToUpdateContent(username string, content *content.Content) error{
+func (c *Course) IsUserAllowedToUpdateContent(username string, content *content.Content) error {
 	if !c.IsUserAllowedToModifyContent(username, content) {
 		return model.UserNotAllowedException{Message: "you can't edit this content"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToDeleteContent(username string, content *content.Content) error{
+func (c *Course) IsUserAllowedToDeleteContent(username string, content *content.Content) error {
 	if !c.IsUserAllowedToModifyContent(username, content) {
 		return model.UserNotAllowedException{Message: "you can't edit this content"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToInsertPending(username string) error{
+func (c *Course) IsUserAllowedToInsertPending(username string) error {
 	if !c.IsUserStudent(username) {
 		return model.UserNotAllowedException{Message: "you are not student"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToUpdatePending(username string, pnd *pending.Pending) error{
+func (c *Course) IsUserAllowedToUpdatePending(username string, pnd *pending.Pending) error {
 	if username != pnd.UploadedByUn {
 		return model.UserNotAllowedException{Message: "you can't edit this offer"}
 	}
@@ -276,14 +276,14 @@ func (c *Course) IsUserAllowedToUpdatePending(username string, pnd *pending.Pend
 	return nil
 }
 
-func (c *Course) IsUserAllowedToDeletePending(username string, pending *pending.Pending) error{
-	if username != pending.UploadedByUn {
+func (c *Course) IsUserAllowedToDeletePending(username string, pending *pending.Pending) error {
+	if !c.IsUserProfOrTA(username) && username != pending.UploadedByUn {
 		return model.UserNotAllowedException{Message: "you can't remove this offer"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToAcceptPending(username string, ond *pending.Pending) error{
+func (c *Course) IsUserAllowedToAcceptPending(username string, ond *pending.Pending) error {
 	if !c.IsUserProfOrTA(username) {
 		return model.UserNotAllowedException{Message: "you can't accept this offer"}
 	}
@@ -293,7 +293,7 @@ func (c *Course) IsUserAllowedToAcceptPending(username string, ond *pending.Pend
 	return nil
 }
 
-func (c *Course) IsUserAllowedToRejectPending(username string, pnd *pending.Pending) error{
+func (c *Course) IsUserAllowedToRejectPending(username string, pnd *pending.Pending) error {
 	if !c.IsUserProfOrTA(username) {
 		return model.UserNotAllowedException{Message: "you can't reject this offer"}
 	}
@@ -303,16 +303,45 @@ func (c *Course) IsUserAllowedToRejectPending(username string, pnd *pending.Pend
 	return nil
 }
 
-func (c *Course) IsUserAllowedToInsertComment(username string) error{
+func (c *Course) IsUserAllowedToInsertComment(username string) error {
 	if !c.IsUserParticipateInCourse(username) {
 		return model.UserNotAllowedException{Message: "you can't write a comment on this course"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToUpdateComment(username, author string) error{
-	if username != author{
+func (c *Course) IsUserAllowedToUpdateComment(username, author string) error {
+	if username != author {
 		return model.UserNotAllowedException{Message: "you can't edit this comment on this course"}
 	}
 	return nil
+}
+
+func (c *Course) FilterPending(username *string, pnd *pending.Pending) *pending.Pending {
+	if username == nil || (*username != pnd.UploadedByUn && !c.IsUserProfOrTA(*username)) {
+		pnd.Furl = ""
+		pnd.Description = ""
+	}
+	return pnd
+}
+
+func (c *Course) FilterPendings(username *string, pends []*pending.Pending) []*pending.Pending {
+	var pnds []*pending.Pending
+	for _, pn := range pends {
+		pnds = append(pnds, c.FilterPending(username, pn))
+	}
+	return pnds
+}
+
+func (c *Course) FilterPendsOfCourse(username *string) *Course {
+	c.Pends = c.FilterPendings(username, c.Pends)
+	return c
+}
+
+func FilterPendsOfCourses(username *string, courses []*Course) []*Course {
+	var crs []*Course
+	for _, cr := range courses {
+		crs = append(crs, cr.FilterPendsOfCourse(username))
+	}
+	return crs
 }
