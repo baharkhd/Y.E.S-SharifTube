@@ -18,6 +18,7 @@ import Courses from "./pages/dashboard/Courses.js";
 import PendingPage from "./pages/CoursePage/PendingPage.js";
 import UploadPage from "./pages/CoursePage/UploadPage.js";
 import useToken from "./Token/useToken.js";
+import { gql, useQuery } from "@apollo/client";
 
 const TestComponent = props => {
   let { id, test } = useParams();
@@ -34,15 +35,24 @@ const TestComponent = props => {
   );
 };
 
+const GET_USER_QUERY = gql`
+  {
+    user {
+      username
+    }
+  }
+`;
+
 function App() {
   const isMobile = useMediaQuery({
     query: "(max-device-width: 570px)"
   });
 
-
+  const { data, loading, error } = useQuery(GET_USER_QUERY);
+  console.log("checkkkkkkk:", data, loading, error);
 
   const { token, setToken } = useToken();
-  console.log("token in app:", token)
+  console.log("token in app:", token);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -83,7 +93,11 @@ function App() {
         </Route>
         {/* Todo: remove this part! */}
         <Route exact path="/course:id">
-          <CourseDashboard isMobile={isMobile} sidebarOpen={sidebarOpen} />
+          <CourseDashboard
+            isMobile={isMobile}
+            sidebarOpen={sidebarOpen}
+            username={token ? (!loading ? data.user.username : "") : ""}
+          />
         </Route>
         <Route exact path="/">
           <Homepage />
@@ -106,7 +120,7 @@ function App() {
         <Route exact path="/course:courseID/upload">
           <UploadPage />
         </Route>
-      </Switch> 
+      </Switch>
     </div>
   );
 }

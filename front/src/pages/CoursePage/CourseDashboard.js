@@ -68,6 +68,14 @@ const contents = [
   }
 ];
 
+// const GET_USER_QUERY = gql`
+//   {
+//     user {
+//       username
+//     }
+//   }
+// `;
+
 const COURSE_QUERY = gql`
   query GetCoursesByID($ids: [String!]!) {
     courses(ids: $ids) {
@@ -157,11 +165,16 @@ function CourseDashboard(props) {
   id = id.substring(1);
   // Todo: use the course id to get the course information and use them
 
+
+  console.log("---------------- username:", props.username)
+
   const response = useQuery(COURSE_QUERY, {
     variables: {
       ids: [id]
     }
   });
+
+  // const userResponse = useQuery(GET_USER_QUERY)
 
   let course = null;
   if (!response.loading && response.data) {
@@ -248,6 +261,7 @@ function CourseDashboard(props) {
           // course={course}
           courseProf={course.prof}
           courseTAs={course.tas}
+          role={props.username === course.prof.username ? "prof" : "non-prof"} // can be prof or ta or st
         />
       )}
       <Segment

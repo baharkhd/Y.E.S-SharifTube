@@ -57,7 +57,7 @@ function SideBar(props) {
       </Menu.Item>
       <Menu.Item>
         {/* If user is the instructor or a TA */}
-        {false ? (
+        {props.role === "prof" ? (
           <Link to={"/course:" + id + "/pendings"}>
             <Button color="blue">Pending Contents</Button>
           </Link>
