@@ -5,22 +5,22 @@ import (
 	"yes-sharifTube/internal/model/user"
 )
 
-func GetCourses(courseIDs []string) ([]*course.Course, error) {
+func GetCourses(username *string, courseIDs []string) ([]*course.Course, error) {
 	// get courses from database
 	courses, err := course.GetAll(courseIDs)
 	if err != nil {
 		return nil, err
 	}
-	return courses, nil
+	return course.FilterPendsOfCourses(username, courses), nil
 }
 
-func GetCoursesByKeyWords(keywords []string, startIdx, amount int) ([]*course.Course, error) {
+func GetCoursesByKeyWords(username *string, keywords []string, startIdx, amount int) ([]*course.Course, error) {
 	// get courses from database
 	courses, err := course.GetByFilter(keywords, startIdx, amount)
 	if err != nil {
 		return nil, err
 	}
-	return courses, nil
+	return course.FilterPendsOfCourses(username, courses), nil
 }
 
 func CreateCourse(authorUsername, title string, summery *string, token string) (*course.Course, error) {
@@ -38,7 +38,7 @@ func CreateCourse(authorUsername, title string, summery *string, token string) (
 	if err != nil {
 		return nil, err
 	}
-	return cr, nil
+	return cr.FilterPendsOfCourse(&authorUsername), nil
 }
 
 func UpdateCourse(authorUsername, courseID string, newTitle, newSummery, newToken *string) (*course.Course, error) {
@@ -60,7 +60,7 @@ func UpdateCourse(authorUsername, courseID string, newTitle, newSummery, newToke
 	if err = course.Update(authorUsername, cr); err != nil {
 		return nil, err
 	}
-	return cr, nil
+	return cr.FilterPendsOfCourse(&authorUsername), nil
 }
 
 func DeleteCourse(authorUsername, courseID string) (*course.Course, error) {
@@ -77,7 +77,7 @@ func DeleteCourse(authorUsername, courseID string) (*course.Course, error) {
 	if err = course.Delete(authorUsername, cr); err != nil {
 		return nil, err
 	}
-	return cr, nil
+	return cr.FilterPendsOfCourse(&authorUsername), nil
 }
 
 func AddUserToCourse(username, courseID, token string) (*course.Course, error) {
@@ -95,7 +95,7 @@ func AddUserToCourse(username, courseID, token string) (*course.Course, error) {
 	if err != nil {
 		return nil, err
 	}
-	return cr, nil
+	return cr.FilterPendsOfCourse(&username), nil
 }
 
 func DeleteUserFromCourse(username, courseID, targetUsername string) (*course.Course, error) {
@@ -116,7 +116,7 @@ func DeleteUserFromCourse(username, courseID, targetUsername string) (*course.Co
 	if err != nil {
 		return nil, err
 	}
-	return cr, nil
+	return cr.FilterPendsOfCourse(&username), nil
 }
 
 func PromoteUserToTA(username, courseID, targetUsername string) (*course.Course, error) {
@@ -137,7 +137,7 @@ func PromoteUserToTA(username, courseID, targetUsername string) (*course.Course,
 	if err != nil {
 		return nil, err
 	}
-	return cr, nil
+	return cr.FilterPendsOfCourse(&username), nil
 }
 
 func DemoteUserToSTD(username, courseID, targetUsername string) (*course.Course, error) {
@@ -158,5 +158,5 @@ func DemoteUserToSTD(username, courseID, targetUsername string) (*course.Course,
 	if err != nil {
 		return nil, err
 	}
-	return cr, nil
+	return cr.FilterPendsOfCourse(&username), nil
 }
