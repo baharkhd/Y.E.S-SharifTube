@@ -19,13 +19,14 @@ type Pending struct {
 	CourseID     string             `json:"course" bson:"course"`
 }
 
-func New(ID primitive.ObjectID, title, uploadedByID, furl, courseID string, description *string) (*Pending, error) {
+var DBD DBDriver
+
+func New(title, uploadedByID, furl, courseID string, description *string) (*Pending, error) {
 	err := RegexValidate(&title, description, &uploadedByID, &furl, &courseID)
 	if err != nil {
 		return nil, err
 	}
 	return &Pending{
-		ID:           ID,
 		Title:        title,
 		Description:  modelUtil.PtrTOStr(description),
 		Status:       PENDING,
@@ -57,34 +58,6 @@ func RegexValidate(title, description, uploadedByID, furl, courseID *string) err
 		}
 	}
 	return nil
-}
-
-func (p Pending) Reshape() (*model.Pending, error) {
-	//todo get author user by its username from database
-	var uploader *model.User
-
-	return &model.Pending{
-		ID:          p.ID.Hex(),
-		Title:       p.Title,
-		Description: &p.Description,
-		Status:      p.Status.Reshape(),
-		Timestamp:   int(p.Timestamp),
-		UploadedBy:  uploader,
-		Furl:        p.Furl,
-		CourseID:    p.CourseID,
-	}, nil
-}
-
-func ReshapeAll(pendings []*Pending) ([]*model.Pending, error) {
-	var ps []*model.Pending
-	for _, p := range pendings {
-		tmp, err := p.Reshape()
-		if err != nil {
-			return nil, model.InternalServerException{Message: "error while reshape pending array: /n" + err.Error()}
-		}
-		ps = append(ps, tmp)
-	}
-	return ps, nil
 }
 
 func (p *Pending) Update(newTitle, newDescription *string) error {

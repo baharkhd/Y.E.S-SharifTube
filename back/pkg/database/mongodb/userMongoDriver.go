@@ -14,12 +14,11 @@ type UserMongoDriver struct {
 	collection *mongo.Collection
 }
 
-
 /*	mongoDB implementation of the UserDBDriver interface
 	here we have a UserMongoDriver which can be initialized with a collaborating collection
 	to perform the CRUD for user.User model on mongo
 */
-func (u UserMongoDriver) GetAll(start,amount int64) ([]*user.User, status.QueryStatus) {
+func (u UserMongoDriver) GetAll(start, amount int64) ([]*user.User, status.QueryStatus) {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
@@ -29,11 +28,11 @@ func (u UserMongoDriver) GetAll(start,amount int64) ([]*user.User, status.QueryS
 	} else {
 		defer cur.Close(ctx)
 		for cur.Next(context.Background()) {
-			if start>0{
+			if start > 0 {
 				start--
 				continue
 			}
-			if amount ==0{
+			if amount == 0 {
 				break
 			}
 			amount--
@@ -41,14 +40,14 @@ func (u UserMongoDriver) GetAll(start,amount int64) ([]*user.User, status.QueryS
 			_ = cur.Decode(&blogUser)
 			result = append(result, &blogUser)
 		}
-		return result,status.SUCCESSFUL
+		return result, status.SUCCESSFUL
 	}
 }
 
 func (u UserMongoDriver) Insert(user *user.User) status.QueryStatus {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
-	user.ID=primitive.NewObjectID()
+	user.ID = primitive.NewObjectID()
 	if _, err := u.collection.InsertOne(ctx, user); err != nil {
 		return status.FAILED
 	}
@@ -61,17 +60,18 @@ func (u UserMongoDriver) Get(username *string) (*user.User, status.QueryStatus) 
 	defer cancel()
 
 	var result user.User
-	if err := u.collection.FindOne(ctx, bson.M{"username":username}).Decode(&result); err != nil {
+	if err := u.collection.FindOne(ctx, bson.M{"username": username}).Decode(&result); err != nil {
 		return &result, status.FAILED
 	}
 	return &result, status.SUCCESSFUL
 }
 
+//todo user deletion should clear everything
 func (u UserMongoDriver) Delete(username *string) status.QueryStatus {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
-	if _, err := u.collection.DeleteOne(ctx, bson.M{"username":username}); err != nil {
+	if _, err := u.collection.DeleteOne(ctx, bson.M{"username": username}); err != nil {
 		return status.FAILED
 	}
 	return status.SUCCESSFUL
@@ -80,28 +80,63 @@ func (u UserMongoDriver) Delete(username *string) status.QueryStatus {
 func (u UserMongoDriver) Update(target string, user *user.User) status.QueryStatus {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
-	query:=bson.M{}
-	update:=bson.M{"$set":query}
-	if user.Name != ""{
-		query["name"]=user.Name
+	query := bson.M{}
+	update := bson.M{"$set": query}
+	if user.Name != "" {
+		query["name"] = user.Name
 	}
-	if user.Username != ""{
-		query["username"]=user.Username
+	if user.Username != "" {
+		query["username"] = user.Username
 	}
-	if user.Email != ""{
-		query["email"]=user.Email
+	if user.Email != "" {
+		query["email"] = user.Email
 	}
-	if user.Password != ""{
-		query["password"]=user.Password
+	if user.Password != "" {
+		query["password"] = user.Password
 	}
-	if updateResult, err := u.collection.UpdateOne(ctx,bson.M{"username":target}, update);
-	err != nil || updateResult.MatchedCount==0 {
+	if updateResult, err := u.collection.UpdateOne(ctx, bson.M{"username": target}, update);
+		err != nil || updateResult.MatchedCount == 0 {
 		return status.FAILED
 	}
 	return status.SUCCESSFUL
 
 }
 
+func (u UserMongoDriver) Enroll(username, courseID string) status.QueryStatus {
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	target := bson.M{
+		"username": username,
+	}
+	change := bson.M{
+		"$push": bson.M{
+			"courses": courseID,
+		},
+	}
+	if updateResult, err := u.collection.UpdateOne(ctx, target, change);
+		err != nil || updateResult.MatchedCount == 0 {
+		return status.FAILED
+	}
+	return status.SUCCESSFUL
+}
+
+func (u UserMongoDriver) Leave(username, courseID string) status.QueryStatus {
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	target := bson.M{
+		"username": username,
+	}
+	change := bson.M{
+		"$pull": bson.M{
+			"courses": courseID,
+		},
+	}
+	if updateResult, err := u.collection.UpdateOne(ctx, target, change);
+		err != nil || updateResult.MatchedCount == 0 {
+		return status.FAILED
+	}
+	return status.SUCCESSFUL
+}
 
 /*	here in this new function we take a dbname and collection name and retrieve
 	the corresponding collection for our UserMongoDriver instance to work with
@@ -116,7 +151,7 @@ func (u UserMongoDriver) Replace(target *string, toBe *user.User) status.QuerySt
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
-	if _, err := u.collection.ReplaceOne(ctx,bson.M{"username":target},toBe); err != nil {
+	if _, err := u.collection.ReplaceOne(ctx, bson.M{"username": target}, toBe); err != nil {
 		return status.FAILED
 	}
 	return status.SUCCESSFUL

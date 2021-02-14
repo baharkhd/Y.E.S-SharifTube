@@ -4,6 +4,7 @@ import (
 	"yes-sharifTube/graph/model"
 	"yes-sharifTube/pkg/database/status"
 )
+
 /*	the actual implementation of CRUD for user model is here
 	we also added getAll method due to our certain needs
 */
@@ -19,7 +20,7 @@ func GetAll(start, amount int64) ([]*User, error) {
 	return all, nil
 }
 
-func Update(targetUsername string, toBe model.EditedUser) (*User,error) {
+func Update(targetUsername string, toBe model.EditedUser) (*User, error) {
 
 	targetUser := newFrom(toBe)
 	return update(targetUsername, targetUser)
@@ -55,7 +56,6 @@ func newFrom(toBe model.EditedUser) User {
 	}
 	return targetUser
 }
-
 
 func Delete(username string) error {
 
@@ -103,6 +103,18 @@ func Get(username string) (*User, error) {
 	}
 }
 
+func GetS(usernames []string) ([]*User, error) {
+	var users []*User
+	for i, _ := range usernames {
+		target, stat := DBD.Get(&usernames[i])
+		if stat == status.FAILED {
+			return nil, model.UserNotFoundException{Message: "couldn't find the requested user"}
+		}
+		users = append(users, target)
+	}
+	return users, nil
+}
+
 func (u *User) Enroll(courseID string) *User {
 	u.enroll(courseID)
 	return u
@@ -115,7 +127,7 @@ func (u *User) Leave(CourseID string) *User {
 
 func (u *User) UpdateName(name string) (*User, error) {
 	u.updateName(name)
-	return update(u.Username,User{Name: u.Name})
+	return update(u.Username, User{Name: u.Name})
 }
 func (u *User) UpdateEmail(email string) (*User, error) {
 	u.updateEmail(email)
@@ -123,9 +135,8 @@ func (u *User) UpdateEmail(email string) (*User, error) {
 }
 
 func (u *User) UpdatePassword(password string) (*User, error) {
-	if err := u.updatePassword(password); err!=nil{
+	if err := u.updatePassword(password); err != nil {
 		return nil, err
 	}
-	return update(u.Username,User{Password: u.Password})
+	return update(u.Username, User{Password: u.Password})
 }
-

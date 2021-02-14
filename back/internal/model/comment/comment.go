@@ -16,13 +16,14 @@ type Comment struct {
 	ContentID string             `json:"content" bson:"content"`
 }
 
-func New(ID primitive.ObjectID, body, authorID, contentID string) (*Comment, error) {
+var DBD DBDriver
+
+func New(body, authorID, contentID string) (*Comment, error) {
 	err := RegexValidate(&body, &authorID, &contentID)
 	if err != nil {
 		return nil, err
 	}
 	return &Comment{
-		ID:        ID,
 		Body:      body,
 		Timestamp: time.Now().Unix(),
 		AuthorUn:  authorID,
@@ -45,41 +46,6 @@ func RegexValidate(body, authorUn, ownerID *string) error {
 		}
 	}
 	return nil
-}
-
-func (c Comment) Reshape() (*model.Comment, error) {
-	// todo get author from database by its username
-	var author *model.User
-
-	res := &model.Comment{
-		ID:        c.ID.Hex(),
-		Author:    author,
-		Body:      c.Body,
-		Timestamp: int(c.Timestamp),
-		Replies:   nil,
-		ContentID: c.ContentID,
-	}
-
-	//reshape replies
-	replies, err := ReshapeAllReplies(c.Replies)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "error while reshape replies of comment: /n" + err.Error()}
-	}
-	res.Replies = replies
-
-	return res, nil
-}
-
-func ReshapeAll(courses []*Comment) ([]*model.Comment, error) {
-	var cs []*model.Comment
-	for _, c := range courses {
-		tmp, err := c.Reshape()
-		if err != nil {
-			return nil, model.InternalServerException{Message: "error while reshape comment array: /n" + err.Error()}
-		}
-		cs = append(cs, tmp)
-	}
-	return cs, nil
 }
 
 func (c *Comment) Update(newBody *string) error {

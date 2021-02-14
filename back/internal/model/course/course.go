@@ -25,7 +25,9 @@ type Course struct {
 	Inventory []*attachment.Attachment `json:"inventory" bson:"inventory"`
 }
 
-func New(ID primitive.ObjectID, title, profUsername, token string, summery *string) (*Course, error) {
+var DBD DBDriver
+
+func New(title, profUsername, token string, summery *string) (*Course, error) {
 	hashedToken, err := modelUtil.HashToken([]byte(token))
 	if err != nil {
 		return nil, model.InternalServerException{Message: "internal server error: couldn't hash token"}
@@ -35,7 +37,6 @@ func New(ID primitive.ObjectID, title, profUsername, token string, summery *stri
 		return nil, err
 	}
 	return &Course{
-		ID:        ID,
 		Title:     title,
 		Summery:   modelUtil.PtrTOStr(summery),
 		CreatedAt: time.Now().Unix(),
@@ -66,57 +67,6 @@ func RegexValidate(title, summery, profUsername, token *string) error {
 	return nil
 }
 
-func (c Course) Reshape() (*model.Course, error) {
-	//todo get Users from database by usernames
-	var prof *model.User
-	var tas []*model.User
-	var students []*model.User
-
-	res := &model.Course{
-		ID:        c.ID.Hex(),
-		Title:     c.Title,
-		Summary:   &c.Summery,
-		CreatedAt: int(c.CreatedAt),
-		Prof:      prof,
-		Tas:       tas,
-		Pends:     nil,
-		Students:  students,
-		Contents:  nil,
-		Inventory: nil,
-	}
-
-	//reshape pendings
-	pends, err := pending.ReshapeAll(c.Pends)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "error while reshape pending array of course: /n" + err.Error()}
-	}
-	res.Pends = pends
-
-	//reshape contents
-	contents, err := content.ReshapeAll(c.Contents)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "error while reshape contents of course: /n" + err.Error()}
-	}
-	res.Contents = contents
-
-	//reshape inventory
-	res.Inventory = attachment.ReshapeAll(c.Inventory)
-
-	return res, nil
-}
-
-func ReshapeAll(courses []*Course) ([]*model.Course, error) {
-	var cs []*model.Course
-	for _, c := range courses {
-		tmp, err := c.Reshape()
-		if err != nil {
-			return nil, model.InternalServerException{Message: "error while reshape course array: " + err.Error()}
-		}
-		cs = append(cs, tmp)
-	}
-	return cs, nil
-}
-
 func (c *Course) Update(newTitle, newSummery, newToken *string) error {
 	if newTitle == nil && newSummery == nil && newToken == nil {
 		return model.EmptyFieldsException{Message: model.EmptyKeyErrorMessage}
@@ -141,7 +91,7 @@ func (c *Course) Update(newTitle, newSummery, newToken *string) error {
 	return nil
 }
 
-func (c Course) IsUserNotStudent(username string) bool {
+func (c Course) IsUserProfOrTA(username string) bool {
 	if c.ProfUn == username || modelUtil.ContainsInStringArray(c.TaUns, username) {
 		return true
 	}
@@ -171,6 +121,18 @@ func (c Course) IsUserAllowedToDeleteUser(username, target string) bool {
 	}
 	// every body can remove them selves except professor
 	if modelUtil.ContainsInStringArray(c.StdUns, username) && username == target && c.ProfUn != username {
+		return true
+	}
+	return false
+}
+
+func (c Course) IsUserAllowedToModifyContent(username string, content *content.Content) bool {
+	// professor can remove every one except his self
+	if c.ProfUn == username {
+		return true
+	}
+	// ta can remove every one except professor
+	if modelUtil.ContainsInStringArray(c.TaUns, username) && c.ProfUn != content.UploadedByUn && c.ProfUn != content.ApprovedByUn {
 		return true
 	}
 	return false
@@ -253,4 +215,104 @@ func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cn
 		}
 	}
 	return nil, nil, model.CommentNotFoundException{Message: "there is no comment @" + commentID.Hex()}
+}
+
+func (c *Course) IsUserAllowedToInsertAttachment(username string) error{
+	if !c.IsUserProfOrTA(username) {
+		return model.UserNotAllowedException{Message: "you are not professor or ta"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToUpdateAttachment(username string) error{
+	if !c.IsUserProfOrTA(username) {
+		return model.UserNotAllowedException{Message: "you are not professor or ta"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToDeleteAttachment(username string) error{
+	if !c.IsUserProfOrTA(username) {
+		return model.UserNotAllowedException{Message: "you are not professor or ta"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToInsertContent(username string) error{
+	if !c.IsUserProfOrTA(username) {
+		return model.UserNotAllowedException{Message: "you are not professor or ta"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToUpdateContent(username string, content *content.Content) error{
+	if !c.IsUserAllowedToModifyContent(username, content) {
+		return model.UserNotAllowedException{Message: "you can't edit this content"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToDeleteContent(username string, content *content.Content) error{
+	if !c.IsUserAllowedToModifyContent(username, content) {
+		return model.UserNotAllowedException{Message: "you can't edit this content"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToInsertPending(username string) error{
+	if !c.IsUserStudent(username) {
+		return model.UserNotAllowedException{Message: "you are not student"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToUpdatePending(username string, pnd *pending.Pending) error{
+	if username != pnd.UploadedByUn {
+		return model.UserNotAllowedException{Message: "you can't edit this offer"}
+	}
+	if pnd.Status != pending.PENDING {
+		return model.OfferedContentNotPendingException{Message: "this offer has been closed"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToDeletePending(username string, pending *pending.Pending) error{
+	if username != pending.UploadedByUn {
+		return model.UserNotAllowedException{Message: "you can't remove this offer"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToAcceptPending(username string, ond *pending.Pending) error{
+	if !c.IsUserProfOrTA(username) {
+		return model.UserNotAllowedException{Message: "you can't accept this offer"}
+	}
+	if ond.Status != pending.PENDING {
+		return model.OfferedContentNotPendingException{Message: "this offer has been closed"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToRejectPending(username string, pnd *pending.Pending) error{
+	if !c.IsUserProfOrTA(username) {
+		return model.UserNotAllowedException{Message: "you can't reject this offer"}
+	}
+	if pnd.Status != pending.PENDING {
+		return model.OfferedContentNotPendingException{Message: "this offer has been closed"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToInsertComment(username string) error{
+	if !c.IsUserParticipateInCourse(username) {
+		return model.UserNotAllowedException{Message: "you can't write a comment on this course"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToUpdateComment(username, author string) error{
+	if username != author{
+		return model.UserNotAllowedException{Message: "you can't edit this comment on this course"}
+	}
+	return nil
 }
