@@ -37,21 +37,22 @@ function SideBar(props) {
     >
       <Menu.Item as="a">
         <Icon name="student" />
-        Course Instructor: folan
+        Course Instructor: {props.courseProf.name ? props.courseProf.name : ""}
       </Menu.Item>
       <Menu.Item as="a">
         <Icon name="users" />
         TAs:
         <List>
-          {TAs.map(TA => {
-            return (
-              <List.Item as="li">
-                {/* <List.Icon name="user" /> */}
-                {/* <List.Content>{TA}</List.Content> */}
-                {TA}
-              </List.Item>
-            );
-          })}
+          {TAs !== null &&
+            TAs.map(TA => {
+              return (
+                <List.Item as="li">
+                  {/* <List.Icon name="user" /> */}
+                  {/* <List.Content>{TA}</List.Content> */}
+                  {TA.name}
+                </List.Item>
+              );
+            })}
         </List>
       </Menu.Item>
       <Menu.Item>

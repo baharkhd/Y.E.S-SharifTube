@@ -12,7 +12,6 @@ const GET_USER_QUERY = gql`
     user {
       username
       name
-      password
       email
       courseIDs
     }

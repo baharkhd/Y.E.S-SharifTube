@@ -25,7 +25,6 @@ const UPDATE_USER_MUTATION = gql`
       __typename
       ... on User {
         name
-        password
         email
       }
     }

@@ -74,21 +74,21 @@ const COURSE_QUERY = gql`
       id
       title
       summary
-      # contents {
-      #   id
-      #   title
-      #   description
-      # }
-      # prof {
-      #   name
-      #   username
-      #   email
-      # }
-      # tas {
-      #   name
-      #   username
-      #   email
-      # }
+      contents {
+        id
+        title
+        description
+      }
+      prof {
+        name
+        username
+        email
+      }
+      tas {
+        name
+        username
+        email
+      }
     }
   }
 `;
@@ -161,9 +161,21 @@ function CourseDashboard(props) {
     variables: {
       ids: [id]
     }
-  })
+  });
 
-  console.log("data in course dashboard", response.data, response.loading, response.error)
+  let course = null;
+  if (!response.loading && response.data) {
+    course = response.data.courses[0];
+    delete course.prof.__typename;
+  }
+  console.log("this course:", course);
+
+  console.log(
+    "data in course dashboard",
+    response.data,
+    response.loading,
+    response.error
+  );
 
   const [state, dispatch] = React.useReducer(searchReducer, initialState);
   const { loading, results, value, resultsShown } = state;
@@ -229,7 +241,15 @@ function CourseDashboard(props) {
 
   return (
     <div>
-      <SideBar isMobile={props.isMobile} sidebarIsOpen={props.sidebarOpen} />
+      {!response.loading && (
+        <SideBar
+          isMobile={props.isMobile}
+          sidebarIsOpen={props.sidebarOpen}
+          // course={course}
+          courseProf={course.prof}
+          courseTAs={course.tas}
+        />
+      )}
       <Segment
         style={{
           position: "absolute",

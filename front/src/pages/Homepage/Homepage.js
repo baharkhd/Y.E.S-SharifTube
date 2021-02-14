@@ -3,41 +3,6 @@ import { Card, Grid, Segment } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { useMutation, gql, useQuery } from "@apollo/client";
 
-const courses = [
-  {
-    title: "course1",
-    id: "ID1"
-  },
-  {
-    title: "course2",
-    id: "ID2"
-  },
-  {
-    title: "course3",
-    id: "ID3"
-  },
-  {
-    title: "course4",
-    id: "ID4"
-  },
-  {
-    title: "course5",
-    id: "ID5"
-  },
-  {
-    title: "course6",
-    id: "ID6"
-  },
-  {
-    title: "course7",
-    id: "ID7"
-  },
-  {
-    title: "course8",
-    id: "ID8"
-  }
-];
-
 const COURSES_QUERY = gql`
   query GetCoursesByFilter($keyWords: [String!]!, $amount: Int!, $start: Int!) {
     coursesByKeyWords(keyWords: $keyWords, amount: $amount, start: $start) {
