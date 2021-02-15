@@ -25,6 +25,8 @@ function Homepage() {
       amount: 100,
       start: 0
     },
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
     onError(err) {
       console.log("error in getCourses:", err);
     }

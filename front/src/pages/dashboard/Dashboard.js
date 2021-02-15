@@ -4,7 +4,7 @@ import SideBar from "./Sidebar.js";
 import Panel from "./Panel.js";
 import Courses from "./Courses.js";
 import { Route, Switch, Link } from "react-router-dom";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery, useMutation } from "@apollo/client";
 import constants from "../../constants.js";
 
 const GET_USER_QUERY = gql`
@@ -18,16 +18,24 @@ const GET_USER_QUERY = gql`
   }
 `;
 
-function Dashboard(props) {
+const Dashboard = props => {
   const [state, setState] = useState({
-    activeItem: "Personal Information"
+    activeItem: "Personal Information",
+    user: undefined
   });
 
   console.log(
     "token in dashboard:",
     localStorage.getItem(constants.AUTH_TOKEN)
   );
-  const { data, loading, error } = useQuery(GET_USER_QUERY);
+
+  // const [test] = useMutation(GET_USER_QUERY, {
+  //   refetchQueries
+  // })
+  const { data, loading, error } = useQuery(GET_USER_QUERY, {
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first"
+  });
 
   console.log("data:", data);
   console.log("loading:", loading);
@@ -44,6 +52,6 @@ function Dashboard(props) {
         ))}
     </div>
   );
-}
+};
 
 export default Dashboard;

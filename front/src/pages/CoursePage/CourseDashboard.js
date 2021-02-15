@@ -165,10 +165,11 @@ function CourseDashboard(props) {
   id = id.substring(1);
   // Todo: use the course id to get the course information and use them
 
-
-  console.log("---------------- username:", props.username)
+  console.log("---------------- username:", props.username);
 
   const response = useQuery(COURSE_QUERY, {
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
     variables: {
       ids: [id]
     }

@@ -47,23 +47,21 @@ function Courses(props) {
   const [courseIDs, setCourseIDs] = useState([]);
 
   const courses = useQuery(GET_COURSES_QUERY, {
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
     variables: {
       ids: courseIDs
     }
   });
 
   const { data, loading, error } = useQuery(GET_USER_QUERY, {
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
     onCompleted: ({ user }) => {
       console.log("user:", user);
       setCourseIDs(user.courseIDs);
     }
   });
-
-  let test = [1, 2, 3, 4];
-  test = test.filter(t => {
-    return t == 2;
-  });
-  console.log("test:", test);
 
   console.log("coursesObject:", courses);
   console.log("coursesIDs", courseIDs);

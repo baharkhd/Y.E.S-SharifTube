@@ -203,10 +203,10 @@ function ContentPage(props) {
   let { courseID, contentID } = useParams();
   courseID = courseID.substring(1);
   contentID = contentID.substring(1);
+  console.log("contentID:", contentID, ", courseID:", courseID)
 
   const [newComment, setNewComment] = useState("");
 
-  console.log("courseID:", courseID, ", contentID:", contentID);
   return (
     <div>
       <Segment style={{ top: 70, overflow: "hidden", borderRadius: 0 }}>

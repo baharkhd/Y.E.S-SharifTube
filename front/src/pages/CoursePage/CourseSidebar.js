@@ -24,6 +24,11 @@ function SideBar(props) {
 
   const handleItemClick = (e, { name }) => setState({ activeItem: name });
 
+  let uploadPath =
+    props.role == "prof"
+      ? "/course:" + id + "/upload"
+      : "/course:" + id + "/offer";
+
   return (
     <Sidebar
       as={Menu}
@@ -56,8 +61,11 @@ function SideBar(props) {
         </List>
       </Menu.Item>
       <Menu.Item>
+        <Link to={uploadPath}>
+          <Button color="blue">Upload Videos</Button>
+        </Link>
         {/* If user is the instructor or a TA */}
-        {props.role === "prof" ? (
+        {/* {props.role === "prof" ? (
           <Link to={"/course:" + id + "/pendings"}>
             <Button color="blue">Pending Contents</Button>
           </Link>
@@ -65,8 +73,15 @@ function SideBar(props) {
           <Link to={"/course:" + id + "/upload"}>
             <Button color="blue">Upload Videos</Button>
           </Link>
-        )}
+        )} */}
       </Menu.Item>
+      {props.role === "prof" && (
+        <Menu.Item>
+          <Link to={"/course:" + id + "/pendings"}>
+            <Button color="black">Pending Contents</Button>
+          </Link>
+        </Menu.Item>
+      )}
     </Sidebar>
   );
 }

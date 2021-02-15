@@ -1,6 +1,7 @@
 import React from "react";
 import { Segment, Label, Card, Icon, Grid, Button } from "semantic-ui-react";
 import { useParams } from "react-router-dom";
+import { useQuery, gql } from "@apollo/client";
 
 const pendingContents = [
   {
@@ -53,6 +54,62 @@ const pendingContents = [
   }
 ];
 
+// enum Status{
+//   PENDING
+//   ACCEPTED
+//   REJECTED
+// }
+
+// type Pending{
+//   id: ID!
+//   title: String!
+//   description: String
+//   status: Status!
+//   timestamp:Int!
+//   uploadedBY: User!
+//   furl: String! #todo better implementation for file
+//   courseID: String!
+// }
+
+// pendings(filter: PendingFilter!, start: Int!=0, amount: Int!=5): [Pending!]!
+
+// input PendingFilter{
+//   courseID: String
+//   status: Status
+//   uploaderUsername: String
+// }
+
+const PENDING_QUERY = gql`
+  query GetPending(
+    $courseID: String
+    $status: Status
+    $uploaderUsername: String
+    $start: Int!
+    $amount: Int!
+  ) {
+    pendings(
+      filter: {
+        courseID: $courseID
+        status: $status
+        uploaderUsername: $uploaderUsername
+      }
+      start: $start
+      amount: $amount
+    ) {
+      id
+      title
+      description
+      furl
+      status
+      timestamp
+      courseID
+      uploadedBY {
+        username
+      }
+    }
+  }
+`;
+
 const ContentCard = ({
   title,
   time,
@@ -94,9 +151,28 @@ const ContentCard = ({
   );
 };
 
-function PendingPage() {
+function PendingPage(props) {
   let { courseID } = useParams();
   courseID = courseID.substring(1);
+
+  // ($coureID: String, $status: Status, $uploaderUsername: String, $start: Int!, amount: Int!)
+
+  const { data, loading, error } = useQuery(PENDING_QUERY, {
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
+    variables: {
+      courseID,
+      status: "PENDING",
+      uploaderUsername: props.username,
+      start: 0,
+      amount: 100
+    }
+  });
+
+  console.log("In pending page:");
+  console.log("data:", data);
+  console.log("loading:", loading);
+  console.log("error:", error);
 
   return (
     <Segment style={{ top: 70 }}>

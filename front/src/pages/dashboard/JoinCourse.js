@@ -50,6 +50,8 @@ function JoinCourseModel({ joiningCourse, setState }) {
   });
 
   const { data, loading, error } = useQuery(COURSES_QUERY, {
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
     variables: {
       keyWords: [],
       amount: 100,
@@ -66,7 +68,7 @@ function JoinCourseModel({ joiningCourse, setState }) {
       token: courseInfo.token
     },
     onCompleted: ({ addUserToCourse }) => {
-      console.log("add user to coure:", addUserToCourse)
+      console.log("add user to coure:", addUserToCourse);
       if (addUserToCourse.__typename == "Course") {
         alert("you successfully added to the class :D");
       } else {

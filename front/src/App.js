@@ -115,9 +115,12 @@ function App() {
           <ContentPage />
         </Route>
         <Route exact path="/course:courseID/pendings">
-          <PendingPage />
+          <PendingPage username={!loading ? data.user.username : ""} />
         </Route>
         <Route exact path="/course:courseID/upload">
+          <UploadPage />
+        </Route>
+        <Route exact path="/course:courseID/offer">
           <UploadPage />
         </Route>
       </Switch>

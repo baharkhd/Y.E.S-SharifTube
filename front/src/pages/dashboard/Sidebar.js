@@ -32,20 +32,20 @@ function SideBar(props) {
         width="thin"
         style={{ width: 250, top: 70 }}
       >
-        <Link to="/dashboard/panel">
-          <Menu.Item
-            name="personal information"
-            active={state.activeItem === "personal information"}
-            // onClick={handleItemClick}
-            onClick={() => {
-              history.push("/dashboard/panel");
-              setState({ ...state, activeItem: "personal information" });
-            }}
-          >
-            <Icon name="user" />
-            Presonal Information
-          </Menu.Item>
-        </Link>
+        {/* <Link to="/dashboard/panel"> */}
+        <Menu.Item
+          name="personal information"
+          active={state.activeItem === "personal information"}
+          // onClick={handleItemClick}
+          onClick={() => {
+            setState({ ...state, activeItem: "personal information" });
+            history.push("/dashboard/panel");
+          }}
+        >
+          <Icon name="user" />
+          Presonal Information
+        </Menu.Item>
+        {/* </Link> */}
 
         <Link to="/dashboard/courses">
           <Menu.Item

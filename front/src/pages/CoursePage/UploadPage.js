@@ -9,7 +9,7 @@ import {
   Icon
 } from "semantic-ui-react";
 import { gql, useMutation } from "@apollo/client";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory, useLocation } from "react-router-dom";
 
 // uploadContent(username:String, courseID:String!, target:TargetContent!): UploadContentPayLoad!
 
@@ -64,11 +64,49 @@ const OFFER_CONTENT_MUTATION = gql`
   }
 `;
 
+const UPLOAD_CONTENT_MUTATION = gql`
+  mutation UploadContent(
+    $courseID: String!
+    $title: String!
+    $description: String
+    $vurl: String!
+    $tags: [String!]
+  ) {
+    uploadContent(
+      courseID: $courseID
+      target: {
+        title: $title
+        description: $description
+        vurl: $vurl
+        tags: $tags
+      }
+    ) {
+      ... on Content {
+        id
+        title
+        description
+        vurl
+        tags
+        timestamp
+      }
+      ... on Exception {
+        message
+      }
+    }
+  }
+`;
+
 function UploadPage(props) {
+  const history = useHistory();
+
+  let path = useLocation().pathname;
+  var n = path.lastIndexOf("/");
+  var uploadType = path.substring(n + 1);
+
   const [state, setState] = useState({
     title: "",
     description: "",
-    furl: "",
+    url: "",
     tags: [],
     tagInput: ""
   });
@@ -81,11 +119,28 @@ function UploadPage(props) {
       courseID: courseID,
       title: state.title,
       description: state.description,
-      furl: state.furl,
+      furl: state.url
       // tags: state.tags
     },
     onCompleted: ({ offerContent }) => {
       console.log("*** offerContent:", offerContent);
+      let path = "/course:" + courseID;
+      history.push(path);
+    }
+  });
+
+  const [uploadContent] = useMutation(UPLOAD_CONTENT_MUTATION, {
+    variables: {
+      courseID: courseID,
+      title: state.title,
+      description: state.description,
+      vurl: state.url,
+      tags: state.tags
+    },
+    onCompleted: ({ uploadContent }) => {
+      console.log("*** uploadContent:", uploadContent);
+      let path = "/course:" + courseID;
+      history.push(path);
     }
   });
 
@@ -99,7 +154,7 @@ function UploadPage(props) {
             label="URL of this content"
             placeholder="URL"
             onChange={e => {
-              setState({ ...state, furl: e.target.value });
+              setState({ ...state, url: e.target.value });
             }}
           />
         </Form.Group>
@@ -122,42 +177,55 @@ function UploadPage(props) {
           }}
         />
 
-        {/* <Form.Group>
-          <Form.Field
-            control={Input}
-            placeholder="Add a tag"
-            onChange={e => {
-              setState({ ...state, tagInput: e.target.value });
-            }}
-          />
-          <Form.Field>
-            <Form.Button
-              icon="plus"
-              positive
-              onClick={() => {
-                if (state.tagInput !== "") {
-                  setState({ ...state, tags: [...state.tags, state.tagInput] });
-                }
-              }}
-            />
-          </Form.Field>
-        </Form.Group>
+        {uploadType == "upload" ? (
+          <div>
+            <Form.Group>
+              <Form.Field
+                control={Input}
+                placeholder="Add a tag"
+                onChange={e => {
+                  setState({ ...state, tagInput: e.target.value });
+                }}
+              />
+              <Form.Field>
+                <Form.Button
+                  icon="plus"
+                  positive
+                  onClick={() => {
+                    if (state.tagInput !== "") {
+                      setState({
+                        ...state,
+                        tags: [...state.tags, state.tagInput]
+                      });
+                    }
+                  }}
+                />
+              </Form.Field>
+            </Form.Group>
 
-        <Form.Field>
-          <Label.Group>
-            {state.tags.map(tag => {
-              return (
-                <Label size="large">
-                  <Icon name="hashtag" /> {tag}
-                </Label>
-              );
-            })}
-          </Label.Group>
-        </Form.Field> */}
+            <Form.Field>
+              <Label.Group>
+                {state.tags.map(tag => {
+                  return (
+                    <Label size="large">
+                      <Icon name="hashtag" /> {tag}
+                    </Label>
+                  );
+                })}
+              </Label.Group>
+            </Form.Field>
+          </div>
+        ) : (
+          <></>
+        )}
         <Form.Button
           color="blue"
           onClick={() => {
-            offerContent();
+            if (uploadType == "upload") {
+              uploadContent();
+            } else {
+              offerContent();
+            }
           }}
         >
           Upload
