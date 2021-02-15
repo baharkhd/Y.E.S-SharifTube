@@ -110,9 +110,9 @@ function Courses(props) {
           yourClasses.map(course => {
             // let date = new Date(course.createdAt * 1000).toISOString();
             return (
-              <Grid.Column>
+              <Grid.Column key={course.id}>
                 <Link to={"/course:" + course.id}>
-                  <Card>
+                  <Card fluid>
                     <Card.Content>
                       <Card.Header>{course.title}</Card.Header>
                       <Card.Description>{course.summary}</Card.Description>
@@ -126,7 +126,7 @@ function Courses(props) {
           })}
         {!courses.loading && yourClasses.length === 0 && (
           <Grid.Column>
-            <Card>
+            <Card fluid>
               <Card.Content>
                 <Card.Header>You have no classes yet.</Card.Header>
                 {/* <Card.Description>{course.summary}</Card.Description>
@@ -151,7 +151,7 @@ function Courses(props) {
             return (
               <Grid.Column>
                 <Link to={"/course:" + course.id}>
-                  <Card>
+                  <Card fluid>
                     <Card.Content>
                       <Card.Header>{course.title}</Card.Header>
                       <Card.Description>{course.summary}</Card.Description>
@@ -165,7 +165,7 @@ function Courses(props) {
           })}
         {!courses.loading && otherClasses.length === 0 && (
           <Grid.Column>
-            <Card>
+            <Card fluid>
               <Card.Content>
                 <Card.Header>You're not member of any classes.</Card.Header>
                 {/* <Card.Description>{course.summary}</Card.Description>

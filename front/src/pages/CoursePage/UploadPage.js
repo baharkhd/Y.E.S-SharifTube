@@ -10,6 +10,7 @@ import {
 } from "semantic-ui-react";
 import { gql, useMutation } from "@apollo/client";
 import { useParams, useHistory, useLocation } from "react-router-dom";
+import constants from "../../constants";
 
 // uploadContent(username:String, courseID:String!, target:TargetContent!): UploadContentPayLoad!
 
@@ -56,6 +57,9 @@ const OFFER_CONTENT_MUTATION = gql`
         furl
         status
         timestamp
+        uploadedBY {
+          username
+        }
       }
       ... on Exception {
         message
@@ -97,6 +101,8 @@ const UPLOAD_CONTENT_MUTATION = gql`
 `;
 
 function UploadPage(props) {
+
+  console.log("+_+_+_+_+_+_+_+_+_+_+ uploadpage tokeeeeeeeeeeeeeeeeeeen:", localStorage.getItem(constants.AUTH_TOKEN))
   const history = useHistory();
 
   let path = useLocation().pathname;

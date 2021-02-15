@@ -159,7 +159,7 @@ function PendingPage(props) {
 
   const { data, loading, error } = useQuery(PENDING_QUERY, {
     fetchPolicy: "cache-and-network",
-    nextFetchPolicy: "cache-first",
+    // nextFetchPolicy: "cache-first",
     variables: {
       courseID,
       status: "PENDING",

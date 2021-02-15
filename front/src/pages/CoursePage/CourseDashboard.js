@@ -260,6 +260,7 @@ function CourseDashboard(props) {
           isMobile={props.isMobile}
           sidebarIsOpen={props.sidebarOpen}
           // course={course}
+          courseTitle={course.title}
           courseProf={course.prof}
           courseTAs={course.tas}
           role={props.username === course.prof.username ? "prof" : "non-prof"} // can be prof or ta or st

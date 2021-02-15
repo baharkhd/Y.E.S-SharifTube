@@ -36,7 +36,7 @@ const GET_USER_QUERY = gql`
     user {
       username
       name
-      password
+      # password
       email
     }
   }
@@ -48,8 +48,8 @@ const genderOptions = [
   { key: "o", text: "Other", value: "other" }
 ];
 
-const UpdatePanelModal = ({ modalOpen, setModalOpen, user }) => {
-  console.log("user in update modal:", user);
+const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
+  // console.log("user in update modal:", user);
   const [state, setState] = useState({
     newName: user.name,
     newGender: "",
@@ -64,14 +64,12 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user }) => {
       password: state.newPass,
       email: state.newEmail
     },
-    onCompleted: ({ updateUser }) => {
-      console.log("updateUser", updateUser);
-      console.log("new state:", state);
-    },
     update(cache, { data: { updateUser } }) {
       const data = cache.readQuery({
         query: GET_USER_QUERY
       });
+
+      console.log("????????????????????????", data);
 
       const localData = _.cloneDeep(data);
       console.log("localData:", localData);
@@ -79,9 +77,12 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user }) => {
       //   return post.id === updatePost.id ? updatePost : post;
       // });
 
-      let newName = updateUser.name == "" ? localData.user.name : updateUser.name;
+      let newName =
+        updateUser.name == "" ? localData.user.name : updateUser.name;
       let newPassword =
-        updateUser.password == "" ? localData.user.password : updateUser.password;
+        updateUser.password == ""
+          ? localData.user.password
+          : updateUser.password;
       let newEmail =
         updateUser.email == "" ? localData.user.email : updateUser.email;
 
@@ -92,6 +93,14 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user }) => {
         username: localData.user.username
       });
 
+      console.log("???????????????????//", {
+        __typename: "User",
+        name: newName,
+        email: newEmail,
+        username: localData.username,
+        password: ""
+      });
+
       cache.writeQuery({
         query: GET_USER_QUERY,
         data: {
@@ -99,10 +108,16 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user }) => {
             __typename: "User",
             name: newName,
             email: newEmail,
-            username: localData.username
+            username: localData.username,
+            password: ""
           }
         }
       });
+    },
+    onCompleted: ({ updateUser }) => {
+      console.log("updateUser", updateUser);
+      // setUser({ user: { ...user, ...updateUser } });
+      console.log("new state:", state);
     }
   });
 
@@ -261,6 +276,7 @@ function Panel(props) {
         modalOpen={modalOpen}
         setModalOpen={setModalOpen}
         user={props.user}
+        setUser={props.setState}
       />
       <PanelInfo
         setModalOpen={setModalOpen}

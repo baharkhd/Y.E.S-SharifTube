@@ -46,7 +46,7 @@ function Homepage() {
             return (
               <Grid.Column>
                 <Link to={"/course:" + course.id}>
-                  <Card
+                  <Card fluid
                     onClick={() => {
                       console.log("course id:", course.id);
                     }}

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Sidebar, Menu, Button, Icon, List } from "semantic-ui-react";
 import { useHistory, Link, useParams } from "react-router-dom";
+import { gql, useMutation } from "@apollo/client";
+import AddTAModal from "./AddTAModal";
 
 const TAs = [
   "folan1",
@@ -12,10 +14,32 @@ const TAs = [
   "folan7"
 ];
 
+const ADD_TA_MUTATION = gql`
+  mutation AddTA($courseID: String!, $targetUsername: String!) {
+    promoteUserToTA(courseID: $courseID, targetUsername: $targetUsername) {
+      __typename
+      ... on Course {
+        id
+        title
+        summary
+        createdAt
+      }
+      ... on Exception {
+        message
+      }
+    }
+  }
+`;
+
 function SideBar(props) {
   const [state, setState] = useState({
-    activeItem: "Personal Information"
+    activeItem: "Personal Information",
+    addingTA: false
   });
+
+  // const [promoteUserToTA] = useMutation(ADD_TA_MUTATION, {
+  //   variables: {}
+  // })
 
   let { id } = useParams();
   id = id.substring(1);
@@ -40,6 +64,11 @@ function SideBar(props) {
       width="thin"
       style={{ width: 250, top: 70 }}
     >
+      <AddTAModal open={state.addingTA} setOpen={setState} courseID={id} />
+      <Menu.Item as="a">
+        <Icon name="student" />
+        Course Title: {props.courseTitle ? props.courseTitle : ""}
+      </Menu.Item>
       <Menu.Item as="a">
         <Icon name="student" />
         Course Instructor: {props.courseProf.name ? props.courseProf.name : ""}
@@ -58,6 +87,16 @@ function SideBar(props) {
                 </List.Item>
               );
             })}
+          <List.Item>
+            <Button
+              positive
+              onClick={() => {
+                setState({ ...state, addingTA: true });
+              }}
+            >
+              Add TA
+            </Button>
+          </List.Item>
         </List>
       </Menu.Item>
       <Menu.Item>

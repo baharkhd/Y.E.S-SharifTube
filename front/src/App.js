@@ -48,7 +48,10 @@ function App() {
     query: "(max-device-width: 570px)"
   });
 
-  const { data, loading, error } = useQuery(GET_USER_QUERY);
+  const { data, loading, error } = useQuery(GET_USER_QUERY, {
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first"
+  });
   console.log("checkkkkkkk:", data, loading, error);
 
   const { token, setToken } = useToken();
@@ -67,7 +70,11 @@ function App() {
       />
       <Switch>
         <Route exact path="/dashboard">
-          <Dashboard isMobile={isMobile} sidebarOpen={sidebarOpen} />
+          <Dashboard
+            isMobile={isMobile}
+            sidebarOpen={sidebarOpen}
+            username={token ? (!loading ? data.user.username : "") : ""}
+          />
         </Route>
 
         <Route exact path="/dashboard/panel">
@@ -75,6 +82,7 @@ function App() {
             isMobile={isMobile}
             sidebarOpen={sidebarOpen}
             isCourse={false}
+            username={token ? (!loading ? data.user.username : "") : ""}
             // component={<Panel isMobile={isMobile} />}
           />
         </Route>
@@ -84,6 +92,7 @@ function App() {
             isMobile={isMobile}
             sidebarOpen={sidebarOpen}
             isCourse={true}
+            username={token ? (!loading ? data.user.username : "") : ""}
             // component={<Courses isMobile={isMobile} />}
           />
         </Route>
@@ -115,7 +124,9 @@ function App() {
           <ContentPage />
         </Route>
         <Route exact path="/course:courseID/pendings">
-          <PendingPage username={!loading ? data.user.username : ""} />
+          <PendingPage
+            username={token ? (!loading ? data.user.username : "") : ""}
+          />
         </Route>
         <Route exact path="/course:courseID/upload">
           <UploadPage />

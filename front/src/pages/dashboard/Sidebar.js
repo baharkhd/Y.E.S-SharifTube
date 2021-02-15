@@ -21,6 +21,7 @@ function SideBar(props) {
       <JoinCourseModel
         joiningCourse={state.joiningCourse}
         setState={setState}
+        username={props.username}
       />
       <Sidebar
         as={Menu}
@@ -61,30 +62,6 @@ function SideBar(props) {
             Courses
           </Menu.Item>
         </Link>
-
-        {/* 
-        <Menu.Item
-          name="personal information"
-          active={state.activeItem === "personal information"}
-          // onClick={handleItemClick}
-          onClick={() => {
-            history.push("/dashboard/panel");
-          }}
-        >
-          <Icon name="user" />
-          Presonal Information
-        </Menu.Item>
-        <Menu.Item
-          name="classes"
-          active={state.activeItem === "classes"}
-          // onClick={handleItemClick}
-          onClick={() => {
-            history.push("/dashboard/courses");
-          }}
-        >
-          <Icon name="book" />
-          Courses
-        </Menu.Item> */}
         <Menu.Item as="a">
           <Button
             positive

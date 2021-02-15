@@ -18,10 +18,10 @@ const COURSES_QUERY = gql`
       title
       summary
       createdAt
-      # prof {
-      #   username
-      #   name
-      # }
+      prof {
+        username
+        name
+      }
     }
   }
 `;
@@ -43,7 +43,7 @@ const JOIN_COURSE_MUTATION = gql`
   }
 `;
 
-function JoinCourseModel({ joiningCourse, setState }) {
+function JoinCourseModel({ joiningCourse, setState, username }) {
   const [courseInfo, setCourseInfo] = useState({
     courseID: "",
     token: ""
@@ -86,23 +86,30 @@ function JoinCourseModel({ joiningCourse, setState }) {
             data.coursesByKeyWords.map((course, i) => {
               let date = new Date(course.createdAt * 1000).toISOString();
               // .substr(11, 8);
-
               return (
                 <Grid.Column>
                   <Card
                     fluid
-                    color={courseInfo.courseID == course.id ? "blue" : ""}
+                    color={
+                      course.prof.username === username
+                        ? "red"
+                        : courseInfo.courseID == course.id
+                        ? "blue"
+                        : ""
+                    }
                     onClick={() => {
-                      if (courseInfo.courseID === course.id) {
-                        setCourseInfo({
-                          ...courseInfo,
-                          courseID: ""
-                        });
-                      } else {
-                        setCourseInfo({
-                          ...courseInfo,
-                          courseID: course.id
-                        });
+                      if (course.prof.username !== username) {
+                        if (courseInfo.courseID === course.id) {
+                          setCourseInfo({
+                            ...courseInfo,
+                            courseID: ""
+                          });
+                        } else {
+                          setCourseInfo({
+                            ...courseInfo,
+                            courseID: course.id
+                          });
+                        }
                       }
                     }}
                   >
