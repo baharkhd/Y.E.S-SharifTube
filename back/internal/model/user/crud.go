@@ -96,9 +96,21 @@ func New(name, email, username, password string) (*User, error) {
 }
 
 func Get(username string) (*User, error) {
+
+	// checking to be in cache first
+	u, err := GetFromCache(username)
+	if err == nil {
+		return u, nil
+	}
+
+	// if not exists, get from database
 	if target, stat := DBD.Get(&username); stat == status.FAILED {
 		return nil, model.UserNotFoundException{Message: "couldn't find the requested user"}
 	} else {
+
+		// add the content to cache
+		_ = target.Cache()
+
 		return target, nil
 	}
 }
@@ -106,10 +118,21 @@ func Get(username string) (*User, error) {
 func GetS(usernames []string) ([]*User, error) {
 	var users []*User
 	for i, _ := range usernames {
-		target, stat := DBD.Get(&usernames[i])
-		if stat == status.FAILED {
-			return nil, model.UserNotFoundException{Message: "couldn't find the requested user"}
+
+		// checking to be in cache first
+		target, err := GetFromCache(usernames[i])
+		if err != nil {
+
+			// if not exists, get from database
+			target, stat := DBD.Get(&usernames[i])
+			if stat == status.FAILED {
+				return nil, model.UserNotFoundException{Message: "couldn't find the requested user"}
+			}
+
+			// add the content to cache
+			_ = target.Cache()
 		}
+
 		users = append(users, target)
 	}
 	return users, nil

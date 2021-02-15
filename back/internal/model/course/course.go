@@ -1,6 +1,8 @@
 package course
 
 import (
+	"encoding/json"
+	"github.com/coocood/freecache"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 	"yes-sharifTube/graph/model"
@@ -10,6 +12,10 @@ import (
 	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/pending"
 )
+
+const CacheExpire = 10 * 60
+const TitleWordSize = 30
+const DescriptionWordSize = 200
 
 type Course struct {
 	ID        primitive.ObjectID       `bson:"_id" json:"id,omitempty"`
@@ -26,6 +32,7 @@ type Course struct {
 }
 
 var DBD DBDriver
+var Cache *freecache.Cache
 
 func New(title, profUsername, token string, summery *string) (*Course, error) {
 	hashedToken, err := modelUtil.HashToken([]byte(token))
@@ -87,6 +94,31 @@ func (c *Course) Update(newTitle, newSummery, newToken *string) error {
 			return model.InternalServerException{Message: "internal server error: couldn't hash token"}
 		}
 		c.Token = hashedToken
+	}
+	return nil
+}
+
+func GetFromCache(courseID string) (*Course, error){
+	c, err := Cache.Get([]byte(courseID))
+	if err == nil {
+		var cr *Course
+		err = json.Unmarshal(c, &cr)
+		if err != nil {
+			return nil, model.InternalServerException{Message: err.Error()}
+		}
+		return cr, err
+	}
+	return nil,  model.CourseNotFoundException{Message: "course not found in cache"}
+}
+
+func (c *Course) Cache() error {
+	course, err := json.Marshal(c)
+	if err != nil {
+		return model.InternalServerException{Message: err.Error()}
+	}
+	err = Cache.Set([]byte(c.ID.Hex()), course, CacheExpire)
+	if err != nil {
+		return model.InternalServerException{Message: "course couldn't in cache"}
 	}
 	return nil
 }

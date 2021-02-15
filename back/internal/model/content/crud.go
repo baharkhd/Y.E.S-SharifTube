@@ -6,6 +6,14 @@ import (
 )
 
 func Get(courseID *string, contentID string) (*Content, error) {
+
+	// checking to be in cache first
+	c, err := GetFromCache(contentID)
+	if err == nil {
+		return c, nil
+	}
+
+	// if not exists, get from database
 	var cpID *primitive.ObjectID = nil
 	if courseID != nil {
 		cID, err := primitive.ObjectIDFromHex(*courseID)
@@ -22,6 +30,10 @@ func Get(courseID *string, contentID string) (*Content, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// add the content to cache
+	_ = content.Cache()
+
 	return content, nil
 }
 

@@ -1,6 +1,8 @@
 package content
 
 import (
+	"encoding/json"
+	"github.com/coocood/freecache"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"sort"
 	"time"
@@ -8,6 +10,8 @@ import (
 	modelUtil "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/comment"
 )
+
+const CacheExpire = 10 * 60
 
 type Content struct {
 	ID           primitive.ObjectID `bson:"_id" json:"id,omitempty"`
@@ -23,6 +27,7 @@ type Content struct {
 }
 
 var DBD DBDriver
+var Cache *freecache.Cache
 
 func New(title, uploadedBy, vurl, courseID string, description, approvedBy *string, tags []string) (*Content, error) {
 	err := RegexValidate(&title, description, &uploadedBy, &vurl, &courseID, approvedBy, tags)
@@ -126,4 +131,29 @@ func (c *Content) GetComment(commentID primitive.ObjectID) (*comment.Comment, *c
 		}
 	}
 	return nil, nil
+}
+
+func GetFromCache(contentID string) (*Content, error){
+	c, err := Cache.Get([]byte(contentID))
+	if err == nil {
+		var cr *Content
+		err = json.Unmarshal(c, &cr)
+		if err != nil {
+			return nil, model.InternalServerException{Message: err.Error()}
+		}
+		return cr, err
+	}
+	return nil,  model.ContentNotFoundException{Message: "content not found in cache"}
+}
+
+func (c *Content) Cache() error {
+	content, err := json.Marshal(c)
+	if err != nil {
+		return model.InternalServerException{Message: err.Error()}
+	}
+	err = Cache.Set([]byte(c.ID.Hex()), content, CacheExpire)
+	if err != nil {
+		return model.InternalServerException{Message: "content couldn't cache"}
+	}
+	return nil
 }

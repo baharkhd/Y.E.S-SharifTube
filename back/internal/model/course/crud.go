@@ -7,6 +7,14 @@ import (
 )
 
 func Get(courseID string) (*Course, error) {
+
+	// checking to be in cache first
+	c, err := GetFromCache(courseID)
+	if err == nil {
+		return c, nil
+	}
+
+	// if not exists, get from database
 	objID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, model.InternalServerException{Message: err.Error()}
@@ -15,22 +23,38 @@ func Get(courseID string) (*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// add the course to cache
+	_ = course.Cache()
+
 	return course, nil
 }
 
 func GetAll(courseIDs []string) ([]*Course, error) {
 	var courses []*Course
 	for _, cID := range courseIDs {
-		objID, err := primitive.ObjectIDFromHex(cID)
+
+		// checking to be in cache first
+		course, err := GetFromCache(cID)
 		if err != nil {
-			return nil, model.InternalServerException{Message: err.Error()}
-		}
-		course, err := DBD.Get(objID)
-		if err != nil {
-			return nil, err
+
+			// if not exists, get from database
+			objID, err := primitive.ObjectIDFromHex(cID)
+			if err != nil {
+				return nil, model.InternalServerException{Message: err.Error()}
+			}
+			course, err = DBD.Get(objID)
+			if err != nil {
+				return nil, err
+			}
+
+			// add the course to cache
+			_ = course.Cache()
+
 		}
 		courses = append(courses, course)
 	}
+
 	return courses, nil
 }
 

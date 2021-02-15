@@ -1,9 +1,13 @@
 package user
 
 import (
+	"encoding/json"
+	"github.com/coocood/freecache"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
 )
+
+const CacheExpire = 10 * 60
 
 type User struct {
 	ID       primitive.ObjectID `bson:"_id" json:"id,omitempty"`
@@ -15,6 +19,7 @@ type User struct {
 }
 
 var DBD DBDriver
+var Cache *freecache.Cache
 
 func (u *User) enroll(courseID string) *User {
 	u.Courses = append(u.Courses, courseID)
@@ -35,6 +40,7 @@ func (u *User) updateName(name string) *User {
 	u.Name = name
 	return u
 }
+
 func (u *User) updateEmail(email string) *User {
 	u.Email = email
 	return u
@@ -49,5 +55,30 @@ func (u *User) updatePassword(password string) error {
 	}
 
 	u.Password = hashedPass
+	return nil
+}
+
+func GetFromCache(username string) (*User, error){
+	c, err := Cache.Get([]byte(username))
+	if err == nil {
+		var cr *User
+		err = json.Unmarshal(c, &cr)
+		if err != nil {
+			return nil, model.InternalServerException{Message: err.Error()}
+		}
+		return cr, err
+	}
+	return nil,  model.UserNotFoundException{Message: "user not found in cache"}
+}
+
+func (u *User) Cache() error {
+	content, err := json.Marshal(u)
+	if err != nil {
+		return model.InternalServerException{Message: err.Error()}
+	}
+	err = Cache.Set([]byte(u.Username), content, CacheExpire)
+	if err != nil {
+		return model.InternalServerException{Message: "content couldn't cache"}
+	}
 	return nil
 }

@@ -3,9 +3,11 @@ package main
 import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/coocood/freecache"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
+	"runtime/debug"
 	"yes-sharifTube/graph"
 	"yes-sharifTube/graph/generated"
 	"yes-sharifTube/internal/middleware/auth"
@@ -32,6 +34,14 @@ func main() {
 	attachment.DBD = mongodb.NewAttachmentMongoDriver("yes-sharifTube", "courses")
 	comment.DBD = mongodb.NewCommentMongoDriver("yes-sharifTube", "courses")
 
+	// set 1Gb cache
+	cacheSize := 100 * 1024 * 1024
+	cache := freecache.NewCache(cacheSize)
+	debug.SetGCPercent(20)
+	course.Cache = cache
+	content.Cache = cache
+	user.Cache = cache
+
 	// Setting up Gin
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
@@ -50,7 +60,6 @@ func main() {
 	//let it begin
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", defaultPort)
 	r.Run(":" + defaultPort)
-
 }
 
 // Defining the Graphql handler
