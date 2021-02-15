@@ -131,6 +131,10 @@ func (c *Course) Cache() error {
 	return nil
 }
 
+func DeleteFromCache(courseID string) {
+	Cache.Del([]byte(courseID))
+}
+
 func (c Course) IsUserProfOrTA(username string) bool {
 	if c.ProfUn == username || modelUtil.ContainsInStringArray(c.TaUns, username) {
 		return true
@@ -255,6 +259,60 @@ func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cn
 		}
 	}
 	return nil, nil, model.CommentNotFoundException{Message: "there is no comment @" + commentID.Hex()}
+}
+
+func (c *Course) IsUserAllowedToUpdateCourse(username string) error{
+	if !c.IsUserProfessor(username) {
+		return model.UserNotAllowedException{Message: "you can't change this course. because you are not professor"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToDeleteCourse(username string) error{
+	if !c.IsUserProfessor(username) {
+		return model.UserNotAllowedException{Message: "you are not professor"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToAddUserInCourse(username, token string) error{
+	if c.IsUserParticipateInCourse(username) {
+		return model.DuplicateUsernameException{Message: "you been been added before"}
+	}
+	if !c.CheckCourseToken(token) {
+		return model.IncorrectTokenException{Message: "wrong course token"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToDeleteUserInCourse(username, targetUsername string) error{
+	if !c.IsUserParticipateInCourse(targetUsername) {
+		return model.UserNotFoundException{Message: "you weren't participate in course"}
+	}
+	if !c.IsUserAllowedToDeleteUser(username, targetUsername) {
+		return model.UserNotAllowedException{Message: "you can't remove this user"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToPromoteUserInCourse(username, targetUsername string) error{
+	if !c.IsUserProfOrTA(username) {
+		return model.UserNotAllowedException{Message: "you are not professor or ta"}
+	}
+	if !c.IsUserStudent(targetUsername) {
+		return model.UserIsNotSTDException{Message: "you are not student"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToDemoteUserInCourse(username, targetUsername string) error{
+	if !c.IsUserProfOrTA(username) {
+		return model.UserNotAllowedException{Message: "you are not professor or ta"}
+	}
+	if !c.IsUserTA(targetUsername) {
+		return model.UserIsNotSTDException{Message: "you are not ta"}
+	}
+	return nil
 }
 
 func (c *Course) IsUserAllowedToInsertAttachment(username string) error {

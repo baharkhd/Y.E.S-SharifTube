@@ -106,11 +106,7 @@ func (r *mutationResolver) CreateCourse(ctx context.Context, username *string, t
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatCourse(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatCourse(res), nil
 }
 
 func (r *mutationResolver) UpdateCourseInfo(ctx context.Context, username *string, courseID string, toBe model.EditedCourse) (model.UpdateCourseInfoPayload, error) {
@@ -138,11 +134,7 @@ func (r *mutationResolver) UpdateCourseInfo(ctx context.Context, username *strin
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatCourse(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatCourse(res), nil
 }
 
 func (r *mutationResolver) DeleteCourse(ctx context.Context, username *string, courseID string) (model.DeleteCoursePayload, error) {
@@ -166,11 +158,7 @@ func (r *mutationResolver) DeleteCourse(ctx context.Context, username *string, c
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatCourse(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatCourse(res), nil
 }
 
 func (r *mutationResolver) AddUserToCourse(ctx context.Context, username *string, courseID string, token string) (model.AddUserToCoursePayload, error) {
@@ -198,11 +186,7 @@ func (r *mutationResolver) AddUserToCourse(ctx context.Context, username *string
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatCourse(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatCourse(res), nil
 }
 
 func (r *mutationResolver) DeleteUserFromCourse(ctx context.Context, username *string, courseID string, targetUsername string) (model.DeleteUserFromCoursePayload, error) {
@@ -226,11 +210,7 @@ func (r *mutationResolver) DeleteUserFromCourse(ctx context.Context, username *s
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatCourse(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatCourse(res), nil
 }
 
 func (r *mutationResolver) PromoteUserToTa(ctx context.Context, username *string, courseID string, targetUsername string) (model.PromoteToTAPayload, error) {
@@ -256,11 +236,7 @@ func (r *mutationResolver) PromoteUserToTa(ctx context.Context, username *string
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatCourse(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatCourse(res), nil
 }
 
 func (r *mutationResolver) DemoteUserToStd(ctx context.Context, username *string, courseID string, targetUsername string) (model.DemoteToSTDPayload, error) {
@@ -286,11 +262,7 @@ func (r *mutationResolver) DemoteUserToStd(ctx context.Context, username *string
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatCourse(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatCourse(res), nil
 }
 
 func (r *mutationResolver) UploadContent(ctx context.Context, username *string, courseID string, target model.TargetContent) (model.UploadContentPayLoad, error) {
@@ -316,11 +288,7 @@ func (r *mutationResolver) UploadContent(ctx context.Context, username *string, 
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatContent(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatContent(res), nil
 }
 
 func (r *mutationResolver) EditContent(ctx context.Context, username *string, courseID string, contentID string, target model.EditContent) (model.EditContentPayLoad, error) {
@@ -350,11 +318,7 @@ func (r *mutationResolver) EditContent(ctx context.Context, username *string, co
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatContent(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatContent(res), nil
 }
 
 func (r *mutationResolver) DeleteContent(ctx context.Context, username *string, courseID string, contentID string) (model.DeleteContentPayLoad, error) {
@@ -380,11 +344,7 @@ func (r *mutationResolver) DeleteContent(ctx context.Context, username *string, 
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatContent(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatContent(res), nil
 }
 
 func (r *mutationResolver) UploadAttachment(ctx context.Context, username *string, courseID string, target model.TargetAttachment) (model.UploadAttachmentPayLoad, error) {
@@ -492,11 +452,7 @@ func (r *mutationResolver) OfferContent(ctx context.Context, username *string, c
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatPending(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatPending(res), nil
 }
 
 func (r *mutationResolver) EditOfferedContent(ctx context.Context, username *string, courseID string, pendingID string, target model.EditedPending) (model.EditOfferedContentPayLoad, error) {
@@ -528,11 +484,7 @@ func (r *mutationResolver) EditOfferedContent(ctx context.Context, username *str
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatPending(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatPending(res), nil
 }
 
 func (r *mutationResolver) DeleteOfferedContent(ctx context.Context, username *string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error) {
@@ -558,11 +510,7 @@ func (r *mutationResolver) DeleteOfferedContent(ctx context.Context, username *s
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatPending(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatPending(res), nil
 }
 
 func (r *mutationResolver) AcceptOfferedContent(ctx context.Context, username *string, courseID string, pendingID string, changed model.EditedPending) (model.EditOfferedContentPayLoad, error) {
@@ -594,11 +542,7 @@ func (r *mutationResolver) AcceptOfferedContent(ctx context.Context, username *s
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatPending(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatPending(res), nil
 }
 
 func (r *mutationResolver) RejectOfferedContent(ctx context.Context, username *string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error) {
@@ -626,11 +570,7 @@ func (r *mutationResolver) RejectOfferedContent(ctx context.Context, username *s
 			return err.(model.InternalServerException), nil
 		}
 	}
-	f, err := reformatPending(res)
-	if err != nil {
-		return err.(model.InternalServerException), nil
-	}
-	return f, nil
+	return reformatPending(res), nil
 }
 
 func (r *mutationResolver) CreateComment(ctx context.Context, username *string, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error) {
@@ -659,17 +599,9 @@ func (r *mutationResolver) CreateComment(ctx context.Context, username *string, 
 		}
 	}
 	if con != nil {
-		f, err := reformatComment(con)
-		if err != nil {
-			return err.(model.InternalServerException), nil
-		}
-		return f, nil
+		return reformatComment(con), nil
 	} else {
-		f, err := reformatReply(rep)
-		if err != nil {
-			return err.(model.InternalServerException), nil
-		}
-		return f, nil
+		return reformatReply(rep), nil
 	}
 }
 
@@ -701,17 +633,9 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, username *string, 
 		}
 	}
 	if con != nil {
-		f, err := reformatComment(con)
-		if err != nil {
-			return err.(model.InternalServerException), nil
-		}
-		return f, nil
+		return reformatComment(con), nil
 	} else {
-		f, err := reformatReply(rep)
-		if err != nil {
-			return err.(model.InternalServerException), nil
-		}
-		return f, nil
+		return reformatReply(rep), nil
 	}
 }
 
@@ -739,17 +663,9 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, username *string, 
 		}
 	}
 	if con != nil {
-		f, err := reformatComment(con)
-		if err != nil {
-			return err.(model.InternalServerException), nil
-		}
-		return f, nil
+		return reformatComment(con), nil
 	} else {
-		f, err := reformatReply(rep)
-		if err != nil {
-			return err.(model.InternalServerException), nil
-		}
-		return f, nil
+		return reformatReply(rep), nil
 	}
 }
 
@@ -769,7 +685,7 @@ func (r *queryResolver) Courses(ctx context.Context, ids []string) ([]*model.Cou
 	if err != nil {
 		return nil, err
 	}
-	return reformatCourses(res)
+	return reformatCourses(res), nil
 }
 
 func (r *queryResolver) CoursesByKeyWords(ctx context.Context, keyWords []string, start int, amount int) ([]*model.Course, error) {
@@ -778,7 +694,7 @@ func (r *queryResolver) CoursesByKeyWords(ctx context.Context, keyWords []string
 	if err != nil {
 		return nil, err
 	}
-	return reformatCourses(res)
+	return reformatCourses(res), nil
 }
 
 func (r *queryResolver) Content(ctx context.Context, id string) (*model.Content, error) {
@@ -786,7 +702,7 @@ func (r *queryResolver) Content(ctx context.Context, id string) (*model.Content,
 	if err != nil {
 		return nil, err
 	}
-	return reformatContent(res)
+	return reformatContent(res), nil
 }
 
 func (r *queryResolver) Contents(ctx context.Context, tags []string, courseID *string, start int, amount int) ([]*model.Content, error) {
@@ -794,7 +710,7 @@ func (r *queryResolver) Contents(ctx context.Context, tags []string, courseID *s
 	if err != nil {
 		return nil, err
 	}
-	return reformatContents(res)
+	return reformatContents(res), nil
 }
 
 func (r *queryResolver) Pendings(ctx context.Context, filter model.PendingFilter, start int, amount int) ([]*model.Pending, error) {
@@ -803,7 +719,7 @@ func (r *queryResolver) Pendings(ctx context.Context, filter model.PendingFilter
 	if err != nil {
 		return nil, err
 	}
-	return reformatPendings(res)
+	return reformatPendings(res), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

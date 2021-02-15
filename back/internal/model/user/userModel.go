@@ -21,6 +21,15 @@ type User struct {
 var DBD DBDriver
 var Cache *freecache.Cache
 
+var DeletedAccount = &User{
+	ID:       primitive.NilObjectID,
+	Username: "DELETED ACCOUNT",
+	Name:     "",
+	Email:    "",
+	Password: "",
+	Courses:  nil,
+}
+
 func (u *User) enroll(courseID string) *User {
 	u.Courses = append(u.Courses, courseID)
 	return u
@@ -58,7 +67,7 @@ func (u *User) updatePassword(password string) error {
 	return nil
 }
 
-func GetFromCache(username string) (*User, error){
+func GetFromCache(username string) (*User, error) {
 	c, err := Cache.Get([]byte(username))
 	if err == nil {
 		var cr *User
@@ -68,7 +77,11 @@ func GetFromCache(username string) (*User, error){
 		}
 		return cr, err
 	}
-	return nil,  model.UserNotFoundException{Message: "user not found in cache"}
+	return nil, model.UserNotFoundException{Message: "user not found in cache"}
+}
+
+func DeleteFromCache(username string) {
+	Cache.Del([]byte(username))
 }
 
 func (u *User) Cache() error {

@@ -2,6 +2,7 @@ package user
 
 import (
 	"yes-sharifTube/graph/model"
+	"yes-sharifTube/internal/model/course"
 	"yes-sharifTube/pkg/database/status"
 )
 
@@ -12,6 +13,7 @@ import (
 	we use status.FAILED to return a failed status and
 	status.SUCCESSFUL to return a successful status (obviously)
 */
+
 func GetAll(start, amount int64) ([]*User, error) {
 	all, err := DBD.GetAll(start, amount)
 	if err == status.FAILED {
@@ -21,7 +23,6 @@ func GetAll(start, amount int64) ([]*User, error) {
 }
 
 func Update(targetUsername string, toBe model.EditedUser) (*User, error) {
-
 	targetUser := newFrom(toBe)
 	return update(targetUsername, targetUser)
 }
@@ -38,6 +39,11 @@ func update(targetUsername string, targetUser User) (*User, error) {
 		// no clue why query failed
 		return nil, model.InternalServerException{Message: "couldn't update the user"}
 	} else {
+
+		// update user in cache if exists
+		DeleteFromCache(targetUser.Username)
+		_ = targetUser.Cache()
+
 		return &targetUser, nil
 	}
 }
@@ -59,9 +65,33 @@ func newFrom(toBe model.EditedUser) User {
 
 func Delete(username string) error {
 
+	// delete user from its courses
+	usr, err := Get(username)
+	if err != nil {
+		return model.UserNotFoundException{Message: "user couldn't found"}
+	}
+	for _, cID := range usr.Courses {
+		c, err := course.Get(cID)
+		if err == nil {
+			if c.IsUserProfessor(username) {
+				err = course.Delete(c)
+				if err != nil {
+					return model.InternalServerException{Message: "course of user couldn't delete"}
+				}
+			} else {
+				_, err = course.DeleteUser(username, c)
+				if err != nil {
+					return model.InternalServerException{Message: "user couldn't delete in the course"}
+				}
+			}
+		}
+	}
+	// delete user from database
 	if stat := DBD.Delete(&username); stat == status.FAILED {
 		return model.InternalServerException{Message: "couldn't delete the user"}
 	} else {
+		// delete from cache if exists
+		DeleteFromCache(username)
 		return nil
 	}
 }
@@ -115,27 +145,33 @@ func Get(username string) (*User, error) {
 	}
 }
 
-func GetS(usernames []string) ([]*User, error) {
+func SetDeletedAccount() error {
+	// checking for duplicate username
+	if _, stat := DBD.Get(&DeletedAccount.Username); stat == status.FAILED {
+		if stat = DBD.InsertExact(DeletedAccount); stat == status.FAILED {
+			return model.InternalServerException{Message: "couldn't create deleted account user"}
+		}
+	}
+	return nil
+}
+
+func GetA(usernames []string) []*User {
 	var users []*User
 	for i, _ := range usernames {
-
-		// checking to be in cache first
-		target, err := GetFromCache(usernames[i])
-		if err != nil {
-
-			// if not exists, get from database
-			target, stat := DBD.Get(&usernames[i])
-			if stat == status.FAILED {
-				return nil, model.UserNotFoundException{Message: "couldn't find the requested user"}
-			}
-
-			// add the content to cache
-			_ = target.Cache()
-		}
-
-		users = append(users, target)
+		users = append(users, GetS(usernames[i]))
 	}
-	return users, nil
+	return users
+}
+
+func GetS(username string) *User {
+	if username == "" {
+		return nil
+	}
+	u, err := Get(username)
+	if err != nil {
+		u = DeletedAccount
+	}
+	return u
 }
 
 func (u *User) Enroll(courseID string) *User {
@@ -152,6 +188,7 @@ func (u *User) UpdateName(name string) (*User, error) {
 	u.updateName(name)
 	return update(u.Username, User{Name: u.Name})
 }
+
 func (u *User) UpdateEmail(email string) (*User, error) {
 	u.updateEmail(email)
 	return update(u.Username, User{Email: u.Email})

@@ -66,94 +66,69 @@ func fetchUsername(ctx context.Context) (*string, error) {
 	return &username, nil
 }
 
-func reformatCourse(c *course.Course) (*model.Course, error) {
-	prof, _ := user.Get(c.ProfUn)
-	tas, _ := user.GetS(c.TaUns)
-	students, _ := user.GetS(c.StdUns)
-
+func reformatCourse(c *course.Course) *model.Course {
 	res := &model.Course{
 		ID:        c.ID.Hex(),
 		Title:     c.Title,
 		Summary:   &c.Summery,
 		CreatedAt: int(c.CreatedAt),
-		Prof:      reformatUser(prof),
-		Tas:       reformatUsers(tas),
+		Prof:      reformatUser(user.GetS(c.ProfUn)),
+		Tas:       reformatUsers(user.GetA(c.TaUns)),
 		Pends:     nil,
-		Students:  reformatUsers(students),
+		Students:  reformatUsers(user.GetA(c.StdUns)),
 		Contents:  nil,
 		Inventory: nil,
 	}
 
 	//reshape pendings
-	pends, err := reformatPendings(c.Pends)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "error while reshape pending array of course: /n" + err.Error()}
-	}
-	res.Pends = pends
+	res.Pends = reformatPendings(c.Pends)
 
 	//reshape contents
-	contents, err := reformatContents(c.Contents)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "error while reshape contents of course: /n" + err.Error()}
-	}
-	res.Contents = contents
+	res.Contents = reformatContents(c.Contents)
 
 	//reshape inventory
 	res.Inventory = reformatAttachments(c.Inventory)
 
-	return res, nil
+	return res
 }
 
-func reformatCourses(courses []*course.Course) ([]*model.Course, error) {
+func reformatCourses(courses []*course.Course) []*model.Course {
 	var cs []*model.Course
 	for _, c := range courses {
-		tmp, err := reformatCourse(c)
-		if err != nil {
-			return nil, model.InternalServerException{Message: "error while reshape course array: " + err.Error()}
-		}
-		cs = append(cs, tmp)
+		cs = append(cs, reformatCourse(c))
 	}
-	return cs, nil
+	return cs
 }
 
-func reformatPending(p *pending.Pending) (*model.Pending, error) {
-	uploader, _ := user.Get(p.UploadedByUn)
-
+func reformatPending(p *pending.Pending) *model.Pending {
 	return &model.Pending{
 		ID:          p.ID.Hex(),
 		Title:       p.Title,
 		Description: &p.Description,
 		Status:      p.Status.Reshape(),
 		Timestamp:   int(p.Timestamp),
-		UploadedBy:  reformatUser(uploader),
+		UploadedBy:  reformatUser(user.GetS(p.UploadedByUn)),
 		Furl:        p.Furl,
 		CourseID:    p.CourseID,
-	}, nil
+	}
 }
 
-func reformatPendings(pendings []*pending.Pending) ([]*model.Pending, error) {
+func reformatPendings(pendings []*pending.Pending) []*model.Pending {
 	var ps []*model.Pending
 	for _, p := range pendings {
-		tmp, err := reformatPending(p)
-		if err != nil {
-			return nil, model.InternalServerException{Message: "error while reshape pending array: /n" + err.Error()}
-		}
-		ps = append(ps, tmp)
+		ps = append(ps, reformatPending(p))
 	}
-	return ps, nil
+	return ps
 }
 
-func reformatContent(c *content.Content) (*model.Content, error) {
-	uploader, _ := user.Get(c.UploadedByUn)
-	approver, _ := user.Get(c.ApprovedByUn)
-
+func reformatContent(c *content.Content) *model.Content {
 	res := &model.Content{
 		ID:          c.ID.Hex(),
 		Title:       c.Title,
 		Description: &c.Description,
 		Timestamp:   int(c.Timestamp),
-		UploadedBy:  reformatUser(uploader),
-		ApprovedBy:  reformatUser(approver),
+		UploadedBy:  reformatUser(user.GetS(c.UploadedByUn)),
+		ApprovedBy:  reformatUser(user.GetS(c.ApprovedByUn)),
 		Vurl:        c.Vurl,
 		Tags:        c.Tags,
 		Comments:    nil,
@@ -161,25 +136,17 @@ func reformatContent(c *content.Content) (*model.Content, error) {
 	}
 
 	//reshape comments
-	comments, err := reformatComments(c.Comments)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "error while reshape comments of content: /n" + err.Error()}
-	}
-	res.Comments = comments
+	res.Comments = reformatComments(c.Comments)
 
-	return res, nil
+	return res
 }
 
-func reformatContents(contents []*content.Content) ([]*model.Content, error) {
+func reformatContents(contents []*content.Content) []*model.Content {
 	var cs []*model.Content
 	for _, c := range contents {
-		tmp, err := reformatContent(c)
-		if err != nil {
-			return nil, model.InternalServerException{Message: "error while reshape content array: /n" + err.Error()}
-		}
-		cs = append(cs, tmp)
+		cs = append(cs, reformatContent(c))
 	}
-	return cs, nil
+	return cs
 }
 
 func reformatAttachment(a *attachment.Attachment) *model.Attachment {
@@ -201,12 +168,10 @@ func reformatAttachments(attachments []*attachment.Attachment) []*model.Attachme
 	return cs
 }
 
-func reformatComment(c *comment.Comment) (*model.Comment, error) {
-	author, _ := user.Get(c.AuthorUn)
-
+func reformatComment(c *comment.Comment) *model.Comment {
 	res := &model.Comment{
 		ID:        c.ID.Hex(),
-		Author:    reformatUser(author),
+		Author:    reformatUser(user.GetS(c.AuthorUn)),
 		Body:      c.Body,
 		Timestamp: int(c.Timestamp),
 		Replies:   nil,
@@ -214,47 +179,33 @@ func reformatComment(c *comment.Comment) (*model.Comment, error) {
 	}
 
 	//reshape replies
-	replies, err := ReshapeAllReplies(c.Replies)
-	if err != nil {
-		return nil, model.InternalServerException{Message: "error while reshape replies of comment: /n" + err.Error()}
-	}
-	res.Replies = replies
+	res.Replies = ReshapeAllReplies(c.Replies)
 
-	return res, nil
+	return res
 }
 
-func reformatComments(courses []*comment.Comment) ([]*model.Comment, error) {
+func reformatComments(courses []*comment.Comment) []*model.Comment {
 	var cs []*model.Comment
 	for _, c := range courses {
-		tmp, err := reformatComment(c)
-		if err != nil {
-			return nil, model.InternalServerException{Message: "error while reshape comment array: /n" + err.Error()}
-		}
-		cs = append(cs, tmp)
+		cs = append(cs, reformatComment(c))
 	}
-	return cs, nil
+	return cs
 }
 
-func reformatReply(r *comment.Reply) (*model.Reply, error) {
-	author, _ := user.Get(r.AuthorUn)
-
+func reformatReply(r *comment.Reply) *model.Reply {
 	return &model.Reply{
 		ID:        r.ID.Hex(),
-		Author:    reformatUser(author),
+		Author:    reformatUser(user.GetS(r.AuthorUn)),
 		Body:      r.Body,
 		Timestamp: int(r.Timestamp),
 		CommentID: r.CommentID,
-	}, nil
+	}
 }
 
-func ReshapeAllReplies(replies []*comment.Reply) ([]*model.Reply, error) {
+func ReshapeAllReplies(replies []*comment.Reply) []*model.Reply {
 	var cs []*model.Reply
 	for _, c := range replies {
-		tmp, err := reformatReply(c)
-		if err != nil {
-			return nil, model.InternalServerException{Message: "error while reshape reply array: /n" + err.Error()}
-		}
-		cs = append(cs, tmp)
+		cs = append(cs, reformatReply(c))
 	}
-	return cs, nil
+	return cs
 }

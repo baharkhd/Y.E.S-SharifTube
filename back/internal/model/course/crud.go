@@ -71,84 +71,93 @@ func Insert(course *Course) (*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// add the course to cache
+	_ = course.Cache()
+
 	return course, nil
 }
 
-func Update(username string, course *Course) error {
-	if !course.IsUserProfessor(username) {
-		return model.UserNotAllowedException{Message: "you can't change this course. because you are not professor"}
+func Update(course *Course) error {
+	err := DBD.UpdateInfo(course.ID, course.Title, course.Summery, course.Token)
+	if err != nil {
+		return err
 	}
-	return DBD.UpdateInfo(course.ID, course.Title, course.Summery, course.Token)
+
+	// add the course to cache
+	DeleteFromCache(course.ID.Hex())
+	_ = course.Cache()
+
+	return nil
 }
 
-func Delete(username string, course *Course) error {
-	if !course.IsUserProfessor(username) {
-		return model.UserNotAllowedException{Message: "you are not professor"}
+func Delete(course *Course) error {
+	err := DBD.Delete(course.ID, append(course.StdUns, append(course.TaUns, course.ProfUn)...))
+	if err != nil {
+		return err
 	}
-	return DBD.Delete(course.ID, append(course.StdUns, append(course.TaUns, course.ProfUn)...))
+	// delete from cache if exists
+	DeleteFromCache(course.ID.Hex())
+	return nil
 }
 
-func AddUser(username, token string, course *Course) (*Course, error) {
-	if course.IsUserParticipateInCourse(username) {
-		return nil, model.DuplicateUsernameException{Message: "you been been added before"}
-	}
-	if !course.CheckCourseToken(token) {
-		return nil, model.IncorrectTokenException{Message: "wrong course token"}
-	}
+func AddUser(username string, course *Course) (*Course, error) {
 	course.StdUns = append(course.StdUns, username)
 	if err := DBD.AddStd(username, course.ID); err != nil {
 		return nil, err
 	}
+
+	// update the course in cache if exists
+	DeleteFromCache(course.ID.Hex())
+	_ = course.Cache()
+
 	return course, nil
 }
 
-func DeleteUser(username, targetUsername string, course *Course) (*Course, error) {
-	if !course.IsUserParticipateInCourse(targetUsername) {
-		return nil, model.UserNotFoundException{Message: "you weren't participate in course"}
-	}
-	if !course.IsUserAllowedToDeleteUser(username, targetUsername) {
-		return nil, model.UserNotAllowedException{Message: "you can't remove this user"}
-	}
+func DeleteUser(targetUsername string, course *Course) (*Course, error) {
 	if modelUtil.ContainsInStringArray(course.TaUns, targetUsername) {
 		course.TaUns = modelUtil.RemoveFromStringArray(course.TaUns, targetUsername)
-		if err := DBD.DelTa(username, course.ID); err != nil {
+		if err := DBD.DelTa(targetUsername, course.ID); err != nil {
 			return nil, err
 		}
 	} else {
 		course.StdUns = modelUtil.RemoveFromStringArray(course.StdUns, targetUsername)
-		if err := DBD.DelStd(username, course.ID); err != nil {
+		if err := DBD.DelStd(targetUsername, course.ID); err != nil {
 			return nil, err
 		}
 	}
+
+	// update the course in cache if exists
+	DeleteFromCache(course.ID.Hex())
+	_ = course.Cache()
+
 	return course, nil
 }
 
-func PromoteUser(username, targetUsername string, course *Course) (*Course, error) {
-	if !course.IsUserProfOrTA(username) {
-		return nil, model.UserNotAllowedException{Message: "you are not professor or ta"}
-	}
-	if !course.IsUserStudent(targetUsername) {
-		return nil, model.UserIsNotSTDException{Message: "you are not student"}
-	}
+func PromoteUser(targetUsername string, course *Course) (*Course, error) {
 	course.StdUns = modelUtil.RemoveFromStringArray(course.StdUns, targetUsername)
 	course.TaUns = append(course.TaUns, targetUsername)
 	if err := DBD.PromoteDemoteUser(course); err != nil {
 		return nil, err
 	}
+
+	// update the course in cache if exists
+	DeleteFromCache(course.ID.Hex())
+	_ = course.Cache()
+
 	return course, nil
 }
 
-func DemoteUser(username, targetUsername string, course *Course) (*Course, error) {
-	if !course.IsUserProfOrTA(username) {
-		return nil, model.UserNotAllowedException{Message: "you are not professor or ta"}
-	}
-	if !course.IsUserTA(targetUsername) {
-		return nil, model.UserIsNotSTDException{Message: "you are not ta"}
-	}
+func DemoteUser(targetUsername string, course *Course) (*Course, error) {
 	course.TaUns = modelUtil.RemoveFromStringArray(course.TaUns, targetUsername)
 	course.StdUns = append(course.StdUns, targetUsername)
 	if err := DBD.PromoteDemoteUser(course); err != nil {
 		return nil, err
 	}
+
+	// update the course in cache if exists
+	DeleteFromCache(course.ID.Hex())
+	_ = course.Cache()
+
 	return course, nil
 }

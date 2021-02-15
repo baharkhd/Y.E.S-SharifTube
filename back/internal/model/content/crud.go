@@ -64,6 +64,10 @@ func Insert(courseID string, content *Content) (*Content, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// insert the content in cache
+	_ = content.Cache()
+
 	return content, nil
 }
 
@@ -72,7 +76,16 @@ func Update(courseID string, content *Content) error {
 	if err != nil {
 		return model.InternalServerException{Message: err.Error()}
 	}
-	return DBD.UpdateInfo(cID, content.ID, content.Title, content.Description, content.Tags, content.Timestamp)
+	err = DBD.UpdateInfo(cID, content.ID, content.Title, content.Description, content.Tags, content.Timestamp)
+	if err != nil {
+		return err
+	}
+
+	// update the content in cache if exists
+	DeleteFromCache(courseID)
+	_ = content.Cache()
+
+	return nil
 }
 
 func Delete(courseID string, content *Content) error {
@@ -80,5 +93,13 @@ func Delete(courseID string, content *Content) error {
 	if err != nil {
 		return model.InternalServerException{Message: err.Error()}
 	}
-	return DBD.Delete(cID, content.ID)
+	err = DBD.Delete(cID, content.ID)
+	if err != nil{
+		return err
+	}
+
+	// delete from cache if exists
+	DeleteFromCache(content.ID.Hex())
+
+	return nil
 }

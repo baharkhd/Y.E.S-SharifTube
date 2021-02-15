@@ -167,3 +167,7 @@ func (c *Content) Cache() error {
 	}
 	return nil
 }
+
+func DeleteFromCache(contentID string) {
+	Cache.Del([]byte(contentID))
+}

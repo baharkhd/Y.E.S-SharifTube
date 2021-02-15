@@ -33,9 +33,13 @@ func main() {
 	pending.DBD = mongodb.NewPendingMongoDriver("yes-sharifTube", "courses")
 	attachment.DBD = mongodb.NewAttachmentMongoDriver("yes-sharifTube", "courses")
 	comment.DBD = mongodb.NewCommentMongoDriver("yes-sharifTube", "courses")
+	// adding the deleted account in database
+	if err := user.SetDeletedAccount(); err != nil {
+		panic(err)
+	}
 
 	// set 1Gb cache
-	cacheSize := 100 * 1024 * 1024
+	cacheSize := 1000 * 1024 * 1024
 	cache := freecache.NewCache(cacheSize)
 	debug.SetGCPercent(20)
 	course.Cache = cache
