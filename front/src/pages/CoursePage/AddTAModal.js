@@ -13,7 +13,7 @@ const USERS_QUERY = gql`
   }
 `;
 
-const AddTAModal = ({ open, setOpen, courseID }) => {
+const AddTAModal = ({ open, setOpen, courseID, students }) => {
   const { data, loading, error } = useQuery(USERS_QUERY, {
     fetchPolicy: "cache-and-network",
     nextFetchPolicy: "cache-first",
@@ -25,15 +25,19 @@ const AddTAModal = ({ open, setOpen, courseID }) => {
 
   let usernames;
   if (!loading) {
-    usernames = data.users.map(user => user.username);
+    usernames = students.map(user => user.username);
   }
+
+  console.log("usernamessssss:", usernames);
 
   return (
     <Modal open={open} size="tiny">
       <Header icon="add user" content="Add TA" />
       <Modal.Content>
         {/* <Input icon="users" iconPosition="left" placeholder="Search users..." /> */}
-        {!loading && <Autocomplete suggestions={usernames} courseID={courseID} />}
+        {!loading && (
+          <Autocomplete suggestions={usernames} courseID={courseID} />
+        )}
       </Modal.Content>
       <Modal.Actions>
         <Button color="green" onClick={() => setOpen({ addingTA: false })}>

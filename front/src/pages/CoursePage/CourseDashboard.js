@@ -97,6 +97,9 @@ const COURSE_QUERY = gql`
         username
         email
       }
+      students {
+        username
+      }
     }
   }
 `;
@@ -262,8 +265,16 @@ function CourseDashboard(props) {
           // course={course}
           courseTitle={course.title}
           courseProf={course.prof}
-          courseTAs={course.tas}
+          courseTAs={course ? course.tas : []}
+          username={props.username}
           role={props.username === course.prof.username ? "prof" : "non-prof"} // can be prof or ta or st
+          students={
+            !response.loading
+              ? response.data.courses[0].students
+                ? response.data.courses[0].students
+                : []
+              : []
+          }
         />
       )}
       <Segment

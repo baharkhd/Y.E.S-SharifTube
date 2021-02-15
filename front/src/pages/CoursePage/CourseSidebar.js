@@ -14,22 +14,22 @@ const TAs = [
   "folan7"
 ];
 
-const ADD_TA_MUTATION = gql`
-  mutation AddTA($courseID: String!, $targetUsername: String!) {
-    promoteUserToTA(courseID: $courseID, targetUsername: $targetUsername) {
-      __typename
-      ... on Course {
-        id
-        title
-        summary
-        createdAt
-      }
-      ... on Exception {
-        message
-      }
-    }
-  }
-`;
+// const ADD_TA_MUTATION = gql`
+//   mutation AddTA($courseID: String!, $targetUsername: String!) {
+//     promoteUserToTA(courseID: $courseID, targetUsername: $targetUsername) {
+//       __typename
+//       ... on Course {
+//         id
+//         title
+//         summary
+//         createdAt
+//       }
+//       ... on Exception {
+//         message
+//       }
+//     }
+//   }
+// `;
 
 function SideBar(props) {
   const [state, setState] = useState({
@@ -48,6 +48,10 @@ function SideBar(props) {
 
   const handleItemClick = (e, { name }) => setState({ activeItem: name });
 
+  console.log("course TAs:", props.courseTAs)
+  console.log("username:", props.username)
+  console.log("is a TA:", props.courseTAs.some(ta => ta.username === props.username))
+
   let uploadPath =
     props.role == "prof"
       ? "/course:" + id + "/upload"
@@ -64,7 +68,12 @@ function SideBar(props) {
       width="thin"
       style={{ width: 250, top: 70 }}
     >
-      <AddTAModal open={state.addingTA} setOpen={setState} courseID={id} />
+      <AddTAModal
+        open={state.addingTA}
+        setOpen={setState}
+        courseID={id}
+        students={props.students}
+      />
       <Menu.Item as="a">
         <Icon name="student" />
         Course Title: {props.courseTitle ? props.courseTitle : ""}
@@ -77,16 +86,15 @@ function SideBar(props) {
         <Icon name="users" />
         TAs:
         <List>
-          {TAs !== null &&
-            TAs.map(TA => {
-              return (
-                <List.Item as="li">
-                  {/* <List.Icon name="user" /> */}
-                  {/* <List.Content>{TA}</List.Content> */}
-                  {TA.name}
-                </List.Item>
-              );
-            })}
+          {props.courseTAs.map(TA => {
+            return (
+              <List.Item as="li">
+                {/* <List.Icon name="user" /> */}
+                {/* <List.Content>{TA}</List.Content> */}
+                {TA.name}
+              </List.Item>
+            );
+          })}
           <List.Item>
             <Button
               positive
@@ -114,7 +122,7 @@ function SideBar(props) {
           </Link>
         )} */}
       </Menu.Item>
-      {props.role === "prof" && (
+      {(props.role === "prof" || props.courseTAs.some(ta => ta.username === props.username)) && (
         <Menu.Item>
           <Link to={"/course:" + id + "/pendings"}>
             <Button color="black">Pending Contents</Button>
