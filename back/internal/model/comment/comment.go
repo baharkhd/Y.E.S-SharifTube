@@ -7,6 +7,9 @@ import (
 	modelUtil "yes-sharifTube/internal/model"
 )
 
+const BodyWordSize = 200
+const BodyCharSize = 600
+
 type Comment struct {
 	ID        primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Body      string             `json:"body" bson:"body"`
@@ -35,6 +38,9 @@ func New(body, authorID, contentID string) (*Comment, error) {
 func RegexValidate(body, authorUn, ownerID *string) error {
 	if body != nil && modelUtil.IsSTREmpty(*body) {
 		return model.RegexMismatchException{Message: "body field is empty"}
+	}
+	if body != nil && (modelUtil.WordCount(*body) > BodyWordSize || len(*body) > BodyCharSize) {
+		return model.RegexMismatchException{Message: "body field exceeds limit size"}
 	}
 	if authorUn != nil && modelUtil.IsSTREmpty(*authorUn) {
 		return model.RegexMismatchException{Message: "author username field is empty"}

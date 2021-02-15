@@ -15,7 +15,9 @@ import (
 
 const CacheExpire = 10 * 60
 const TitleWordSize = 30
-const DescriptionWordSize = 200
+const TitleCharSize = 150
+const SummeryWordSize = 200
+const SummeryCharSize = 800
 
 type Course struct {
 	ID        primitive.ObjectID       `bson:"_id" json:"id,omitempty"`
@@ -61,8 +63,14 @@ func RegexValidate(title, summery, profUsername, token *string) error {
 	if title != nil && modelUtil.IsSTREmpty(*title) {
 		return model.RegexMismatchException{Message: "title field is empty"}
 	}
+	if title != nil && (modelUtil.WordCount(*title) > TitleWordSize || len(*title) > TitleCharSize) {
+		return model.RegexMismatchException{Message: "title field exceeds limit size"}
+	}
 	if summery != nil && modelUtil.IsSTREmpty(*summery) {
 		return model.RegexMismatchException{Message: "summery field is empty"}
+	}
+	if summery != nil && (modelUtil.WordCount(*summery) > SummeryWordSize || len(*summery) > SummeryCharSize) {
+		return model.RegexMismatchException{Message: "summery field exceeds limit size"}
 	}
 	if profUsername != nil && modelUtil.IsSTREmpty(*profUsername) {
 		return model.RegexMismatchException{Message: "professor username field is empty"}

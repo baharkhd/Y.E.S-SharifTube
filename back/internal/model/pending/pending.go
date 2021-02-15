@@ -9,7 +9,9 @@ import (
 )
 
 const TitleWordSize = 30
+const TitleCharSize = 150
 const DescriptionWordSize = 200
+const DescriptionCharSize = 600
 
 type Pending struct {
 	ID           primitive.ObjectID `bson:"_id" json:"id,omitempty"`
@@ -44,13 +46,13 @@ func RegexValidate(title, description, uploadedByID, furl, courseID *string) err
 	if title != nil && modelUtil.IsSTREmpty(*title) {
 		return model.RegexMismatchException{Message: "title field is empty"}
 	}
-	if title != nil && modelUtil.WordCount(*title) > TitleWordSize {
+	if title != nil && (modelUtil.WordCount(*title) > TitleWordSize || len(*title) > TitleCharSize) {
 		return model.RegexMismatchException{Message: "title field exceeds limit size"}
 	}
 	if description != nil && modelUtil.IsSTREmpty(*description) {
 		return model.RegexMismatchException{Message: "description field is empty"}
 	}
-	if description != nil && modelUtil.WordCount(*description) > DescriptionWordSize {
+	if description != nil && (modelUtil.WordCount(*description) > DescriptionWordSize || len(*description) > DescriptionCharSize) {
 		return model.RegexMismatchException{Message: "description field exceeds limit size"}
 	}
 	if uploadedByID != nil && modelUtil.IsSTREmpty(*uploadedByID) {
