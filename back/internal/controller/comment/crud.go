@@ -42,13 +42,16 @@ func CreateComment(authorUsername, contentID, body string, repliedID *string) (*
 		if err != nil {
 			return nil, nil, err
 		}
+		// add comment to content
+		con.AddComment(cmd)
 	} else {
 		// check if the comment exists in the
 		repID, err := primitive.ObjectIDFromHex(*repliedID)
 		if err != nil {
 			return nil, nil, model.InternalServerException{Message: err.Error()}
 		}
-		if ccmt, _ := con.GetComment(repID); ccmt == nil {
+		ccmt, _ := con.GetComment(repID)
+		if ccmt == nil {
 			return nil, nil, model.CommentNotFoundException{Message: "comment not found"}
 		}
 		// create new rely
@@ -61,7 +64,13 @@ func CreateComment(authorUsername, contentID, body string, repliedID *string) (*
 		if err != nil {
 			return nil, nil, err
 		}
+		// add reply to content
+		con.AddReply(repID, rep)
 	}
+	// maintain consistency in cache
+	cr.UpdateContent(con)
+	con.UpdateCache()
+	cr.UpdateCache()
 	return cmd, rep, err
 }
 
@@ -113,6 +122,10 @@ func UpdateComment(authorUsername, contentID, commentID string, newBody *string)
 	if err != nil {
 		return nil, nil, err
 	}
+	// maintain consistency in cache
+	cr.UpdateContent(con)
+	con.UpdateCache()
+	cr.UpdateCache()
 	if rcmt != nil {
 		return nil, rcmt, nil
 	}
@@ -151,5 +164,9 @@ func DeleteComment(authorUsername, contentID, commentID string) (*comment.Commen
 	if rcmt != nil {
 		return nil, rcmt, nil
 	}
+	// maintain consistency in cache
+	cr.UpdateContent(con)
+	con.UpdateCache()
+	cr.UpdateCache()
 	return ccmt, nil, nil
 }

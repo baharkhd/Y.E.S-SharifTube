@@ -106,7 +106,7 @@ func (c *Course) Update(newTitle, newSummery, newToken *string) error {
 	return nil
 }
 
-func GetFromCache(courseID string) (*Course, error){
+func GetFromCache(courseID string) (*Course, error) {
 	c, err := Cache.Get([]byte(courseID))
 	if err == nil {
 		var cr *Course
@@ -116,7 +116,7 @@ func GetFromCache(courseID string) (*Course, error){
 		}
 		return cr, err
 	}
-	return nil,  model.CourseNotFoundException{Message: "course not found in cache"}
+	return nil, model.CourseNotFoundException{Message: "course not found in cache"}
 }
 
 func (c *Course) Cache() error {
@@ -131,8 +131,67 @@ func (c *Course) Cache() error {
 	return nil
 }
 
+func (c *Course) UpdateCache() {
+	DeleteFromCache(c.ID.Hex())
+	_ = c.Cache()
+}
+
 func DeleteFromCache(courseID string) {
 	Cache.Del([]byte(courseID))
+}
+
+func (c *Course) AddContent(con *content.Content) {
+	c.Contents = append(c.Contents, con)
+}
+
+func (c *Course) UpdateContent(con *content.Content) {
+	i := c.GetContent(con.ID)
+	if i >= 0 {
+		c.Contents[i] = con
+	}
+}
+
+func (c *Course) DeleteContent(conID primitive.ObjectID) {
+	i := c.GetContent(conID)
+	if i >= 0 {
+		c.Contents = append(c.Contents[:i], c.Contents[i+1:]...)
+	}
+}
+
+func (c *Course) AddPending(pen *pending.Pending) {
+	c.Pends = append(c.Pends, pen)
+}
+
+func (c *Course) UpdatePending(pen *pending.Pending) {
+	i := c.GetPending(pen.ID)
+	if i >= 0 {
+		c.Pends[i] = pen
+	}
+}
+
+func (c *Course) DeletePending(penID primitive.ObjectID) {
+	i := c.GetPending(penID)
+	if i >= 0 {
+		c.Pends = append(c.Pends[:i], c.Pends[i+1:]...)
+	}
+}
+
+func (c *Course) AddAttachment(at *attachment.Attachment) {
+	c.Inventory = append(c.Inventory, at)
+}
+
+func (c *Course) UpdateAttachment(at *attachment.Attachment) {
+	i := c.GetAttachment(at.ID)
+	if i >= 0 {
+		c.Inventory[i] = at
+	}
+}
+
+func (c *Course) DeleteAttachment(atID primitive.ObjectID) {
+	i := c.GetAttachment(atID)
+	if i >= 0 {
+		c.Inventory = append(c.Inventory[:i], c.Inventory[i+1:]...)
+	}
 }
 
 func (c Course) IsUserProfOrTA(username string) bool {
@@ -209,31 +268,31 @@ func (c Course) CheckCourseToken(token string) bool {
 	return modelUtil.CheckTokenHash(token, c.Token)
 }
 
-func (c Course) GetContent(contentID primitive.ObjectID) *content.Content {
-	for _, cnt := range c.Contents {
+func (c Course) GetContent(contentID primitive.ObjectID) int {
+	for i, cnt := range c.Contents {
 		if cnt.ID == contentID {
-			return cnt
+			return i
 		}
 	}
-	return nil
+	return -1
 }
 
-func (c Course) GetPending(contentID primitive.ObjectID) *pending.Pending {
-	for _, pnt := range c.Pends {
+func (c Course) GetPending(contentID primitive.ObjectID) int {
+	for i, pnt := range c.Pends {
 		if pnt.ID == contentID {
-			return pnt
+			return i
 		}
 	}
-	return nil
+	return -1
 }
 
-func (c Course) GetAttachment(attachmentID primitive.ObjectID) *attachment.Attachment {
-	for _, pnt := range c.Inventory {
+func (c Course) GetAttachment(attachmentID primitive.ObjectID) int {
+	for i, pnt := range c.Inventory {
 		if pnt.ID == attachmentID {
-			return pnt
+			return i
 		}
 	}
-	return nil
+	return -1
 }
 
 func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cnt *content.Content) (*comment.Comment, *comment.Reply, error) {
@@ -261,21 +320,21 @@ func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cn
 	return nil, nil, model.CommentNotFoundException{Message: "there is no comment @" + commentID.Hex()}
 }
 
-func (c *Course) IsUserAllowedToUpdateCourse(username string) error{
+func (c *Course) IsUserAllowedToUpdateCourse(username string) error {
 	if !c.IsUserProfessor(username) {
 		return model.UserNotAllowedException{Message: "you can't change this course. because you are not professor"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToDeleteCourse(username string) error{
+func (c *Course) IsUserAllowedToDeleteCourse(username string) error {
 	if !c.IsUserProfessor(username) {
 		return model.UserNotAllowedException{Message: "you are not professor"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToAddUserInCourse(username, token string) error{
+func (c *Course) IsUserAllowedToAddUserInCourse(username, token string) error {
 	if c.IsUserParticipateInCourse(username) {
 		return model.DuplicateUsernameException{Message: "you been been added before"}
 	}
@@ -285,7 +344,7 @@ func (c *Course) IsUserAllowedToAddUserInCourse(username, token string) error{
 	return nil
 }
 
-func (c *Course) IsUserAllowedToDeleteUserInCourse(username, targetUsername string) error{
+func (c *Course) IsUserAllowedToDeleteUserInCourse(username, targetUsername string) error {
 	if !c.IsUserParticipateInCourse(targetUsername) {
 		return model.UserNotFoundException{Message: "you weren't participate in course"}
 	}
@@ -295,7 +354,7 @@ func (c *Course) IsUserAllowedToDeleteUserInCourse(username, targetUsername stri
 	return nil
 }
 
-func (c *Course) IsUserAllowedToPromoteUserInCourse(username, targetUsername string) error{
+func (c *Course) IsUserAllowedToPromoteUserInCourse(username, targetUsername string) error {
 	if !c.IsUserProfOrTA(username) {
 		return model.UserNotAllowedException{Message: "you are not professor or ta"}
 	}
@@ -305,7 +364,7 @@ func (c *Course) IsUserAllowedToPromoteUserInCourse(username, targetUsername str
 	return nil
 }
 
-func (c *Course) IsUserAllowedToDemoteUserInCourse(username, targetUsername string) error{
+func (c *Course) IsUserAllowedToDemoteUserInCourse(username, targetUsername string) error {
 	if !c.IsUserProfOrTA(username) {
 		return model.UserNotAllowedException{Message: "you are not professor or ta"}
 	}

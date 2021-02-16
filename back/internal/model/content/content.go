@@ -81,7 +81,7 @@ func RegexValidate(title, description, uploadedBy, vurl, courseID, approvedBy *s
 		}
 	}
 	//todo regex definition for Tag
-	if tags != nil && len(tags) == 0{
+	if tags != nil && len(tags) == 0 {
 		return model.RegexMismatchException{Message: "tags field is empty"}
 	}
 	return nil
@@ -143,7 +143,7 @@ func (c *Content) GetComment(commentID primitive.ObjectID) (*comment.Comment, *c
 	return nil, nil
 }
 
-func GetFromCache(contentID string) (*Content, error){
+func GetFromCache(contentID string) (*Content, error) {
 	c, err := Cache.Get([]byte(contentID))
 	if err == nil {
 		var cr *Content
@@ -153,7 +153,7 @@ func GetFromCache(contentID string) (*Content, error){
 		}
 		return cr, err
 	}
-	return nil,  model.ContentNotFoundException{Message: "content not found in cache"}
+	return nil, model.ContentNotFoundException{Message: "content not found in cache"}
 }
 
 func (c *Content) Cache() error {
@@ -168,6 +168,23 @@ func (c *Content) Cache() error {
 	return nil
 }
 
+func (c *Content) UpdateCache() {
+	DeleteFromCache(c.ID.Hex())
+	_ = c.Cache()
+}
+
 func DeleteFromCache(contentID string) {
 	Cache.Del([]byte(contentID))
+}
+
+func (c *Content) AddComment(com *comment.Comment) {
+	c.Comments = append(c.Comments, com)
+}
+
+func (c *Content) AddReply(comID primitive.ObjectID, rep *comment.Reply) {
+	for i, com := range c.Comments {
+		if com.ID == comID {
+			c.Comments[i].Replies = append(c.Comments[i].Replies, rep)
+		}
+	}
 }

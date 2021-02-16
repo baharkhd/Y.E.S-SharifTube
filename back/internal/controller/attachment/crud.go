@@ -31,6 +31,9 @@ func CreateAttachment(authorUsername, courseID, name string, description *string
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.AddAttachment(an)
+	cr.UpdateCache()
 	return an, nil
 }
 
@@ -64,6 +67,9 @@ func UpdateAttachment(authorUsername, courseID, attachmentID string, newName, ne
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.UpdateAttachment(an)
+	cr.UpdateCache()
 	return an, nil
 }
 
@@ -92,5 +98,8 @@ func DeleteAttachment(authorUsername, courseID, attachmentID string) (*attachmen
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.DeleteAttachment(an.ID)
+	cr.UpdateCache()
 	return an, nil
 }

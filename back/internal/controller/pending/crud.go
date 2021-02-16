@@ -46,6 +46,9 @@ func CreatePending(authorUsername, courseID, title string, description *string, 
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.AddPending(pn)
+	cr.UpdateCache()
 	return pn, nil
 }
 
@@ -79,6 +82,9 @@ func UpdatePending(authorUsername, courseID, pendingID string, newTitle, newDesc
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.UpdatePending(pn)
+	cr.UpdateCache()
 	return pn, nil
 }
 
@@ -107,6 +113,9 @@ func DeletePending(authorUsername, courseID, pendingID string) (*pending.Pending
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.DeletePending(pn.ID)
+	cr.UpdateCache()
 	return pn, nil
 }
 
@@ -149,6 +158,10 @@ func AcceptPending(username, courseID, pendingID string, newTitle, newDescriptio
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.UpdatePending(pn)
+	cr.AddContent(nc)
+	cr.UpdateCache()
 	return pn, nil
 }
 
@@ -177,5 +190,8 @@ func RejectPending(username, courseID, pendingID string) (*pending.Pending, erro
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.UpdatePending(pn)
+	cr.UpdateCache()
 	return pn, nil
 }

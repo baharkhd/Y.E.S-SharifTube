@@ -96,8 +96,10 @@ func Delete(course *Course) error {
 	if err != nil {
 		return err
 	}
+
 	// delete from cache if exists
 	DeleteFromCache(course.ID.Hex())
+
 	return nil
 }
 
@@ -108,8 +110,7 @@ func AddUser(username string, course *Course) (*Course, error) {
 	}
 
 	// update the course in cache if exists
-	DeleteFromCache(course.ID.Hex())
-	_ = course.Cache()
+	course.UpdateCache()
 
 	return course, nil
 }
@@ -128,8 +129,7 @@ func DeleteUser(targetUsername string, course *Course) (*Course, error) {
 	}
 
 	// update the course in cache if exists
-	DeleteFromCache(course.ID.Hex())
-	_ = course.Cache()
+	course.UpdateCache()
 
 	return course, nil
 }
@@ -142,8 +142,7 @@ func PromoteUser(targetUsername string, course *Course) (*Course, error) {
 	}
 
 	// update the course in cache if exists
-	DeleteFromCache(course.ID.Hex())
-	_ = course.Cache()
+	course.UpdateCache()
 
 	return course, nil
 }
@@ -156,8 +155,7 @@ func DemoteUser(targetUsername string, course *Course) (*Course, error) {
 	}
 
 	// update the course in cache if exists
-	DeleteFromCache(course.ID.Hex())
-	_ = course.Cache()
+	course.UpdateCache()
 
 	return course, nil
 }

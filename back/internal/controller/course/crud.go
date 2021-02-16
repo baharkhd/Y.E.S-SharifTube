@@ -57,7 +57,7 @@ func UpdateCourse(authorUsername, courseID string, newTitle, newSummery, newToke
 		return nil, err
 	}
 	// check if user can update course
-	if err = cr.IsUserAllowedToUpdateCourse(authorUsername); err != nil{
+	if err = cr.IsUserAllowedToUpdateCourse(authorUsername); err != nil {
 		return nil, err
 	}
 	// update the course in database
@@ -78,7 +78,7 @@ func DeleteCourse(authorUsername, courseID string) (*course.Course, error) {
 		return nil, err
 	}
 	// check if user can delete course
-	if err = cr.IsUserAllowedToDeleteCourse(authorUsername); err != nil{
+	if err = cr.IsUserAllowedToDeleteCourse(authorUsername); err != nil {
 		return nil, err
 	}
 	// delete the course from database
@@ -90,7 +90,8 @@ func DeleteCourse(authorUsername, courseID string) (*course.Course, error) {
 
 func AddUserToCourse(username, courseID, token string) (*course.Course, error) {
 	// check if user exists in database
-	if _, err := user.Get(username); err != nil {
+	usr, err := user.Get(username)
+	if err != nil {
 		return nil, err
 	}
 	// get the course from database
@@ -99,7 +100,7 @@ func AddUserToCourse(username, courseID, token string) (*course.Course, error) {
 		return nil, err
 	}
 	// check if user can add to the course
-	if err = cr.IsUserAllowedToAddUserInCourse(username, token); err != nil{
+	if err = cr.IsUserAllowedToAddUserInCourse(username, token); err != nil {
 		return nil, err
 	}
 	// add the user to course in database
@@ -107,6 +108,9 @@ func AddUserToCourse(username, courseID, token string) (*course.Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	usr.Enroll(courseID)
+	usr.UpdateCache()
 	return cr.FilterPendsOfCourse(&username), nil
 }
 
@@ -115,7 +119,8 @@ func DeleteUserFromCourse(username, courseID, targetUsername string) (*course.Co
 	if _, err := user.Get(username); err != nil {
 		return nil, err
 	}
-	if _, err := user.Get(targetUsername); err != nil {
+	usr, err := user.Get(targetUsername)
+	if err != nil {
 		return nil, err
 	}
 	// get the course from database
@@ -124,7 +129,7 @@ func DeleteUserFromCourse(username, courseID, targetUsername string) (*course.Co
 		return nil, err
 	}
 	// check if user can delete another from course
-	if err = cr.IsUserAllowedToDeleteUserInCourse(username, targetUsername); err != nil{
+	if err = cr.IsUserAllowedToDeleteUserInCourse(username, targetUsername); err != nil {
 		return nil, err
 	}
 	// delete the user from course in database
@@ -132,6 +137,9 @@ func DeleteUserFromCourse(username, courseID, targetUsername string) (*course.Co
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	usr.Leave(courseID)
+	usr.UpdateCache()
 	return cr.FilterPendsOfCourse(&username), nil
 }
 
@@ -149,7 +157,7 @@ func PromoteUserToTA(username, courseID, targetUsername string) (*course.Course,
 		return nil, err
 	}
 	// check if user can promote another in course
-	if err = cr.IsUserAllowedToPromoteUserInCourse(username, targetUsername); err != nil{
+	if err = cr.IsUserAllowedToPromoteUserInCourse(username, targetUsername); err != nil {
 		return nil, err
 	}
 	// promote user to ta in database
@@ -174,7 +182,7 @@ func DemoteUserToSTD(username, courseID, targetUsername string) (*course.Course,
 		return nil, err
 	}
 	// check if user can demote to student course
-	if err = cr.IsUserAllowedToDemoteUserInCourse(username, targetUsername); err != nil{
+	if err = cr.IsUserAllowedToDemoteUserInCourse(username, targetUsername); err != nil {
 		return nil, err
 	}
 	// demote at to student in database
