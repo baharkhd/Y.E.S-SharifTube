@@ -5,19 +5,19 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-var	publicKeyPath ="/home/kycilius/.ssh/id_rsa"
-
+var publicKeyPath = "/home/kycilius/.ssh/id_rsa"
 
 type BaremetalObjectStorageDriver struct {
 	baseSir    string
+	host       string
 	sshSession *ssh.Session
 	scpSession *scp.Client
 }
 
-func New(host,username, baseDir string) (*BaremetalObjectStorageDriver,error){
+func New(host, username, baseDir string) (*BaremetalObjectStorageDriver, error) {
 	client, err := newSSHClient(host, username, publicKeyPath)
-	if err!=nil{
-		return nil,err
+	if err != nil {
+		return nil, err
 	}
 	scpSession, err3 := scp.NewClientBySSH(client)
 	if err3 != nil {
@@ -25,15 +25,14 @@ func New(host,username, baseDir string) (*BaremetalObjectStorageDriver,error){
 	}
 
 	sshSession, err2 := client.NewSession()
-	if err2!=nil{
-		return nil,err2
+	if err2 != nil {
+		return nil, err2
 	}
 
-
 	return &BaremetalObjectStorageDriver{
+		host:       host,
 		baseSir:    baseDir,
 		sshSession: sshSession,
 		scpSession: &scpSession,
-	},nil
+	}, nil
 }
-
