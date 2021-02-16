@@ -507,23 +507,29 @@ func (c *Course) AddNewContent(authorUsername string, title string, description 
 		return nil, err
 	}
 
+	// storing video in the Object Storage
 	var vurl string
 	for _, sub := range OSD.GetRoot().Subs {
 		if sub.Id == c.ID.Hex() {
-			 if err:=OSD.Store(sub, upload.Filename, upload.File, upload.Size);err!=nil{
-				 return nil, err
-			 }
+			if err := OSD.Store(sub, upload.Filename, upload.File, upload.Size); err != nil {
+				return nil, err
+			}
 			vurl = OSD.GetURL(sub, upload.Filename)
 			break
 		}
 	}
+
 	// create a content
 	cn, err := content.New(title, authorUsername, vurl, c.ID.Hex(), description, nil, tags)
 	if err != nil {
 		return nil, nil
 	}
 
-	return cn,nil
+	// maintain consistency in cache
+	c.AddContent(cn)
+	c.UpdateCache()
+
+	return cn, nil
 }
 
 func FilterPendsOfCourses(username *string, courses []*Course) []*Course {
