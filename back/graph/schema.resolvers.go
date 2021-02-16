@@ -437,7 +437,7 @@ func (r *mutationResolver) OfferContent(ctx context.Context, username *string, c
 			return err.(model.UserNotFoundException), nil
 		}
 	}
-	res, err := pendingController.CreatePending(*username, courseID, target.Title, target.Description, target.Furl)
+	res, err := pendingController.CreatePending(*username, courseID, target.Title, target.Description, target.Video)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:

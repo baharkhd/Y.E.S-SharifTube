@@ -413,9 +413,9 @@ type TargetCourse struct {
 }
 
 type TargetPending struct {
-	Title       string  `json:"title"`
-	Description *string `json:"description"`
-	Furl        string  `json:"furl"`
+	Title       string         `json:"title"`
+	Description *string        `json:"description"`
+	Video       graphql.Upload `json:"video"`
 }
 
 type TargetUser struct {

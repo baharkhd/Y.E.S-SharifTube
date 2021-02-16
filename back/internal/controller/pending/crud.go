@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/99designs/gqlgen/graphql"
 	"yes-sharifTube/graph/model"
 	"yes-sharifTube/internal/model/course"
 	"yes-sharifTube/internal/model/pending"
@@ -20,7 +21,7 @@ func GetPendings(username *string, courseID, uploaderUsername *string, status *m
 	return prs, nil
 }
 
-func CreatePending(authorUsername, courseID, title string, description *string, furl string) (*pending.Pending, error) {
+func CreatePending(authorUsername, courseID, title string, description *string, video graphql.Upload) (*pending.Pending, error) {
 	// check if user exists in database
 	if _, err := user.Get(authorUsername); err != nil {
 		return nil, err
@@ -30,21 +31,9 @@ func CreatePending(authorUsername, courseID, title string, description *string, 
 	if err != nil {
 		return nil, err
 	}
-	// create a pending
-	pn, err := pending.New(title, authorUsername, furl, courseID, description)
-	if err != nil {
-		return nil, err
-	}
-	// check if user can offer
-	err = cr.IsUserAllowedToInsertPending(authorUsername)
-	if err != nil {
-		return nil, err
-	}
-	// insert the pending into database
-	pn, err = pending.Insert(courseID, pn)
-	if err != nil {
-		return nil, err
-	}
+
+	cr.AddNewPending(title,authorUsername,video,description)
+
 	// maintain consistency in cache
 	cr.AddPending(pn)
 	cr.UpdateCache()

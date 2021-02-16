@@ -508,16 +508,11 @@ func (c *Course) AddNewContent(authorUsername string, title string, description 
 	}
 
 	// storing video in the Object Storage
-	var vurl string
-	for _, sub := range OSD.GetRoot().Subs {
-		if sub.Id == c.ID.Hex() {
-			if err := OSD.Store(sub, upload.Filename, upload.File, upload.Size); err != nil {
-				return nil, err
-			}
-			vurl = OSD.GetURL(sub, upload.Filename)
-			break
-		}
+	bucket := c.getCourseBucket()
+	if err := OSD.Store(bucket, upload.Filename, upload.File, upload.Size); err != nil {
+		return nil, err
 	}
+	vurl := OSD.GetURL(bucket, upload.Filename)
 
 	// create a content
 	cn, err := content.New(title, authorUsername, vurl, c.ID.Hex(), description, nil, tags)
@@ -530,6 +525,35 @@ func (c *Course) AddNewContent(authorUsername string, title string, description 
 	c.UpdateCache()
 
 	return cn, nil
+}
+
+func (c *Course) AddNewPending(title string, authorUsername string, upload graphql.Upload, description *string) (*pending.Pending, error) {
+
+	// check if user can offer
+	err := c.IsUserAllowedToInsertPending(authorUsername)
+	if err != nil {
+		return nil, err
+	}
+
+	// store video in Object Storage
+	bucket := c.getCourseBucket()
+	if err := OSD.Store(bucket, upload.Filename, upload.File, upload.Size); err != nil {
+		return nil, err
+	}
+	vurl := OSD.GetURL(bucket, upload.Filename)
+
+	// create a pending
+	pn, err := pending.New(title, authorUsername, vurl, c.ID.Hex(), description)
+	if err != nil {
+		return nil, err
+	}
+
+	// insert the pending into database
+	pn, err = pending.Insert(c.ID.Hex(), pn)
+	if err != nil {
+		return nil, err
+	}
+	return pn,nil
 }
 
 func FilterPendsOfCourses(username *string, courses []*Course) []*Course {
