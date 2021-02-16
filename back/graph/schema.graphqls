@@ -158,7 +158,7 @@ input EditAttachment{
 input TargetPending{
     title: String!
     description: String
-    furl: String! # todo actual video
+    video: Upload! # todo actual video
 }
 
 input EditedPending{
