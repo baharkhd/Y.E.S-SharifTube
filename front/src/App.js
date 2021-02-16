@@ -149,7 +149,7 @@ function App() {
           <Login setToken={setToken} setUsername={setUsername} />
         </Route>
         <Route exact path="/signup">
-          <Signup />
+          <Signup setToken={setToken} setUsername={setUsername} />
         </Route>
         <Route exact path="/search">
           <SearchIndex />

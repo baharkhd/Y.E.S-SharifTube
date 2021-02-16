@@ -33,8 +33,8 @@ const Dashboard = props => {
   //   refetchQueries
   // })
   const { data, loading, error } = useQuery(GET_USER_QUERY, {
-    // fetchPolicy: "cache-and-network",
-    // nextFetchPolicy: "cache-first"
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first"
   });
 
   console.log("user in dashboard:", state.user)
@@ -43,7 +43,7 @@ const Dashboard = props => {
   console.log("error:", error);
 
   return (
-    <div>
+    <div >
       <SideBar isMobile={props.isMobile} open={props.sidebarOpen} username={props.username} />
       {!loading &&
         (!props.isCourse ? (
