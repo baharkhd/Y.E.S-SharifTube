@@ -18,6 +18,7 @@ const COURSES_QUERY = gql`
   }
 `;
 
+
 function Homepage() {
   const { data, loading, error } = useQuery(COURSES_QUERY, {
     variables: {
