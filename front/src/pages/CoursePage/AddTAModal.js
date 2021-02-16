@@ -40,10 +40,12 @@ const AddTAModal = ({ open, setOpen, courseID, students }) => {
         )}
       </Modal.Content>
       <Modal.Actions>
-        <Button color="green" onClick={() => setOpen({ addingTA: false })}>
+          
+        {/* <Button color="green" onClick={() => setOpen({ addingTA: false })}> */}
           {/* <Icon name="checkmark" /> */}
-          Add
-        </Button>
+          {/* Add */}
+        {/* </Button> */}
+
         <Button color="red" onClick={() => setOpen({ addingTA: false })}>
           {/* <Icon name="remove" />  */}
           Cancel

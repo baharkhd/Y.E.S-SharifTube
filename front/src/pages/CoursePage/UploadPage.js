@@ -11,28 +11,7 @@ import {
 import { gql, useMutation } from "@apollo/client";
 import { useParams, useHistory, useLocation } from "react-router-dom";
 import constants from "../../constants";
-
-// uploadContent(username:String, courseID:String!, target:TargetContent!): UploadContentPayLoad!
-
-// input TargetContent{
-//   title: String!
-//   description: String
-//   vurl: String! # todo actual video
-//   tags: [String!]
-// }
-
-// type Content{
-//   id: ID!
-//   title: String!
-//   description: String
-//   timestamp: Int!
-//   uploadedBY: User!
-//   approvedBY: User
-//   vurl: String! #todo better implementation for video file
-//   comments(start: Int!=0, amount: Int!=5): [Comment!]
-//   tags: [String!]
-//   courseID: String!
-// }
+import FileUpload from '../FileUpload/FileUpload'
 
 const OFFER_CONTENT_MUTATION = gql`
   mutation OfferContent(
@@ -237,6 +216,7 @@ function UploadPage(props) {
           Upload
         </Form.Button>
       </Form>
+      <FileUpload />
     </Segment>
   );
 }

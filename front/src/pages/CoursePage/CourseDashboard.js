@@ -95,7 +95,6 @@ const COURSE_QUERY = gql`
       tas {
         name
         username
-        email
       }
       students {
         username
@@ -265,7 +264,7 @@ function CourseDashboard(props) {
           // course={course}
           courseTitle={course.title}
           courseProf={course.prof}
-          courseTAs={course ? course.tas : []}
+          courseTAs={course ? (course.tas ? course.tas : []) : []}
           username={props.username}
           role={props.username === course.prof.username ? "prof" : "non-prof"} // can be prof or ta or st
           students={

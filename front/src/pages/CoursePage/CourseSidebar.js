@@ -48,9 +48,12 @@ function SideBar(props) {
 
   const handleItemClick = (e, { name }) => setState({ activeItem: name });
 
-  console.log("course TAs:", props.courseTAs)
-  console.log("username:", props.username)
-  console.log("is a TA:", props.courseTAs.some(ta => ta.username === props.username))
+  console.log("course TAs:", props.courseTAs);
+  console.log("username:", props.username);
+  console.log(
+    "is a TA:",
+    props.courseTAs.some(ta => ta.username === props.username)
+  );
 
   let uploadPath =
     props.role == "prof"
@@ -95,16 +98,19 @@ function SideBar(props) {
               </List.Item>
             );
           })}
-          <List.Item>
-            <Button
-              positive
-              onClick={() => {
-                setState({ ...state, addingTA: true });
-              }}
-            >
-              Add TA
-            </Button>
-          </List.Item>
+          {(props.role === "prof" ||
+            props.courseTAs.some(ta => ta.username === props.username)) && (
+            <List.Item>
+              <Button
+                positive
+                onClick={() => {
+                  setState({ ...state, addingTA: true });
+                }}
+              >
+                Add TA
+              </Button>
+            </List.Item>
+          )}
         </List>
       </Menu.Item>
       <Menu.Item>
@@ -122,7 +128,8 @@ function SideBar(props) {
           </Link>
         )} */}
       </Menu.Item>
-      {(props.role === "prof" || props.courseTAs.some(ta => ta.username === props.username)) && (
+      {(props.role === "prof" ||
+        props.courseTAs.some(ta => ta.username === props.username)) && (
         <Menu.Item>
           <Link to={"/course:" + id + "/pendings"}>
             <Button color="black">Pending Contents</Button>

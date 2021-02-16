@@ -29,6 +29,14 @@ const SIGNUP_REGISTER = gql`
   }
 `;
 
+const USERS_QUERY = gql`
+  {
+    users(start: 0, amount: 100) {
+      username
+    }
+  }
+`;
+
 const RegisterForm = props => {
   const [state, setState] = useState({
     name: "",
@@ -39,7 +47,7 @@ const RegisterForm = props => {
     error: ""
   });
 
-  const [signup] = useMutation(SIGNUP_REGISTER, {
+  const [createUser] = useMutation(SIGNUP_REGISTER, {
     variables: {
       username: state.username,
       name: state.name,
@@ -123,7 +131,7 @@ const RegisterForm = props => {
           control={Button}
           onClick={() => {
             //   handleRegister();
-            signup();
+            createUser();
           }}
         />
       </Segment>

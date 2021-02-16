@@ -2,6 +2,8 @@ import React, { Component, useState } from "react";
 import PropTypes from "prop-types";
 import { Segment, Input, List, Button, Icon } from "semantic-ui-react";
 import { gql, useMutation } from "@apollo/client";
+import { useParams } from "react-router-dom";
+import _ from 'lodash'
 
 const ADD_TA_MUTATION = gql`
   mutation AddTA($courseID: String!, $targetUsername: String!) {
@@ -12,10 +14,41 @@ const ADD_TA_MUTATION = gql`
         title
         summary
         createdAt
+        tas {
+          username
+          name
+        }
       }
       ... on Exception {
         message
       }
+    }
+  }
+`;
+
+const COURSE_QUERY = gql`
+  query GetCoursesByID($ids: [String!]!) {
+    courses(ids: $ids) {
+      id
+      #   title
+      #   summary
+      #   contents {
+      #     id
+      #     title
+      #     description
+      #   }
+      #   prof {
+      #     name
+      #     username
+      #     email
+      #   }
+      tas {
+        name
+        username
+      }
+      #   students {
+      #     username
+      #   }
     }
   }
 `;
@@ -29,7 +62,31 @@ function Autocomplete(props) {
     TA_username: ""
   });
 
+  let { id } = useParams();
+  id = id.substring(1);
+
   const [promoteUserToTA] = useMutation(ADD_TA_MUTATION, {
+    update(cache, { data: { createPost } }) {
+      const data = cache.readQuery({
+        query: COURSE_QUERY,
+        variables: {
+          ids: [id]
+        }
+      });
+
+      const localCourse = _.cloneDeep(data);
+      console.log("localData in auto complete:", localCourse);
+      console.log("newData:", {
+        ...localCourse
+      });
+
+      cache.writeQuery({
+        query: COURSE_QUERY,
+        data: {
+          ...localCourse
+        }
+      });
+    },
     onCompleted: ({ promoteUserToTA }) => {
       console.log("promoteUserToTA------- :", promoteUserToTA);
     }
@@ -102,6 +159,7 @@ function Autocomplete(props) {
                 <List.Item>
                   <List.Content floated="right">
                     <Button
+                      positive
                       onClick={() => {
                         promoteUserToTA({
                           variables: {

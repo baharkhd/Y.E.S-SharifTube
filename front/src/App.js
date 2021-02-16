@@ -48,12 +48,14 @@ function App() {
     query: "(max-device-width: 570px)"
   });
 
+  const [username, setUsername] = useState("");
+
   const { data, loading, error } = useQuery(GET_USER_QUERY, {
-    fetchPolicy: "cache-and-network",
-    nextFetchPolicy: "cache-first"
+    fetchPolicy: "cache-and-network"
+    //   nextFetchPolicy: "cache-first"
   });
   console.log("checkkkkkkk:", data, loading, error);
-
+  console.log("username:", username);
   const { token, setToken } = useToken();
   console.log("token in app:", token);
 
@@ -73,7 +75,15 @@ function App() {
           <Dashboard
             isMobile={isMobile}
             sidebarOpen={sidebarOpen}
-            username={token ? (!loading ? data.user.username : "") : ""}
+            username={
+              token
+                ? !loading
+                  ? data
+                    ? data.user.username
+                    : username
+                  : ""
+                : ""
+            }
           />
         </Route>
 
@@ -82,7 +92,15 @@ function App() {
             isMobile={isMobile}
             sidebarOpen={sidebarOpen}
             isCourse={false}
-            username={token ? (!loading ? data.user.username : "") : ""}
+            username={
+              token
+                ? !loading
+                  ? data
+                    ? data.user.username
+                    : username
+                  : ""
+                : ""
+            }
             // component={<Panel isMobile={isMobile} />}
           />
         </Route>
@@ -92,7 +110,15 @@ function App() {
             isMobile={isMobile}
             sidebarOpen={sidebarOpen}
             isCourse={true}
-            username={token ? (!loading ? data.user.username : "") : ""}
+            username={
+              token
+                ? !loading
+                  ? data
+                    ? data.user.username
+                    : username
+                  : ""
+                : ""
+            }
             // component={<Courses isMobile={isMobile} />}
           />
         </Route>
@@ -105,14 +131,22 @@ function App() {
           <CourseDashboard
             isMobile={isMobile}
             sidebarOpen={sidebarOpen}
-            username={token ? (!loading ? data.user.username : "") : ""}
+            username={
+              token
+                ? !loading
+                  ? data
+                    ? data.user.username
+                    : username
+                  : ""
+                : ""
+            }
           />
         </Route>
         <Route exact path="/">
           <Homepage />
         </Route>
         <Route exact path="/login">
-          <Login setToken={setToken} />
+          <Login setToken={setToken} setUsername={setUsername} />
         </Route>
         <Route exact path="/signup">
           <Signup />
@@ -125,7 +159,15 @@ function App() {
         </Route>
         <Route exact path="/course:courseID/pendings">
           <PendingPage
-            username={token ? (!loading ? data.user.username : "") : ""}
+            username={
+              token
+                ? !loading
+                  ? data
+                    ? data.user.username
+                    : username
+                  : ""
+                : ""
+            }
           />
         </Route>
         <Route exact path="/course:courseID/upload">

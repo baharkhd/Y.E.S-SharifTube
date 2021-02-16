@@ -36,10 +36,15 @@ const LoginForm = props => {
       username: state.username,
       password: state.password
     },
+    update(cache, { data: { login } }) {
+      console.log("update in login:", login)
+      console.log("cache in login update fuunction:", cache)
+    },
     onCompleted: ({ login }) => {
       if (login.__typename == "Token") {
         console.log("login:", login);
         console.log("token in logiin:", login.token);
+        props.setUsername(state.username)
         // props.setToken(login.token);
         // history.push("/dashboard");
         changeToken(login.token);
@@ -144,7 +149,7 @@ function Login(props) {
               marginLeft: 20
             }}
           >
-            <LoginForm setToken={props.setToken} />
+            <LoginForm setToken={props.setToken} setUsername={props.setUsername} />
           </Grid.Column>
         </Grid.Row>
       </Grid>
