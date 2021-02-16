@@ -41,7 +41,7 @@ func update(targetUsername string, targetUser User) (*User, error) {
 	} else {
 
 		// update user in cache if exists
-		DeleteFromCache(targetUser.Username)
+		DeleteFromCache(targetUsername)
 		_ = targetUser.Cache()
 
 		return &targetUser, nil
@@ -121,6 +121,10 @@ func New(name, email, username, password string) (*User, error) {
 	if stat := DBD.Insert(user); stat == status.FAILED {
 		return &User{}, model.InternalServerException{Message: "couldn't create user"}
 	} else {
+
+		// add the user to cache
+		_ = user.Cache()
+
 		return user, nil
 	}
 }
@@ -138,7 +142,7 @@ func Get(username string) (*User, error) {
 		return nil, model.UserNotFoundException{Message: "couldn't find the requested user"}
 	} else {
 
-		// add the content to cache
+		// add the user to cache
 		_ = target.Cache()
 
 		return target, nil
