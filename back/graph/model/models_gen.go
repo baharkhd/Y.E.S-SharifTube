@@ -390,9 +390,9 @@ func (Reply) IsEditCommentPayLoad()   {}
 func (Reply) IsDeleteCommentPayLoad() {}
 
 type TargetAttachment struct {
-	Name        string  `json:"name"`
-	Aurl        string  `json:"aurl"`
-	Description *string `json:"description"`
+	Name        string         `json:"name"`
+	Attach      graphql.Upload `json:"attach"`
+	Description *string        `json:"description"`
 }
 
 type TargetComment struct {

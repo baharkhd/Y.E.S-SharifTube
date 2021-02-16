@@ -556,6 +556,35 @@ func (c *Course) AddNewPending(title string, authorUsername string, upload graph
 	return pn,nil
 }
 
+func (c *Course) AddNewAttachment(authorUsername string, name string, attach graphql.Upload, description *string) (*attachment.Attachment, error) {
+
+	// check if user can insert attachment
+	err := c.IsUserAllowedToInsertAttachment(authorUsername)
+	if err != nil {
+		return nil, err
+	}
+
+	// store attachment in object storage
+	bucket := c.GetAttachmentBucket()
+	if err := OSD.Store(bucket, attach.Filename, attach.File, attach.Size); err != nil {
+		return nil, err
+	}
+	aurl := OSD.GetURL(bucket, attach.Filename)
+
+	// create an attachment
+	an, err := attachment.New(name, aurl, c.ID.Hex(), description)
+	if err != nil {
+		return nil, err
+	}
+	// insert the attachment into database
+	an, err = attachment.Insert(c.ID.Hex(), an)
+	if err != nil {
+		return nil, err
+	}
+	return an,nil
+}
+
+
 func FilterPendsOfCourses(username *string, courses []*Course) []*Course {
 	var crs []*Course
 	for _, cr := range courses {

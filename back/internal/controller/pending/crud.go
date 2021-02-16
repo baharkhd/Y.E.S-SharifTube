@@ -35,6 +35,9 @@ func CreatePending(authorUsername, courseID, title string, description *string, 
 
 	// adding new pending to the model
 	pn, err := cr.AddNewPending(title, authorUsername, video, description)
+	if err != nil {
+		return nil, err
+	}
 
 	// maintain consistency in cache
 	cr.AddPending(pn)
