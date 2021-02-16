@@ -37,6 +37,9 @@ function SideBar(props) {
     addingTA: false
   });
 
+  let isProfTA =
+    props.courseTAs.some(ta => ta.username === props.username) || props.isProf;
+
   // const [promoteUserToTA] = useMutation(ADD_TA_MUTATION, {
   //   variables: {}
   // })
@@ -55,10 +58,9 @@ function SideBar(props) {
     props.courseTAs.some(ta => ta.username === props.username)
   );
 
-  let uploadPath =
-    props.role == "prof"
-      ? "/course:" + id + "/upload"
-      : "/course:" + id + "/offer";
+  let uploadPath = isProfTA
+    ? "/course:" + id + "/upload"
+    : "/course:" + id + "/offer";
 
   return (
     <Sidebar
@@ -98,8 +100,7 @@ function SideBar(props) {
               </List.Item>
             );
           })}
-          {(props.role === "prof" ||
-            props.courseTAs.some(ta => ta.username === props.username)) && (
+          {props.isHead && (
             <List.Item>
               <Button
                 positive
@@ -117,19 +118,8 @@ function SideBar(props) {
         <Link to={uploadPath}>
           <Button color="blue">Upload Videos</Button>
         </Link>
-        {/* If user is the instructor or a TA */}
-        {/* {props.role === "prof" ? (
-          <Link to={"/course:" + id + "/pendings"}>
-            <Button color="blue">Pending Contents</Button>
-          </Link>
-        ) : (
-          <Link to={"/course:" + id + "/upload"}>
-            <Button color="blue">Upload Videos</Button>
-          </Link>
-        )} */}
       </Menu.Item>
-      {(props.role === "prof" ||
-        props.courseTAs.some(ta => ta.username === props.username)) && (
+      {props.isHead && (
         <Menu.Item>
           <Link to={"/course:" + id + "/pendings"}>
             <Button color="black">Pending Contents</Button>
