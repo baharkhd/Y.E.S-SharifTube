@@ -13,6 +13,7 @@ type BaremetalOSD struct {
 	client *ssh.Client
 }
 
+
 func (b *BaremetalOSD) GetRoot() *objectstorage.Bucket {
 	return b.root
 }

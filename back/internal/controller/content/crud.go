@@ -23,7 +23,7 @@ func GetContents(tags []string, courseID *string, startIdx, amount int) ([]*cont
 	return contents, nil
 }
 
-func CreateContent(authorUsername, courseID, title string, description *string, upload graphql.Upload, tags []string) (*content.Content, error) {
+func CreateContent(authorUsername, courseID, title string, description *string, upload []*graphql.Upload, tags []string) (*content.Content, error) {
 	// check if user exists in database
 	if _, err := user.Get(authorUsername); err != nil {
 		return nil, err

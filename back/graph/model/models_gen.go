@@ -400,10 +400,10 @@ type TargetComment struct {
 }
 
 type TargetContent struct {
-	Title       string         `json:"title"`
-	Description *string        `json:"description"`
-	Video       graphql.Upload `json:"video"`
-	Tags        []string       `json:"tags"`
+	Title       string            `json:"title"`
+	Description *string           `json:"description"`
+	Video       []*graphql.Upload `json:"video"`
+	Tags        []string          `json:"tags"`
 }
 
 type TargetCourse struct {
@@ -413,9 +413,9 @@ type TargetCourse struct {
 }
 
 type TargetPending struct {
-	Title       string         `json:"title"`
-	Description *string        `json:"description"`
-	Video       graphql.Upload `json:"video"`
+	Title       string            `json:"title"`
+	Description *string           `json:"description"`
+	Video       []*graphql.Upload `json:"video"`
 }
 
 type TargetUser struct {
