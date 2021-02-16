@@ -8,6 +8,12 @@ import (
 )
 
 func newSSHClient(host, username, publicKeyPath string) (*ssh.Client, error) {
+	config := getSSHConfig(username, publicKeyPath)
+	return ssh.Dial("tcp", host, config)
+
+}
+
+func getSSHConfig(username string, publicKeyPath string) *ssh.ClientConfig {
 	config := &ssh.ClientConfig{
 		User: username,
 		Auth: []ssh.AuthMethod{
@@ -15,8 +21,7 @@ func newSSHClient(host, username, publicKeyPath string) (*ssh.Client, error) {
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
-	return ssh.Dial("tcp", host, config)
-
+	return config
 }
 
 func publicKey(path string) ssh.AuthMethod {
@@ -32,19 +37,26 @@ func publicKey(path string) ssh.AuthMethod {
 }
 
 func (b *BaremetalObjectStorageDriver)Run(command string) error {
-	sessStdOut, err := b.sshSession.StdoutPipe()
+
+	session, err2 := b.client.NewSession()
+	if err2 != nil {
+		return err2
+	}
+	defer session.Close()
+
+	sessStdOut, err := session.StdoutPipe()
 	if err != nil {
 		return err
 	}
 	go io.Copy(os.Stdout, sessStdOut)
 
-	sessStderr, err := b.sshSession.StderrPipe()
+	sessStderr, err := session.StderrPipe()
 	if err != nil {
 		panic(err)
 	}
 	go io.Copy(os.Stderr, sessStderr)
 
-	err = b.sshSession.Run(command)
+	err = session.Run(command)
 	if err != nil {
 		return err
 	}

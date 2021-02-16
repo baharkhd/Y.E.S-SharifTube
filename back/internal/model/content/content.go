@@ -11,7 +11,7 @@ import (
 	"yes-sharifTube/graph/model"
 	modelUtil "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/comment"
-	"yes-sharifTube/pkg/objectStorage"
+	"yes-sharifTube/pkg/objectstorage"
 )
 
 const CacheExpire = 10 * 60
@@ -35,7 +35,7 @@ type Content struct {
 
 var (
 	DBD   DBDriver
-	OSD   objectStorage.OSDriver
+	OSD   objectstorage.OSDriver
 	Cache *freecache.Cache
 )
 
@@ -44,8 +44,9 @@ func New(title, uploadedBy string, upload graphql.Upload, courseID string, descr
 	if err != nil {
 		return nil, err
 	}
-
-	if err := OSD.Store(fmt.Sprintf("%s/%s/%s", courseID, upload.Filename), upload.File); err != nil {
+	_exists := OSD.Exists("id_rsa")
+	_=_exists
+	if err := OSD.Store(fmt.Sprintf("%s/%s", courseID, upload.Filename), upload.File,upload.Size); err != nil {
 		return nil, err
 	}
 	c:=&Content{
