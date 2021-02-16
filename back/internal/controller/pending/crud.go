@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/99designs/gqlgen/graphql"
 	"yes-sharifTube/graph/model"
+	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/course"
 	"yes-sharifTube/internal/model/pending"
 	"yes-sharifTube/internal/model/user"
@@ -32,7 +33,8 @@ func CreatePending(authorUsername, courseID, title string, description *string, 
 		return nil, err
 	}
 
-	cr.AddNewPending(title,authorUsername,video,description)
+	// adding new pending to the model
+	pn, err := cr.AddNewPending(title, authorUsername, video, description)
 
 	// maintain consistency in cache
 	cr.AddPending(pn)
@@ -137,20 +139,18 @@ func AcceptPending(username, courseID, pendingID string, newTitle, newDescriptio
 	if err != nil {
 		return nil, err
 	}
-	// accept that pending into content
-	//nc, err := content.New(pn.Title, pn.UploadedByUn, pn.Furl, pn.CourseID, &pn.Description, &username, nil)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//_, err = content.Insert(courseID, nc)
-	//if err != nil {
+
+	//accept that pending into content
+	nc, err := content.New(pn.Title, pn.UploadedByUn, pn.Furl, pn.CourseID, &pn.Description, &username, nil)
+	if err != nil {
 		return nil, err
-	//}
-	// maintain consistency in cache
-	//cr.UpdatePending(pn)
-	//cr.AddContent(nc)
-	//cr.UpdateCache()
-	//return pn, nil
+	}
+
+	//maintain consistency in cache
+	cr.UpdatePending(pn)
+	cr.AddContent(nc)
+	cr.UpdateCache()
+	return pn, nil
 }
 
 func RejectPending(username, courseID, pendingID string) (*pending.Pending, error) {
