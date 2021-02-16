@@ -3,6 +3,7 @@ import { Sidebar, Menu, Button, Icon, List } from "semantic-ui-react";
 import { useHistory, Link, useParams } from "react-router-dom";
 import { gql, useMutation } from "@apollo/client";
 import AddTAModal from "./AddTAModal";
+import PendingPage from "./PendingPage";
 
 const TAs = [
   "folan1",
@@ -37,6 +38,16 @@ function SideBar(props) {
     addingTA: false
   });
 
+  let isProfTA =
+    props.courseTAs.some(ta => ta.username === props.username) || props.isProf;
+
+  console.log(
+    "{}{}{}",
+    props.courseTAs.some(ta => ta.username === props.username),
+    props.isProf,
+    isProfTA
+  );
+
   // const [promoteUserToTA] = useMutation(ADD_TA_MUTATION, {
   //   variables: {}
   // })
@@ -55,10 +66,9 @@ function SideBar(props) {
     props.courseTAs.some(ta => ta.username === props.username)
   );
 
-  let uploadPath =
-    props.role == "prof"
-      ? "/course:" + id + "/upload"
-      : "/course:" + id + "/offer";
+  let uploadPath = isProfTA
+    ? "/course:" + id + "/upload"
+    : "/course:" + id + "/offer";
 
   return (
     <Sidebar
@@ -98,43 +108,35 @@ function SideBar(props) {
               </List.Item>
             );
           })}
-          {(props.role === "prof" ||
-            props.courseTAs.some(ta => ta.username === props.username)) && (
-            <List.Item>
-              <Button
-                positive
-                onClick={() => {
-                  setState({ ...state, addingTA: true });
-                }}
-              >
-                Add TA
-              </Button>
-            </List.Item>
-          )}
         </List>
       </Menu.Item>
+
+      {isProfTA && (
+        <Menu.Item>
+          <Button
+            positive
+            onClick={() => {
+              setState({ ...state, addingTA: true });
+            }}
+          >
+            Add TA
+          </Button>
+        </Menu.Item>
+      )}
+
       <Menu.Item>
         <Link to={uploadPath}>
           <Button color="blue">Upload Videos</Button>
         </Link>
-        {/* If user is the instructor or a TA */}
-        {/* {props.role === "prof" ? (
-          <Link to={"/course:" + id + "/pendings"}>
-            <Button color="blue">Pending Contents</Button>
-          </Link>
-        ) : (
-          <Link to={"/course:" + id + "/upload"}>
-            <Button color="blue">Upload Videos</Button>
-          </Link>
-        )} */}
       </Menu.Item>
-      {(props.role === "prof" ||
-        props.courseTAs.some(ta => ta.username === props.username)) && (
-        <Menu.Item>
-          <Link to={"/course:" + id + "/pendings"}>
-            <Button color="black">Pending Contents</Button>
-          </Link>
-        </Menu.Item>
+      {isProfTA && (
+        // <Link to={"/course:" + id + "/pendings"} component={PendingPage} >
+          <Menu.Item>
+            <Link to={"/course:" + id + "/pendings"}>
+              <Button color="black">Pending Contents</Button>
+            </Link>
+          </Menu.Item>
+        // </Link>
       )}
     </Sidebar>
   );

@@ -79,6 +79,33 @@ const UPLOAD_CONTENT_MUTATION = gql`
   }
 `;
 
+const COURSE_QUERY = gql`
+  query GetCoursesByID($ids: [String!]!) {
+    courses(ids: $ids) {
+      id
+      title
+      summary
+      contents {
+        id
+        title
+        description
+      }
+      prof {
+        name
+        username
+        email
+      }
+      tas {
+        name
+        username
+      }
+      students {
+        username
+      }
+    }
+  }
+`;
+
 function UploadPage(props) {
 
   console.log("+_+_+_+_+_+_+_+_+_+_+ uploadpage tokeeeeeeeeeeeeeeeeeeen:", localStorage.getItem(constants.AUTH_TOKEN))
@@ -121,6 +148,22 @@ function UploadPage(props) {
       description: state.description,
       vurl: state.url,
       tags: state.tags
+    },
+    update(cache, {data: {uploadContent}}) {
+      var data = cache.readQuery({
+        query: COURSE_QUERY,
+        variables: {
+          ids: [courseID]
+        }
+      })
+
+      data = data[0]
+
+      console.log("in update of uploadContent")
+      console.log("uploadContent:", uploadContent)
+      console.log("data:", data)
+
+      
     },
     onCompleted: ({ uploadContent }) => {
       console.log("*** uploadContent:", uploadContent);

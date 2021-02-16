@@ -2,6 +2,19 @@ import React, { useState } from "react";
 import { Grid, Form, Segment, Message, Input, Button } from "semantic-ui-react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/client";
+import { useHistory } from "react-router-dom";
+import constants from "../../constants.js";
+
+const LOGIN_MUTATION = gql`
+  mutation Login($username: String!, $password: String!) {
+    login(input: { username: $username, password: $password }) {
+      __typename
+      ... on Token {
+        token
+      }
+    }
+  }
+`;
 
 const SIGNUP_REGISTER = gql`
   mutation CreateUser(
@@ -47,6 +60,45 @@ const RegisterForm = props => {
     error: ""
   });
 
+  const history = useHistory();
+
+  async function changeToken(token) {
+    await props.setToken(token);
+    history.push("/dashboard");
+  }
+
+  const [login] = useMutation(LOGIN_MUTATION, {
+    variables: {
+      username: state.username,
+      password: state.password
+    },
+    update(cache, { data: { login } }) {
+      // console.log("update in login:", login);
+      // console.log("cache in login update fuunction:", cache);
+    },
+    onCompleted: ({ login }) => {
+      if (login.__typename == "Token") {
+        console.log("login:", login);
+        console.log("token in logiin:", login.token);
+        props.setUsername(state.username);
+        // props.setToken(login.token);
+        // history.push("/dashboard");
+        changeToken(login.token);
+      } else {
+        switch (login.__typename) {
+          case "UserPassMissMatchException":
+            alert(constants.USER_PASS_MISMATCH);
+            setState({ ...state, error: constants.USER_PASS_MISMATCH });
+            break;
+          case "InternalServerException":
+            alert(constants.INTERNAL_SERVER_EXCEPTION);
+            setState({ ...state, error: constants.INTERNAL_SERVER_EXCEPTION });
+            break;
+        }
+      }
+    }
+  });
+
   const [createUser] = useMutation(SIGNUP_REGISTER, {
     variables: {
       username: state.username,
@@ -56,6 +108,11 @@ const RegisterForm = props => {
     },
     onCompleted: ({ createUser }) => {
       console.log("createUser:", createUser);
+      if (createUser.__typename == "User") {
+        login();
+      } else {
+        alert(createUser.__typename);
+      }
     }
   });
 
@@ -131,7 +188,12 @@ const RegisterForm = props => {
           control={Button}
           onClick={() => {
             //   handleRegister();
-            createUser();
+            if (state.password === state.confirmPass) {
+              createUser();
+            } else {
+              alert("Passwords mismatch")
+            }
+            
           }}
         />
       </Segment>
@@ -143,7 +205,7 @@ const RegisterForm = props => {
   );
 };
 
-function Signup() {
+function Signup(props) {
   return (
     <div style={{ top: "80px", position: "absolute", width: "100%" }}>
       <Grid
@@ -156,7 +218,7 @@ function Signup() {
           <Grid.Column
             style={{ maxWidth: 450, marginRight: 20, marginLeft: 20 }}
           >
-            <RegisterForm />
+            <RegisterForm setUsername={props.setUsername} setToken={props.setToken} />
           </Grid.Column>
         </Grid.Row>
       </Grid>
