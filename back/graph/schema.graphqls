@@ -225,6 +225,9 @@ type OfferedContentNotPendingException implements Exception{
 type CommentNotFoundException implements Exception{
     message: String!
 }
+type FileAlreadyExistsException implements Exception{
+    message: String!
+}
 
 type OperationSuccessfull{
     message:String!

@@ -271,6 +271,12 @@ func (EmptyFieldsException) IsEditAttachmentPayLoad()     {}
 func (EmptyFieldsException) IsEditOfferedContentPayLoad() {}
 func (EmptyFieldsException) IsEditCommentPayLoad()        {}
 
+type FileAlreadyExistsException struct {
+	Message string `json:"message"`
+}
+
+func (FileAlreadyExistsException) IsException() {}
+
 type IncorrectTokenException struct {
 	Message string `json:"message"`
 }

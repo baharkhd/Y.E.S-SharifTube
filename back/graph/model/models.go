@@ -50,3 +50,7 @@ func (e OfferedContentNotPendingException) Error() string {
 func (e CommentNotFoundException) Error() string {
 	return e.Message
 }
+
+func (e FileAlreadyExistsException) Error() string {
+	return e.Message
+}

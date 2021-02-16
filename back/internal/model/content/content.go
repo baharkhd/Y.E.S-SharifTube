@@ -2,6 +2,7 @@ package content
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/coocood/freecache"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -10,6 +11,7 @@ import (
 	"yes-sharifTube/graph/model"
 	modelUtil "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/comment"
+	"yes-sharifTube/pkg/objectStorage"
 )
 
 const CacheExpire = 10 * 60
@@ -33,17 +35,19 @@ type Content struct {
 
 var (
 	DBD   DBDriver
-	OSD   OSDriver
+	OSD   objectStorage.OSDriver
 	Cache *freecache.Cache
 )
 
-func New(title, uploadedBy string, vurl graphql.Upload, courseID string, description, approvedBy *string, tags []string) (*Content, error) {
+func New(title, uploadedBy string, upload graphql.Upload, courseID string, description, approvedBy *string, tags []string) (*Content, error) {
 	err := RegexValidate(&title, description, &uploadedBy, &courseID, approvedBy, tags)
 	if err != nil {
 		return nil, err
 	}
 
-
+	if err:=OSD.Store(fmt.Sprintf("%s/%s", courseID, upload.Filename), upload.File); err!=nil{
+		return nil, model.FileAlreadyExistsException{Message: "a file with the same path and name already exists!"}
+	}
 
 	return &Content{
 		Title:        title,
@@ -51,7 +55,7 @@ func New(title, uploadedBy string, vurl graphql.Upload, courseID string, descrip
 		Timestamp:    time.Now().Unix(),
 		UploadedByUn: uploadedBy,
 		ApprovedByUn: modelUtil.PtrTOStr(approvedBy),
-		Vurl:         vurl,
+		Vurl:         OSD.GetURL(fmt.Sprintf("%s/%s", courseID, upload.Filename)),
 		Tags:         tags,
 		Comments:     []*comment.Comment{},
 		CourseID:     courseID,

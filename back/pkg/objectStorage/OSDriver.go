@@ -1,4 +1,4 @@
-package content
+package objectStorage
 
 import "io"
 
@@ -6,5 +6,6 @@ import "io"
 type OSDriver interface {
 	Exists(path string) bool
 	Store(path string, file io.Reader) error
-	Get(path string)string
+	Update(path string, file io.Reader) error
+	GetURL(path string) string
 }
