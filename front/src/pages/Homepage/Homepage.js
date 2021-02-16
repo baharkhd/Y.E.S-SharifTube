@@ -10,10 +10,15 @@ const COURSES_QUERY = gql`
       title
       summary
       createdAt
-      # prof {
-      #   username
-      #   name
-      # }
+      
+      prof {
+        username
+        name
+      }
+
+      students {
+        username
+      }
     }
   }
 `;
