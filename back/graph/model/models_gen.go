@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type AddUserToCoursePayload interface {
@@ -269,6 +271,12 @@ func (EmptyFieldsException) IsEditAttachmentPayLoad()     {}
 func (EmptyFieldsException) IsEditOfferedContentPayLoad() {}
 func (EmptyFieldsException) IsEditCommentPayLoad()        {}
 
+type FileAlreadyExistsException struct {
+	Message string `json:"message"`
+}
+
+func (FileAlreadyExistsException) IsException() {}
+
 type IncorrectTokenException struct {
 	Message string `json:"message"`
 }
@@ -392,10 +400,10 @@ type TargetComment struct {
 }
 
 type TargetContent struct {
-	Title       string   `json:"title"`
-	Description *string  `json:"description"`
-	Vurl        string   `json:"vurl"`
-	Tags        []string `json:"tags"`
+	Title       string         `json:"title"`
+	Description *string        `json:"description"`
+	Video       graphql.Upload `json:"video"`
+	Tags        []string       `json:"tags"`
 }
 
 type TargetCourse struct {

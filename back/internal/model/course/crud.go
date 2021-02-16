@@ -72,6 +72,9 @@ func Insert(course *Course) (*Course, error) {
 		return nil, err
 	}
 
+	// create the bucket
+	OSD.NewBucket(OSD.GetRoot(),course.ID.Hex())
+
 	// add the course to cache
 	_ = course.Cache()
 

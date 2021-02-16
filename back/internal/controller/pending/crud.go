@@ -2,7 +2,6 @@ package controller
 
 import (
 	"yes-sharifTube/graph/model"
-	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/course"
 	"yes-sharifTube/internal/model/pending"
 	"yes-sharifTube/internal/model/user"
@@ -150,19 +149,19 @@ func AcceptPending(username, courseID, pendingID string, newTitle, newDescriptio
 		return nil, err
 	}
 	// accept that pending into content
-	nc, err := content.New(pn.Title, pn.UploadedByUn, pn.Furl, pn.CourseID, &pn.Description, &username, nil)
-	if err != nil {
+	//nc, err := content.New(pn.Title, pn.UploadedByUn, pn.Furl, pn.CourseID, &pn.Description, &username, nil)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//_, err = content.Insert(courseID, nc)
+	//if err != nil {
 		return nil, err
-	}
-	_, err = content.Insert(courseID, nc)
-	if err != nil {
-		return nil, err
-	}
+	//}
 	// maintain consistency in cache
-	cr.UpdatePending(pn)
-	cr.AddContent(nc)
-	cr.UpdateCache()
-	return pn, nil
+	//cr.UpdatePending(pn)
+	//cr.AddContent(nc)
+	//cr.UpdateCache()
+	//return pn, nil
 }
 
 func RejectPending(username, courseID, pendingID string) (*pending.Pending, error) {
