@@ -1,26 +1,39 @@
 package baremetal
 
 import (
-	"io"
+	scp "github.com/bramvdbogaerde/go-scp"
+	"golang.org/x/crypto/ssh"
 )
 
+var	publicKeyPath ="/home/kycilius/.ssh/id_rsa"
+
+
 type BaremetalObjectStorageDriver struct {
-	baseSir string
-	host    string
+	baseSir    string
+	sshSession *ssh.Session
+	scpSession *scp.Client
 }
 
-func (b BaremetalObjectStorageDriver) Exists(path string) bool {
-	panic("implement me")
+func New(host,username, baseDir string) (*BaremetalObjectStorageDriver,error){
+	client, err := newSSHClient(host, username, publicKeyPath)
+	if err!=nil{
+		return nil,err
+	}
+	scpSession, err3 := scp.NewClientBySSH(client)
+	if err3 != nil {
+		return nil, err3
+	}
+
+	sshSession, err2 := client.NewSession()
+	if err2!=nil{
+		return nil,err2
+	}
+
+
+	return &BaremetalObjectStorageDriver{
+		baseSir:    baseDir,
+		sshSession: sshSession,
+		scpSession: &scpSession,
+	},nil
 }
 
-func (b BaremetalObjectStorageDriver) Store(path string, file io.Reader) error {
-	panic("implement me")
-}
-
-func (b BaremetalObjectStorageDriver) Update(path string, file io.Reader) error {
-	panic("implement me")
-}
-
-func (b BaremetalObjectStorageDriver) GetURL(path string) string {
-	panic("implement me")
-}
