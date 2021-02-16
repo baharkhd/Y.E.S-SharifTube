@@ -459,7 +459,7 @@ func (c *Course) AddNewContent(authorUsername string, title string, description 
 		}
 	}
 	// create a content
-	cn, err := content.New(title, authorUsername, vurl, c, description, nil, tags)
+	cn, err := content.New(title, authorUsername, vurl, c.ID.Hex(), description, nil, tags)
 	if err != nil {
 		return nil, nil
 	}

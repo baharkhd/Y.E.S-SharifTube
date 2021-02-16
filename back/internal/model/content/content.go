@@ -9,7 +9,6 @@ import (
 	"yes-sharifTube/graph/model"
 	modelUtil "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/comment"
-	"yes-sharifTube/internal/model/course"
 )
 
 const CacheExpire = 10 * 60
@@ -36,8 +35,7 @@ var (
 	Cache *freecache.Cache
 )
 
-func New(title, uploadedBy, vurl string, cr *course.Course, description, approvedBy *string, tags []string) (*Content, error) {
-	courseID:=cr.ID.Hex()
+func New(title, uploadedBy, vurl string, courseID string, description, approvedBy *string, tags []string) (*Content, error) {
 	err := RegexValidate(&title, description, &uploadedBy, &courseID, approvedBy, tags)
 	if err != nil {
 		return nil, err
