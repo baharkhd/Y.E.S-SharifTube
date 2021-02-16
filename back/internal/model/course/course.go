@@ -11,6 +11,7 @@ import (
 	"yes-sharifTube/internal/model/comment"
 	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/pending"
+	"yes-sharifTube/pkg/objectstorage"
 )
 
 const CacheExpire = 10 * 60
@@ -33,8 +34,11 @@ type Course struct {
 	Inventory []*attachment.Attachment `json:"inventory" bson:"inventory"`
 }
 
-var DBD DBDriver
-var Cache *freecache.Cache
+var (
+	Cache *freecache.Cache
+	OSD   objectstorage.OSDriver
+	DBD   DBDriver
+)
 
 func New(title, profUsername, token string, summery *string) (*Course, error) {
 	hashedToken, err := modelUtil.HashToken([]byte(token))
@@ -106,7 +110,7 @@ func (c *Course) Update(newTitle, newSummery, newToken *string) error {
 	return nil
 }
 
-func GetFromCache(courseID string) (*Course, error){
+func GetFromCache(courseID string) (*Course, error) {
 	c, err := Cache.Get([]byte(courseID))
 	if err == nil {
 		var cr *Course
@@ -116,7 +120,7 @@ func GetFromCache(courseID string) (*Course, error){
 		}
 		return cr, err
 	}
-	return nil,  model.CourseNotFoundException{Message: "course not found in cache"}
+	return nil, model.CourseNotFoundException{Message: "course not found in cache"}
 }
 
 func (c *Course) Cache() error {
@@ -261,21 +265,21 @@ func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cn
 	return nil, nil, model.CommentNotFoundException{Message: "there is no comment @" + commentID.Hex()}
 }
 
-func (c *Course) IsUserAllowedToUpdateCourse(username string) error{
+func (c *Course) IsUserAllowedToUpdateCourse(username string) error {
 	if !c.IsUserProfessor(username) {
 		return model.UserNotAllowedException{Message: "you can't change this course. because you are not professor"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToDeleteCourse(username string) error{
+func (c *Course) IsUserAllowedToDeleteCourse(username string) error {
 	if !c.IsUserProfessor(username) {
 		return model.UserNotAllowedException{Message: "you are not professor"}
 	}
 	return nil
 }
 
-func (c *Course) IsUserAllowedToAddUserInCourse(username, token string) error{
+func (c *Course) IsUserAllowedToAddUserInCourse(username, token string) error {
 	if c.IsUserParticipateInCourse(username) {
 		return model.DuplicateUsernameException{Message: "you been been added before"}
 	}
@@ -285,7 +289,7 @@ func (c *Course) IsUserAllowedToAddUserInCourse(username, token string) error{
 	return nil
 }
 
-func (c *Course) IsUserAllowedToDeleteUserInCourse(username, targetUsername string) error{
+func (c *Course) IsUserAllowedToDeleteUserInCourse(username, targetUsername string) error {
 	if !c.IsUserParticipateInCourse(targetUsername) {
 		return model.UserNotFoundException{Message: "you weren't participate in course"}
 	}
@@ -295,7 +299,7 @@ func (c *Course) IsUserAllowedToDeleteUserInCourse(username, targetUsername stri
 	return nil
 }
 
-func (c *Course) IsUserAllowedToPromoteUserInCourse(username, targetUsername string) error{
+func (c *Course) IsUserAllowedToPromoteUserInCourse(username, targetUsername string) error {
 	if !c.IsUserProfOrTA(username) {
 		return model.UserNotAllowedException{Message: "you are not professor or ta"}
 	}
@@ -305,7 +309,7 @@ func (c *Course) IsUserAllowedToPromoteUserInCourse(username, targetUsername str
 	return nil
 }
 
-func (c *Course) IsUserAllowedToDemoteUserInCourse(username, targetUsername string) error{
+func (c *Course) IsUserAllowedToDemoteUserInCourse(username, targetUsername string) error {
 	if !c.IsUserProfOrTA(username) {
 		return model.UserNotAllowedException{Message: "you are not professor or ta"}
 	}

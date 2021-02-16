@@ -36,7 +36,7 @@ func publicKey(path string) ssh.AuthMethod {
 	return ssh.PublicKeys(signer)
 }
 
-func (b *BaremetalObjectStorageDriver)Run(command string) error {
+func (b *BaremetalOSD)Run(command string) error {
 
 	session, err2 := b.client.NewSession()
 	if err2 != nil {

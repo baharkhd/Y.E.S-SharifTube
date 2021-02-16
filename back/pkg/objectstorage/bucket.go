@@ -17,3 +17,9 @@ func NewBucket(id string, parent *Bucket) *Bucket {
 	}
 	return b
 }
+func (b *Bucket)GetPath() string{
+	if b.parent!=nil{
+		return b.parent.GetPath()+"/"+b.id
+	}
+	return b.id
+}

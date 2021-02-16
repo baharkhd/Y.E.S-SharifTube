@@ -35,7 +35,6 @@ type Content struct {
 
 var (
 	DBD   DBDriver
-	OSD   objectstorage.OSDriver
 	Cache *freecache.Cache
 )
 
