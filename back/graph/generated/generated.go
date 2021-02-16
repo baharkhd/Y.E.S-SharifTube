@@ -1224,7 +1224,9 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `type User {
+	{Name: "graph/schema.graphqls", Input: `scalar Upload
+
+type User {
     id: ID!
     username: String! # uniqe
     name: String
@@ -1358,7 +1360,7 @@ input EditedCourse{
 input TargetContent{
     title: String!
     description: String
-    vurl: String! # todo actual video
+    video: Upload!
     tags: [String!]
 }
 
@@ -7816,11 +7818,11 @@ func (ec *executionContext) unmarshalInputTargetContent(ctx context.Context, obj
 			if err != nil {
 				return it, err
 			}
-		case "vurl":
+		case "video":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vurl"))
-			it.Vurl, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("video"))
+			it.Video, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11206,6 +11208,21 @@ func (ec *executionContext) marshalNUpdateUserPayload2yesᚑsharifTubeᚋgraph�
 		return graphql.Null
 	}
 	return ec._UpdateUserPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) (graphql.Upload, error) {
+	res, err := graphql.UnmarshalUpload(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v graphql.Upload) graphql.Marshaler {
+	res := graphql.MarshalUpload(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalNUploadAttachmentPayLoad2yesᚑsharifTubeᚋgraphᚋmodelᚐUploadAttachmentPayLoad(ctx context.Context, sel ast.SelectionSet, v model.UploadAttachmentPayLoad) graphql.Marshaler {

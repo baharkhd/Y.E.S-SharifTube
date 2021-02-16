@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type AddUserToCoursePayload interface {
@@ -392,10 +394,10 @@ type TargetComment struct {
 }
 
 type TargetContent struct {
-	Title       string   `json:"title"`
-	Description *string  `json:"description"`
-	Vurl        string   `json:"vurl"`
-	Tags        []string `json:"tags"`
+	Title       string         `json:"title"`
+	Description *string        `json:"description"`
+	Video       graphql.Upload `json:"video"`
+	Tags        []string       `json:"tags"`
 }
 
 type TargetCourse struct {
