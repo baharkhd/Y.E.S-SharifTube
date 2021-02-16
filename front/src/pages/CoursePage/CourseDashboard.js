@@ -59,6 +59,11 @@ const COURSE_QUERY = gql`
       students {
         username
       }
+      pends {
+        title
+        description
+        id
+      }
     }
   }
 `;
@@ -118,6 +123,7 @@ function CourseDashboard(props) {
           // course={course}
           courseTitle={course.title}
           courseProf={course.prof}
+          coursePends={course ? (course.pends ? course.pends : []) : []}
           courseTAs={course ? (course.tas ? course.tas : []) : []}
           username={props.username}
           isProf={props.username === course.prof.username} // can be prof or ta or st

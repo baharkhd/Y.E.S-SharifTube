@@ -3,6 +3,7 @@ import { Sidebar, Menu, Button, Icon, List } from "semantic-ui-react";
 import { useHistory, Link, useParams } from "react-router-dom";
 import { gql, useMutation } from "@apollo/client";
 import AddTAModal from "./AddTAModal";
+import PendingPage from "./PendingPage";
 
 const TAs = [
   "folan1",
@@ -39,6 +40,13 @@ function SideBar(props) {
 
   let isProfTA =
     props.courseTAs.some(ta => ta.username === props.username) || props.isProf;
+
+  console.log(
+    "{}{}{}",
+    props.courseTAs.some(ta => ta.username === props.username),
+    props.isProf,
+    isProfTA
+  );
 
   // const [promoteUserToTA] = useMutation(ADD_TA_MUTATION, {
   //   variables: {}
@@ -100,31 +108,35 @@ function SideBar(props) {
               </List.Item>
             );
           })}
-          {props.isHead && (
-            <List.Item>
-              <Button
-                positive
-                onClick={() => {
-                  setState({ ...state, addingTA: true });
-                }}
-              >
-                Add TA
-              </Button>
-            </List.Item>
-          )}
         </List>
       </Menu.Item>
+
+      {isProfTA && (
+        <Menu.Item>
+          <Button
+            positive
+            onClick={() => {
+              setState({ ...state, addingTA: true });
+            }}
+          >
+            Add TA
+          </Button>
+        </Menu.Item>
+      )}
+
       <Menu.Item>
         <Link to={uploadPath}>
           <Button color="blue">Upload Videos</Button>
         </Link>
       </Menu.Item>
-      {props.isHead && (
-        <Menu.Item>
-          <Link to={"/course:" + id + "/pendings"}>
-            <Button color="black">Pending Contents</Button>
-          </Link>
-        </Menu.Item>
+      {isProfTA && (
+        // <Link to={"/course:" + id + "/pendings"} component={PendingPage} >
+          <Menu.Item>
+            <Link to={"/course:" + id + "/pendings"}>
+              <Button color="black">Pending Contents</Button>
+            </Link>
+          </Menu.Item>
+        // </Link>
       )}
     </Sidebar>
   );

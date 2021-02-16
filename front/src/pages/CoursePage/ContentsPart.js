@@ -159,7 +159,7 @@ function ContentsPart({ contents, id }) {
             value={value}
           />
         </Grid.Column>
-        <Grid.Column floated="right">
+        {/* <Grid.Column floated="right">
           <Button
             onClick={() => {
               dispatch({ type: "UPDATE_SHOWN_RESULTS", data: results });
@@ -167,7 +167,7 @@ function ContentsPart({ contents, id }) {
           >
             check
           </Button>
-        </Grid.Column>
+        </Grid.Column> */}
       </Grid>
 
       <Divider horizontal>

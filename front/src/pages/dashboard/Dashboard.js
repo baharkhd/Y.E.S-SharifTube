@@ -43,7 +43,7 @@ const Dashboard = props => {
   console.log("error:", error);
 
   return (
-    <div>
+    <div >
       <SideBar isMobile={props.isMobile} open={props.sidebarOpen} username={props.username} />
       {!loading &&
         (!props.isCourse ? (
