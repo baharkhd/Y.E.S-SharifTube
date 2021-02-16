@@ -45,11 +45,10 @@ func New(title, uploadedBy string, upload graphql.Upload, courseID string, descr
 		return nil, err
 	}
 
-	if err:=OSD.Store(fmt.Sprintf("%s/%s", courseID, upload.Filename), upload.File); err!=nil{
-		return nil, model.FileAlreadyExistsException{Message: "a file with the same path and name already exists!"}
+	if err := OSD.Store(fmt.Sprintf("%s/%s/%s", courseID, upload.Filename), upload.File); err != nil {
+		return nil, err
 	}
-
-	return &Content{
+	c:=&Content{
 		Title:        title,
 		Description:  modelUtil.PtrTOStr(description),
 		Timestamp:    time.Now().Unix(),
@@ -59,7 +58,8 @@ func New(title, uploadedBy string, upload graphql.Upload, courseID string, descr
 		Tags:         tags,
 		Comments:     []*comment.Comment{},
 		CourseID:     courseID,
-	}, nil
+	}
+	return insert(courseID, c)
 }
 
 func RegexValidate(title, description, uploadedBy, courseID, approvedBy *string, tags []string) error {
@@ -88,7 +88,7 @@ func RegexValidate(title, description, uploadedBy, courseID, approvedBy *string,
 		}
 	}
 	//todo regex definition for Tag
-	if tags != nil && len(tags) == 0{
+	if tags != nil && len(tags) == 0 {
 		return model.RegexMismatchException{Message: "tags field is empty"}
 	}
 	return nil
@@ -118,7 +118,7 @@ func (c *Content) Update(newTitle, newDescription *string, newTags []string) err
 	if newTitle == nil && newDescription == nil {
 		return model.EmptyFieldsException{Message: model.EmptyKeyErrorMessage}
 	}
-	err := RegexValidate(newTitle, newDescription,  nil, nil, nil, newTags)
+	err := RegexValidate(newTitle, newDescription, nil, nil, nil, newTags)
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func (c *Content) GetComment(commentID primitive.ObjectID) (*comment.Comment, *c
 	return nil, nil
 }
 
-func GetFromCache(contentID string) (*Content, error){
+func GetFromCache(contentID string) (*Content, error) {
 	c, err := Cache.Get([]byte(contentID))
 	if err == nil {
 		var cr *Content
@@ -160,7 +160,7 @@ func GetFromCache(contentID string) (*Content, error){
 		}
 		return cr, err
 	}
-	return nil,  model.ContentNotFoundException{Message: "content not found in cache"}
+	return nil, model.ContentNotFoundException{Message: "content not found in cache"}
 }
 
 func (c *Content) Cache() error {

@@ -44,11 +44,6 @@ func CreateContent(authorUsername, courseID, title string, description *string, 
 		return nil, err
 	}
 
-	// insert the content into database
-	cn, err = content.Insert(courseID, cn)
-	if err != nil {
-		return nil, err
-	}
 	return cn, nil
 }
 

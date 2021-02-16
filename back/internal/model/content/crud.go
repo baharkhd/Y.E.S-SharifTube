@@ -55,7 +55,7 @@ func GetByFilter(courseID *string, tags []string, startIdx, amount int) ([]*Cont
 	return contents, nil
 }
 
-func Insert(courseID string, content *Content) (*Content, error) {
+func insert(courseID string, content *Content) (*Content, error) {
 	cID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, model.InternalServerException{Message: err.Error()}
