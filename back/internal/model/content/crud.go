@@ -82,8 +82,7 @@ func Update(courseID string, content *Content) error {
 	}
 
 	// update the content in cache if exists
-	DeleteFromCache(courseID)
-	_ = content.Cache()
+	content.UpdateCache()
 
 	return nil
 }

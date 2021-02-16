@@ -47,6 +47,9 @@ func CreateContent(authorUsername, courseID, title string, description *string, 
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.AddContent(cn)
+	cr.UpdateCache()
 	return cn, nil
 }
 
@@ -79,6 +82,9 @@ func UpdateContent(authorUsername, courseID, contentID string, newTitle, newDesc
 	if err = content.Update(courseID, cn); err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.UpdateContent(cn)
+	cr.UpdateCache()
 	return cn, nil
 }
 
@@ -106,5 +112,8 @@ func DeleteContent(authorUsername, courseID, contentID string) (*content.Content
 	if err = content.Delete(courseID, cn); err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	cr.DeleteContent(cn.ID)
+	cr.UpdateCache()
 	return cn, nil
 }

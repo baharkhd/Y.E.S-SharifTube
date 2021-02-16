@@ -95,3 +95,8 @@ func (u *User) Cache() error {
 	}
 	return nil
 }
+
+func (u *User) UpdateCache() {
+	DeleteFromCache(u.Username)
+	_ = u.Cache()
+}

@@ -41,8 +41,8 @@ func update(targetUsername string, targetUser User) (*User, error) {
 	} else {
 
 		// update user in cache if exists
-		DeleteFromCache(targetUsername)
-		_ = targetUser.Cache()
+		targetUser.Username = targetUsername
+		targetUser.UpdateCache()
 
 		return &targetUser, nil
 	}
@@ -78,6 +78,8 @@ func Delete(username string) error {
 				if err != nil {
 					return model.InternalServerException{Message: "course of user couldn't delete"}
 				}
+				// maintain consistency
+				course.DeleteFromCache(c.ID.Hex())
 			} else {
 				_, err = course.DeleteUser(username, c)
 				if err != nil {
