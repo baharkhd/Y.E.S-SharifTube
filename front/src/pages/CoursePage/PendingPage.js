@@ -1,5 +1,16 @@
-import React from "react";
-import { Segment, Label, Card, Icon, Grid, Button } from "semantic-ui-react";
+import React, { useState } from "react";
+import {
+  Segment,
+  Label,
+  Card,
+  Icon,
+  Grid,
+  Button,
+  Modal,
+  Form,
+  Input,
+  TextArea
+} from "semantic-ui-react";
 import { useParams } from "react-router-dom";
 import { useQuery, gql } from "@apollo/client";
 
@@ -110,6 +121,94 @@ const PENDING_QUERY = gql`
   }
 `;
 
+// type Pending{
+//   id: ID!
+//   title: String!
+//   description: String
+//   status: Status!
+//   timestamp:Int!
+//   uploadedBY: User!
+//   furl: String! #todo better implementation for file
+//   courseID: String!
+// }
+
+const ChangePendingModal = props => {
+  const [state, setState] = useState({
+    title: props.title,
+    description: props.description,
+    tagInput: "",
+    tags: []
+  });
+  return (
+    <Modal open={true}>
+      <Modal.Header>Change the content if you want :)</Modal.Header>
+      <Modal.Content>
+        <Form>
+          <Form.Group>
+            <Form.Field
+              control={Input}
+              label="Title"
+              placeholder="Enter title for this content"
+              value={state.title}
+              onChange={e => {
+                setState({ ...state, title: e.target.value });
+              }}
+            />
+          </Form.Group>
+          <Form.TextArea
+            label="Description"
+            placeholder="Enter description for this content"
+            value={state.description}
+            onChange={e => {
+              setState({ ...state, description: e.target.value });
+            }}
+          />
+          <Form.Group>
+            <Form.Field
+              control={Input}
+              // label="Tags"
+              placeholder="Add a tag"
+              onChange={e => {
+                setState({ ...state, tagInput: e.target.value });
+              }}
+            />
+            <Form.Field>
+              <Form.Button
+                icon="plus"
+                positive
+                onClick={() => {
+                  if (state.tagInput !== "") {
+                    setState({
+                      ...state,
+                      tags: [...state.tags, state.tagInput]
+                    });
+                  }
+                }}
+              />
+            </Form.Field>
+          </Form.Group>
+
+          <Form.Field>
+            <Label.Group>
+              {state.tags.map(tag => {
+                return (
+                  <Label size="large">
+                    <Icon name="hashtag" /> {tag}
+                  </Label>
+                );
+              })}
+            </Label.Group>
+          </Form.Field>
+        </Form>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button positive>Change and Approve!</Button>
+        <Button negative>Cancel</Button>
+      </Modal.Actions>
+    </Modal>
+  );
+};
+
 const ContentCard = ({
   title,
   time,
@@ -141,9 +240,9 @@ const ContentCard = ({
 
         <Card.Content>
           <Button.Group fluid>
-            <Button positive>salam</Button>
-            <Button color="blue">salam</Button>
-            <Button color="red">salam</Button>
+            <Button positive>Approve</Button>
+            {/* <Button color="blue">salam</Button> */}
+            <Button color="red">Reject</Button>
           </Button.Group>
         </Card.Content>
       </Card>
@@ -155,11 +254,15 @@ function PendingPage(props) {
   let { courseID } = useParams();
   courseID = courseID.substring(1);
 
+  const [state, setState] = useState({
+    modalOpen: false
+  });
+
   // ($coureID: String, $status: Status, $uploaderUsername: String, $start: Int!, amount: Int!)
 
   const { data, loading, error } = useQuery(PENDING_QUERY, {
     fetchPolicy: "cache-and-network",
-    // nextFetchPolicy: "cache-first",
+    nextFetchPolicy: "cache-first",
     variables: {
       courseID,
       status: "PENDING",
@@ -176,6 +279,7 @@ function PendingPage(props) {
 
   return (
     <Segment style={{ top: 70 }}>
+      <ChangePendingModal />
       <Grid columns={3} stackable>
         {pendingContents.map(content => {
           return (

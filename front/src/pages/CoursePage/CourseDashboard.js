@@ -170,8 +170,8 @@ function CourseDashboard(props) {
   console.log("---------------- username:", props.username);
 
   const response = useQuery(COURSE_QUERY, {
-    fetchPolicy: "cache-and-network",
-    nextFetchPolicy: "cache-first",
+    // fetchPolicy: "cache-and-network",
+    // nextFetchPolicy: "cache-first",
     variables: {
       ids: [id]
     }

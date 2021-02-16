@@ -4,7 +4,6 @@ import gql from "graphql-tag";
 import { useMutation } from "@apollo/client";
 import { useHistory } from "react-router-dom";
 import constants from "../../constants.js";
-import { async } from "q";
 
 const LOGIN_MUTATION = gql`
   mutation Login($username: String!, $password: String!) {
