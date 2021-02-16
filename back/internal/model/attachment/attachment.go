@@ -7,6 +7,11 @@ import (
 	modelUtil "yes-sharifTube/internal/model"
 )
 
+const NameWordSize = 30
+const NameCharSize = 150
+const DescriptionWordSize = 200
+const DescriptionCharSize = 600
+
 type Attachment struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Name        string             `json:"name" bson:"name"`
@@ -36,8 +41,14 @@ func RegexValidate(name, description, aurl, courseID *string) error {
 	if name != nil && modelUtil.IsSTREmpty(*name) {
 		return model.RegexMismatchException{Message: "name field is empty"}
 	}
+	if name != nil && (modelUtil.WordCount(*name) > NameWordSize || len(*name) > NameCharSize) {
+		return model.RegexMismatchException{Message: "name field exceeds limit size"}
+	}
 	if description != nil && modelUtil.IsSTREmpty(*description) {
 		return model.RegexMismatchException{Message: "description field is empty"}
+	}
+	if description != nil && (modelUtil.WordCount(*description) > DescriptionWordSize || len(*description) > DescriptionCharSize) {
+		return model.RegexMismatchException{Message: "description field exceeds limit size"}
 	}
 	//todo regex definition for Aurl field
 	if aurl != nil && modelUtil.IsSTREmpty(*aurl) {

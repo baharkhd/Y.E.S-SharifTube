@@ -1,6 +1,8 @@
 package course
 
 import (
+	"encoding/json"
+	"github.com/coocood/freecache"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 	"yes-sharifTube/graph/model"
@@ -10,6 +12,12 @@ import (
 	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/pending"
 )
+
+const CacheExpire = 10 * 60
+const TitleWordSize = 30
+const TitleCharSize = 150
+const SummeryWordSize = 200
+const SummeryCharSize = 800
 
 type Course struct {
 	ID        primitive.ObjectID       `bson:"_id" json:"id,omitempty"`
@@ -26,6 +34,7 @@ type Course struct {
 }
 
 var DBD DBDriver
+var Cache *freecache.Cache
 
 func New(title, profUsername, token string, summery *string) (*Course, error) {
 	hashedToken, err := modelUtil.HashToken([]byte(token))
@@ -54,8 +63,14 @@ func RegexValidate(title, summery, profUsername, token *string) error {
 	if title != nil && modelUtil.IsSTREmpty(*title) {
 		return model.RegexMismatchException{Message: "title field is empty"}
 	}
+	if title != nil && (modelUtil.WordCount(*title) > TitleWordSize || len(*title) > TitleCharSize) {
+		return model.RegexMismatchException{Message: "title field exceeds limit size"}
+	}
 	if summery != nil && modelUtil.IsSTREmpty(*summery) {
 		return model.RegexMismatchException{Message: "summery field is empty"}
+	}
+	if summery != nil && (modelUtil.WordCount(*summery) > SummeryWordSize || len(*summery) > SummeryCharSize) {
+		return model.RegexMismatchException{Message: "summery field exceeds limit size"}
 	}
 	if profUsername != nil && modelUtil.IsSTREmpty(*profUsername) {
 		return model.RegexMismatchException{Message: "professor username field is empty"}
@@ -89,6 +104,35 @@ func (c *Course) Update(newTitle, newSummery, newToken *string) error {
 		c.Token = hashedToken
 	}
 	return nil
+}
+
+func GetFromCache(courseID string) (*Course, error){
+	c, err := Cache.Get([]byte(courseID))
+	if err == nil {
+		var cr *Course
+		err = json.Unmarshal(c, &cr)
+		if err != nil {
+			return nil, model.InternalServerException{Message: err.Error()}
+		}
+		return cr, err
+	}
+	return nil,  model.CourseNotFoundException{Message: "course not found in cache"}
+}
+
+func (c *Course) Cache() error {
+	course, err := json.Marshal(c)
+	if err != nil {
+		return model.InternalServerException{Message: err.Error()}
+	}
+	err = Cache.Set([]byte(c.ID.Hex()), course, CacheExpire)
+	if err != nil {
+		return model.InternalServerException{Message: "course couldn't in cache"}
+	}
+	return nil
+}
+
+func DeleteFromCache(courseID string) {
+	Cache.Del([]byte(courseID))
 }
 
 func (c Course) IsUserProfOrTA(username string) bool {
@@ -215,6 +259,60 @@ func (c *Course) RemoveComment(username string, commentID primitive.ObjectID, cn
 		}
 	}
 	return nil, nil, model.CommentNotFoundException{Message: "there is no comment @" + commentID.Hex()}
+}
+
+func (c *Course) IsUserAllowedToUpdateCourse(username string) error{
+	if !c.IsUserProfessor(username) {
+		return model.UserNotAllowedException{Message: "you can't change this course. because you are not professor"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToDeleteCourse(username string) error{
+	if !c.IsUserProfessor(username) {
+		return model.UserNotAllowedException{Message: "you are not professor"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToAddUserInCourse(username, token string) error{
+	if c.IsUserParticipateInCourse(username) {
+		return model.DuplicateUsernameException{Message: "you been been added before"}
+	}
+	if !c.CheckCourseToken(token) {
+		return model.IncorrectTokenException{Message: "wrong course token"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToDeleteUserInCourse(username, targetUsername string) error{
+	if !c.IsUserParticipateInCourse(targetUsername) {
+		return model.UserNotFoundException{Message: "you weren't participate in course"}
+	}
+	if !c.IsUserAllowedToDeleteUser(username, targetUsername) {
+		return model.UserNotAllowedException{Message: "you can't remove this user"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToPromoteUserInCourse(username, targetUsername string) error{
+	if !c.IsUserProfOrTA(username) {
+		return model.UserNotAllowedException{Message: "you are not professor or ta"}
+	}
+	if !c.IsUserStudent(targetUsername) {
+		return model.UserIsNotSTDException{Message: "you are not student"}
+	}
+	return nil
+}
+
+func (c *Course) IsUserAllowedToDemoteUserInCourse(username, targetUsername string) error{
+	if !c.IsUserProfOrTA(username) {
+		return model.UserNotAllowedException{Message: "you are not professor or ta"}
+	}
+	if !c.IsUserTA(targetUsername) {
+		return model.UserIsNotSTDException{Message: "you are not ta"}
+	}
+	return nil
 }
 
 func (c *Course) IsUserAllowedToInsertAttachment(username string) error {

@@ -56,8 +56,12 @@ func UpdateCourse(authorUsername, courseID string, newTitle, newSummery, newToke
 	if err != nil {
 		return nil, err
 	}
+	// check if user can update course
+	if err = cr.IsUserAllowedToUpdateCourse(authorUsername); err != nil{
+		return nil, err
+	}
 	// update the course in database
-	if err = course.Update(authorUsername, cr); err != nil {
+	if err = course.Update(cr); err != nil {
 		return nil, err
 	}
 	return cr.FilterPendsOfCourse(&authorUsername), nil
@@ -73,8 +77,12 @@ func DeleteCourse(authorUsername, courseID string) (*course.Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	// check if user can delete course
+	if err = cr.IsUserAllowedToDeleteCourse(authorUsername); err != nil{
+		return nil, err
+	}
 	// delete the course from database
-	if err = course.Delete(authorUsername, cr); err != nil {
+	if err = course.Delete(cr); err != nil {
 		return nil, err
 	}
 	return cr.FilterPendsOfCourse(&authorUsername), nil
@@ -90,8 +98,12 @@ func AddUserToCourse(username, courseID, token string) (*course.Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	// check if user can add to the course
+	if err = cr.IsUserAllowedToAddUserInCourse(username, token); err != nil{
+		return nil, err
+	}
 	// add the user to course in database
-	cr, err = course.AddUser(username, token, cr)
+	cr, err = course.AddUser(username, cr)
 	if err != nil {
 		return nil, err
 	}
@@ -111,8 +123,12 @@ func DeleteUserFromCourse(username, courseID, targetUsername string) (*course.Co
 	if err != nil {
 		return nil, err
 	}
+	// check if user can delete another from course
+	if err = cr.IsUserAllowedToDeleteUserInCourse(username, targetUsername); err != nil{
+		return nil, err
+	}
 	// delete the user from course in database
-	cr, err = course.DeleteUser(username, targetUsername, cr)
+	cr, err = course.DeleteUser(targetUsername, cr)
 	if err != nil {
 		return nil, err
 	}
@@ -132,8 +148,12 @@ func PromoteUserToTA(username, courseID, targetUsername string) (*course.Course,
 	if err != nil {
 		return nil, err
 	}
+	// check if user can promote another in course
+	if err = cr.IsUserAllowedToPromoteUserInCourse(username, targetUsername); err != nil{
+		return nil, err
+	}
 	// promote user to ta in database
-	cr, err = course.PromoteUser(username, targetUsername, cr)
+	cr, err = course.PromoteUser(targetUsername, cr)
 	if err != nil {
 		return nil, err
 	}
@@ -153,8 +173,12 @@ func DemoteUserToSTD(username, courseID, targetUsername string) (*course.Course,
 	if err != nil {
 		return nil, err
 	}
+	// check if user can demote to student course
+	if err = cr.IsUserAllowedToDemoteUserInCourse(username, targetUsername); err != nil{
+		return nil, err
+	}
 	// demote at to student in database
-	cr, err = course.DemoteUser(username, targetUsername, cr)
+	cr, err = course.DemoteUser(targetUsername, cr)
 	if err != nil {
 		return nil, err
 	}

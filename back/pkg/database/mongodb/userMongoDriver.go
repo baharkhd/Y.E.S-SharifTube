@@ -55,6 +55,15 @@ func (u UserMongoDriver) Insert(user *user.User) status.QueryStatus {
 
 }
 
+func (u UserMongoDriver) InsertExact(user *user.User) status.QueryStatus {
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	if _, err := u.collection.InsertOne(ctx, user); err != nil {
+		return status.FAILED
+	}
+	return status.SUCCESSFUL
+}
+
 func (u UserMongoDriver) Get(username *string) (*user.User, status.QueryStatus) {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()

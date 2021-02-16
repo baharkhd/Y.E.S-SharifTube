@@ -3,9 +3,11 @@ package main
 import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/coocood/freecache"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
+	"runtime/debug"
 	"yes-sharifTube/graph"
 	"yes-sharifTube/graph/generated"
 	"yes-sharifTube/internal/middleware/auth"
@@ -31,6 +33,18 @@ func main() {
 	pending.DBD = mongodb.NewPendingMongoDriver("yes-sharifTube", "courses")
 	attachment.DBD = mongodb.NewAttachmentMongoDriver("yes-sharifTube", "courses")
 	comment.DBD = mongodb.NewCommentMongoDriver("yes-sharifTube", "courses")
+	// adding the deleted account in database
+	if err := user.SetDeletedAccount(); err != nil {
+		panic(err)
+	}
+
+	// set 1Gb cache
+	cacheSize := 1000 * 1024 * 1024
+	cache := freecache.NewCache(cacheSize)
+	debug.SetGCPercent(20)
+	course.Cache = cache
+	content.Cache = cache
+	user.Cache = cache
 
 	// Setting up Gin
 	r := gin.Default()
@@ -50,7 +64,6 @@ func main() {
 	//let it begin
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", defaultPort)
 	r.Run(":" + defaultPort)
-
 }
 
 // Defining the Graphql handler

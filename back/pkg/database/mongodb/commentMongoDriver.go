@@ -54,16 +54,68 @@ func (c CommentMongoDriver) InsertComment(courseID, contentID primitive.ObjectID
 	return comment, nil
 }
 
+// todo fix
 func (c CommentMongoDriver) UpdateComment(courseID, contentID, commentID primitive.ObjectID, newBody string, timestamp int64) error {
-	//todo implementation
+	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
+	defer cancel()
+
+	target := bson.D{
+		{"_id", courseID},
+		{"contents._id", contentID},
+		{"contents.comments._id", commentID},
+	}
+	change := bson.D{
+		{"$set", bson.D{
+			{"contents.$.comments.$[elem].body", newBody},
+			{"contents.$.comments.$[elem].timestamp", timestamp},
+		},
+		},
+	}
+	err := c.collection.FindOneAndUpdate(ctx, target, change, options.FindOneAndUpdate().SetArrayFilters(
+		options.ArrayFilters{
+			Filters: []interface{}{
+				//bson.M{"con._id": contentID},
+				bson.M{"elem._id": commentID},
+			},
+		},
+	),
+	)
+	if err != nil {
+		return model.InternalServerException{Message: "couldn't update comment"}
+	}
 	return nil
 }
 
-func (c CommentMongoDriver) DeleteComment(courseID, contentID primitive.ObjectID, comment *comment.Comment) error {
-	//todo implementation
+// todo fix
+func (c CommentMongoDriver) DeleteComment(courseID, contentID, commentID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
+	defer cancel()
+
+	target := bson.M{
+		"_id":          courseID,
+		"contents._id": contentID,
+	}
+	change := bson.M{
+		"$pull": bson.M{
+			"contents.$[con].comments.$[elem]._id": commentID,
+		},
+	}
+	_, err := c.collection.UpdateOne(ctx, target, change, options.Update().SetArrayFilters(
+		options.ArrayFilters{
+			Filters: []interface{}{
+				bson.M{"con._id": contentID},
+				bson.M{"elem._id": commentID,
+				},
+			},
+		},
+	))
+	if err != nil {
+		return model.InternalServerException{Message: "database Internal Error:/n" + err.Error()}
+	}
 	return nil
 }
 
+// todo fix
 func (c CommentMongoDriver) InsertReply(courseID, contentID, repliedAtID primitive.ObjectID, reply *comment.Reply) (*comment.Reply, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
@@ -92,11 +144,13 @@ func (c CommentMongoDriver) InsertReply(courseID, contentID, repliedAtID primiti
 	return reply, nil
 }
 
+// todo fix
 func (c CommentMongoDriver) UpdateReply(courseID, contentID, replyID primitive.ObjectID, newBody string, timestamp int64) error {
 	//todo implementation
 	return nil
 }
 
+// todo fix
 func (c CommentMongoDriver) DeleteReply(courseID, contentID, replyID primitive.ObjectID) error {
 	//todo implementation
 	return nil

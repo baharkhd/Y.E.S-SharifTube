@@ -21,6 +21,38 @@ func InsertComment(courseID, contentID string, comment *Comment) (*Comment, erro
 	return comment, nil
 }
 
+func UpdateComment(courseID, contentID, commentID string, newBody string, timestamp int64) error {
+	cID, err := primitive.ObjectIDFromHex(courseID)
+	if err != nil {
+		return model.InternalServerException{Message: err.Error()}
+	}
+	conID, err := primitive.ObjectIDFromHex(contentID)
+	if err != nil {
+		return model.InternalServerException{Message: err.Error()}
+	}
+	comID, err := primitive.ObjectIDFromHex(contentID)
+	if err != nil {
+		return model.InternalServerException{Message: err.Error()}
+	}
+	return DBD.UpdateComment(cID, conID, comID, newBody, timestamp)
+}
+
+func DeleteComment(courseID, contentID, commentID string) error {
+	cID, err := primitive.ObjectIDFromHex(courseID)
+	if err != nil {
+		return model.InternalServerException{Message: err.Error()}
+	}
+	conID, err := primitive.ObjectIDFromHex(contentID)
+	if err != nil {
+		return model.InternalServerException{Message: err.Error()}
+	}
+	comID, err := primitive.ObjectIDFromHex(contentID)
+	if err != nil {
+		return model.InternalServerException{Message: err.Error()}
+	}
+	return DBD.DeleteComment(cID, conID, comID)
+}
+
 func InsertReply(courseID, contentID string, repliedID string, reply *Reply) (*Reply, error) {
 	cID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {

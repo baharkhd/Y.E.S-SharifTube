@@ -7,6 +7,7 @@ import (
 type DBDriver interface {
 	Delete(name *string) status.QueryStatus
 	Insert(user *User) status.QueryStatus
+	InsertExact(user *User) status.QueryStatus
 	Get(name *string) (*User, status.QueryStatus)
 	Update(target string, user *User) status.QueryStatus
 	GetAll(start, amount int64) ([]*User, status.QueryStatus)
