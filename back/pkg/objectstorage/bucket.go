@@ -1,25 +1,25 @@
 package objectstorage
 
 type Bucket struct {
-	id     string
-	parent *Bucket
-	subs   []*Bucket
+	Id     string
+	Parent *Bucket
+	Subs   []*Bucket
 }
 
 func NewBucket(id string, parent *Bucket) *Bucket {
 	b := &Bucket{
-		id:     id,
-		parent: parent,
-		subs:   []*Bucket{},
+		Id:     id,
+		Parent: parent,
+		Subs:   []*Bucket{},
 	}
 	if parent != nil {
-		parent.subs = append(parent.subs, b)
+		parent.Subs = append(parent.Subs, b)
 	}
 	return b
 }
 func (b *Bucket)GetPath() string{
-	if b.parent!=nil{
-		return b.parent.GetPath()+"/"+b.id
+	if b.Parent !=nil{
+		return b.Parent.GetPath()+"/"+b.Id
 	}
-	return b.id
+	return b.Id
 }

@@ -2,8 +2,6 @@ package content
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/coocood/freecache"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"sort"
@@ -11,7 +9,7 @@ import (
 	"yes-sharifTube/graph/model"
 	modelUtil "yes-sharifTube/internal/model"
 	"yes-sharifTube/internal/model/comment"
-	"yes-sharifTube/pkg/objectstorage"
+	"yes-sharifTube/internal/model/course"
 )
 
 const CacheExpire = 10 * 60
@@ -38,14 +36,10 @@ var (
 	Cache *freecache.Cache
 )
 
-func New(title, uploadedBy string, upload graphql.Upload, courseID string, description, approvedBy *string, tags []string) (*Content, error) {
+func New(title, uploadedBy, vurl string, cr *course.Course, description, approvedBy *string, tags []string) (*Content, error) {
+	courseID:=cr.ID.Hex()
 	err := RegexValidate(&title, description, &uploadedBy, &courseID, approvedBy, tags)
 	if err != nil {
-		return nil, err
-	}
-	_exists := OSD.Exists("id_rsa")
-	_=_exists
-	if err := OSD.Store(fmt.Sprintf("%s/%s", courseID, upload.Filename), upload.File,upload.Size); err != nil {
 		return nil, err
 	}
 	c:=&Content{
@@ -54,7 +48,7 @@ func New(title, uploadedBy string, upload graphql.Upload, courseID string, descr
 		Timestamp:    time.Now().Unix(),
 		UploadedByUn: uploadedBy,
 		ApprovedByUn: modelUtil.PtrTOStr(approvedBy),
-		Vurl:         OSD.GetURL(fmt.Sprintf("%s/%s", courseID, upload.Filename)),
+		Vurl:         vurl,
 		Tags:         tags,
 		Comments:     []*comment.Comment{},
 		CourseID:     courseID,

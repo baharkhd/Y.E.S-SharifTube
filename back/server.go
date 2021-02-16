@@ -31,7 +31,7 @@ func main() {
 	if driver, err := baremetal.New("localhost:22", "kycilius", "/home/kycilius/Documents/dev-null");err!=nil{
 		panic(err)
 	}else {
-		content.OSD=driver
+		course.OSD=driver
 	}
 
 

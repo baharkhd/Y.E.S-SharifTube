@@ -33,14 +33,10 @@ func CreateContent(authorUsername, courseID, title string, description *string, 
 	if err != nil {
 		return nil, err
 	}
-	//check if user can insert content
-	err = cr.IsUserAllowedToInsertContent(authorUsername)
-	if err != nil {
-		return nil, err
-	}
-	// create a content
-	cn, err := content.New(title, authorUsername, upload, courseID, description, nil, tags)
-	if err != nil {
+
+	// create new course
+	cn, err := cr.AddNewContent(authorUsername, title, description, upload, tags)
+	if err!=nil{
 		return nil, err
 	}
 

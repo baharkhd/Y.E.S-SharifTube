@@ -2,6 +2,7 @@ package course
 
 import (
 	"encoding/json"
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/coocood/freecache"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
@@ -438,6 +439,32 @@ func (c *Course) FilterPendings(username *string, pends []*pending.Pending) []*p
 func (c *Course) FilterPendsOfCourse(username *string) *Course {
 	c.Pends = c.FilterPendings(username, c.Pends)
 	return c
+}
+
+func (c *Course) AddNewContent(authorUsername string, title string, description *string, upload graphql.Upload, tags []string) (*content.Content, error) {
+	//check if user can insert content
+	err := c.IsUserAllowedToInsertContent(authorUsername)
+	if err != nil {
+		return nil, err
+	}
+
+	var vurl string
+	for _, sub := range OSD.GetRoot().Subs {
+		if sub.Id == c.ID.Hex() {
+			 if err:=OSD.Store(sub, upload.Filename, upload.File, upload.Size);err!=nil{
+				 return nil, err
+			 }
+			vurl = OSD.GetURL(sub, upload.Filename)
+			break
+		}
+	}
+	// create a content
+	cn, err := content.New(title, authorUsername, vurl, c, description, nil, tags)
+	if err != nil {
+		return nil, nil
+	}
+
+	return cn,nil
 }
 
 func FilterPendsOfCourses(username *string, courses []*Course) []*Course {
