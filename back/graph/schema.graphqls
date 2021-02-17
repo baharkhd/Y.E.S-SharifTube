@@ -1,3 +1,5 @@
+scalar Upload
+
 type User {
     id: ID!
     username: String! # uniqe
@@ -133,7 +135,7 @@ input EditedCourse{
 input TargetContent{
     title: String!
     description: String
-    vurl: String! # todo actual video
+    video: Upload!
     tags: [String!]
 }
 
@@ -233,6 +235,9 @@ type OfferedContentNotPendingException implements Exception{
     message: String!
 }
 type CommentNotFoundException implements Exception{
+    message: String!
+}
+type FileAlreadyExistsException implements Exception{
     message: String!
 }
 

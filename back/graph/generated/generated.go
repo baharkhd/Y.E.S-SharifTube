@@ -113,6 +113,10 @@ type ComplexityRoot struct {
 		Message func(childComplexity int) int
 	}
 
+	FileAlreadyExistsException struct {
+		Message func(childComplexity int) int
+	}
+
 	IncorrectTokenException struct {
 		Message func(childComplexity int) int
 	}
@@ -564,6 +568,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EmptyFieldsException.Message(childComplexity), true
+
+	case "FileAlreadyExistsException.message":
+		if e.complexity.FileAlreadyExistsException.Message == nil {
+			break
+		}
+
+		return e.complexity.FileAlreadyExistsException.Message(childComplexity), true
 
 	case "IncorrectTokenException.message":
 		if e.complexity.IncorrectTokenException.Message == nil {
@@ -1232,7 +1243,9 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `type User {
+	{Name: "graph/schema.graphqls", Input: `scalar Upload
+
+type User {
     id: ID!
     username: String! # uniqe
     name: String
@@ -1367,7 +1380,7 @@ input EditedCourse{
 input TargetContent{
     title: String!
     description: String
-    vurl: String! # todo actual video
+    video: Upload!
     tags: [String!]
 }
 
@@ -1467,6 +1480,9 @@ type OfferedContentNotPendingException implements Exception{
     message: String!
 }
 type CommentNotFoundException implements Exception{
+    message: String!
+}
+type FileAlreadyExistsException implements Exception{
     message: String!
 }
 
@@ -3925,6 +3941,41 @@ func (ec *executionContext) _EmptyFieldsException_message(ctx context.Context, f
 	}()
 	fc := &graphql.FieldContext{
 		Object:     "EmptyFieldsException",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FileAlreadyExistsException_message(ctx context.Context, field graphql.CollectedField, obj *model.FileAlreadyExistsException) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FileAlreadyExistsException",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -7941,11 +7992,11 @@ func (ec *executionContext) unmarshalInputTargetContent(ctx context.Context, obj
 			if err != nil {
 				return it, err
 			}
-		case "vurl":
+		case "video":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vurl"))
-			it.Vurl, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("video"))
+			it.Video, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9064,6 +9115,13 @@ func (ec *executionContext) _Exception(ctx context.Context, sel ast.SelectionSet
 			return graphql.Null
 		}
 		return ec._CommentNotFoundException(ctx, sel, obj)
+	case model.FileAlreadyExistsException:
+		return ec._FileAlreadyExistsException(ctx, sel, &obj)
+	case *model.FileAlreadyExistsException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._FileAlreadyExistsException(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -9767,6 +9825,33 @@ func (ec *executionContext) _EmptyFieldsException(ctx context.Context, sel ast.S
 			out.Values[i] = graphql.MarshalString("EmptyFieldsException")
 		case "message":
 			out.Values[i] = ec._EmptyFieldsException_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var fileAlreadyExistsExceptionImplementors = []string{"FileAlreadyExistsException", "Exception"}
+
+func (ec *executionContext) _FileAlreadyExistsException(ctx context.Context, sel ast.SelectionSet, obj *model.FileAlreadyExistsException) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fileAlreadyExistsExceptionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FileAlreadyExistsException")
+		case "message":
+			out.Values[i] = ec._FileAlreadyExistsException_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -11338,6 +11423,21 @@ func (ec *executionContext) marshalNUpdateUserPayload2yesᚑsharifTubeᚋgraph�
 		return graphql.Null
 	}
 	return ec._UpdateUserPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) (graphql.Upload, error) {
+	res, err := graphql.UnmarshalUpload(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v graphql.Upload) graphql.Marshaler {
+	res := graphql.MarshalUpload(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalNUploadAttachmentPayLoad2yesᚑsharifTubeᚋgraphᚋmodelᚐUploadAttachmentPayLoad(ctx context.Context, sel ast.SelectionSet, v model.UploadAttachmentPayLoad) graphql.Marshaler {

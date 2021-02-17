@@ -64,57 +64,57 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
       password: state.newPass,
       email: state.newEmail
     },
-    // update(cache, { data: { updateUser } }) {
-    //   const data = cache.readQuery({
-    //     query: GET_USER_QUERY
-    //   });
+    update(cache, { data: { updateUser } }) {
+      const data = cache.readQuery({
+        query: GET_USER_QUERY
+      });
 
-    //   console.log("updateUser:", updateUser)
-    //   console.log("????????????????????????", data);
+      console.log("updateUser:", updateUser)
+      console.log("????????????????????????", data);
 
-    //   const localData = _.cloneDeep(data);
-    //   console.log("localData:", localData);
-    //   // localData.user = localData.user.map(post => {
-    //   //   return post.id === updatePost.id ? updatePost : post;
-    //   // });
+      const localData = _.cloneDeep(data);
+      console.log("localData:", localData);
+      // localData.user = localData.user.map(post => {
+      //   return post.id === updatePost.id ? updatePost : post;
+      // });
 
-    //   let newName =
-    //     updateUser.name == "" ? localData.user.name : updateUser.name;
-    //   let newPassword =
-    //     updateUser.password == ""
-    //       ? localData.user.password
-    //       : updateUser.password;
-    //   let newEmail =
-    //     updateUser.email == "" ? localData.user.email : updateUser.email;
+      let newName =
+        updateUser.name == "" ? localData.user.name : updateUser.name;
+      let newPassword =
+        updateUser.password == ""
+          ? localData.user.password
+          : updateUser.password;
+      let newEmail =
+        updateUser.email == "" ? localData.user.email : updateUser.email;
 
-    //   console.log("?????", {
-    //     name: newName,
-    //     password: newPassword,
-    //     email: newEmail,
-    //     username: localData.user.username
-    //   });
+      console.log("?????", {
+        name: newName,
+        password: newPassword,
+        email: newEmail,
+        username: localData.user.username
+      });
 
-    //   console.log("???????????????????//", {
-    //     __typename: "User",
-    //     name: newName,
-    //     email: newEmail,
-    //     username: localData.username,
-    //     password: ""
-    //   });
+      console.log("???????????????????//", {
+        __typename: "User",
+        name: newName,
+        email: newEmail,
+        username: localData.username,
+        password: ""
+      });
 
-    //   cache.writeQuery({
-    //     query: GET_USER_QUERY,
-    //     data: {
-    //       user: {
-    //         __typename: "User",
-    //         name: newName,
-    //         email: newEmail,
-    //         username: localData.username,
-    //         password: ""
-    //       }
-    //     }
-    //   });
-    // },
+      cache.writeQuery({
+        query: GET_USER_QUERY,
+        data: {
+          user: {
+            __typename: "User",
+            name: newName,
+            email: newEmail,
+            username: localData.username,
+            password: ""
+          }
+        }
+      });
+    },
     onCompleted: ({ updateUser }) => {
       console.log("updateUser", updateUser);
       // setUser({ user: { ...user, ...updateUser } });

@@ -30,15 +30,17 @@ type Content struct {
 	CourseID     string             `json:"course" bson:"course"`
 }
 
-var DBD DBDriver
-var Cache *freecache.Cache
+var (
+	DBD   DBDriver
+	Cache *freecache.Cache
+)
 
-func New(title, uploadedBy, vurl, courseID string, description, approvedBy *string, tags []string) (*Content, error) {
-	err := RegexValidate(&title, description, &uploadedBy, &vurl, &courseID, approvedBy, tags)
+func New(title, uploadedBy, vurl string, courseID string, description, approvedBy *string, tags []string) (*Content, error) {
+	err := RegexValidate(&title, description, &uploadedBy, &courseID, approvedBy, tags)
 	if err != nil {
 		return nil, err
 	}
-	return &Content{
+	c:=&Content{
 		Title:        title,
 		Description:  modelUtil.PtrTOStr(description),
 		Timestamp:    time.Now().Unix(),
@@ -48,10 +50,11 @@ func New(title, uploadedBy, vurl, courseID string, description, approvedBy *stri
 		Tags:         tags,
 		Comments:     []*comment.Comment{},
 		CourseID:     courseID,
-	}, nil
+	}
+	return insert(courseID, c)
 }
 
-func RegexValidate(title, description, uploadedBy, vurl, courseID, approvedBy *string, tags []string) error {
+func RegexValidate(title, description, uploadedBy, courseID, approvedBy *string, tags []string) error {
 	if title != nil && modelUtil.IsSTREmpty(*title) {
 		return model.RegexMismatchException{Message: "title field is empty"}
 	}
@@ -69,10 +72,6 @@ func RegexValidate(title, description, uploadedBy, vurl, courseID, approvedBy *s
 	}
 	if approvedBy != nil && modelUtil.IsSTREmpty(*approvedBy) {
 		return model.RegexMismatchException{Message: "approves  username field is empty"}
-	}
-	//todo regex definition for Vurl field
-	if vurl != nil && modelUtil.IsSTREmpty(*vurl) {
-		return model.RegexMismatchException{Message: "file URL is empty"}
 	}
 	if courseID != nil {
 		_, err := primitive.ObjectIDFromHex(*courseID)
@@ -111,7 +110,7 @@ func (c *Content) Update(newTitle, newDescription *string, newTags []string) err
 	if newTitle == nil && newDescription == nil {
 		return model.EmptyFieldsException{Message: model.EmptyKeyErrorMessage}
 	}
-	err := RegexValidate(newTitle, newDescription, nil, nil, nil, nil, newTags)
+	err := RegexValidate(newTitle, newDescription, nil, nil, nil, newTags)
 	if err != nil {
 		return err
 	}

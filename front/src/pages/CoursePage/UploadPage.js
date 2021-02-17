@@ -11,7 +11,7 @@ import {
 import { gql, useMutation } from "@apollo/client";
 import { useParams, useHistory, useLocation } from "react-router-dom";
 import constants from "../../constants";
-import FileUpload from '../FileUpload/FileUpload'
+import FileUpload from "../FileUpload/FileUpload";
 
 const OFFER_CONTENT_MUTATION = gql`
   mutation OfferContent(
@@ -47,12 +47,71 @@ const OFFER_CONTENT_MUTATION = gql`
   }
 `;
 
-const UPLOAD_CONTENT_MUTATION = gql`
+// const UPLOAD_CONTENT_MUTATION = gql`
+//   mutation UploadContent(
+//     $courseID: String!
+//     $title: String!
+//     $description: String
+//     $vurl: String!
+//     $tags: [String!]
+//   ) {
+//     uploadContent(
+//       courseID: $courseID
+//       target: {
+//         title: $title
+//         description: $description
+//         vurl: $vurl
+//         tags: $tags
+//       }
+//     ) {
+//       ... on Content {
+//         id
+//         title
+//         description
+//         vurl
+//         tags
+//         timestamp
+//       }
+//       ... on Exception {
+//         message
+//       }
+//     }
+//   }
+// `;
+
+const COURSE_QUERY = gql`
+  query GetCoursesByID($ids: [String!]!) {
+    courses(ids: $ids) {
+      id
+      title
+      summary
+      contents {
+        id
+        title
+        description
+      }
+      prof {
+        name
+        username
+        email
+      }
+      tas {
+        name
+        username
+      }
+      students {
+        username
+      }
+    }
+  }
+`;
+
+const UPLOAD_MUTATION = gql`
   mutation UploadContent(
     $courseID: String!
     $title: String!
     $description: String
-    $vurl: String!
+    $video: Upload!
     $tags: [String!]
   ) {
     uploadContent(
@@ -60,17 +119,20 @@ const UPLOAD_CONTENT_MUTATION = gql`
       target: {
         title: $title
         description: $description
-        vurl: $vurl
+        video: $video
         tags: $tags
       }
     ) {
+      __typename
       ... on Content {
         id
         title
         description
         vurl
-        tags
-        timestamp
+        uploadedBY {
+          name
+          username
+        }
       }
       ... on Exception {
         message
@@ -80,8 +142,9 @@ const UPLOAD_CONTENT_MUTATION = gql`
 `;
 
 function UploadPage(props) {
+  let { courseID } = useParams();
+  courseID = courseID.substring(1);
 
-  console.log("+_+_+_+_+_+_+_+_+_+_+ uploadpage tokeeeeeeeeeeeeeeeeeeen:", localStorage.getItem(constants.AUTH_TOKEN))
   const history = useHistory();
 
   let path = useLocation().pathname;
@@ -93,11 +156,32 @@ function UploadPage(props) {
     description: "",
     url: "",
     tags: [],
-    tagInput: ""
+    tagInput: "",
+    file: ""
   });
 
-  let { courseID } = useParams();
-  courseID = courseID.substring(1);
+  // const [file, setFile] = useState(null)
+
+  const [uploadContent] = useMutation(UPLOAD_MUTATION, {
+    variables: {
+      courseID: courseID,
+      title: state.title,
+      description: state.description,
+      // video: {
+      //   File: state.file,
+      //   Filename: state.file.name,
+      //   Size: state.file.size,
+      //   ContentType: state.file.type
+      // },
+      video: state.file,
+      tags: state.tags
+    },
+    onCompleted: ({ uploadContent }) => {
+      console.log("updateContenttttttttt:", uploadContent);
+    }
+  });
+
+  // console.log("+_+_+_+_+_+_+_+_+_+_+ uploadpage tokeeeeeeeeeeeeeeeeeeen:", localStorage.getItem(constants.AUTH_TOKEN))
 
   const [offerContent] = useMutation(OFFER_CONTENT_MUTATION, {
     variables: {
@@ -114,20 +198,34 @@ function UploadPage(props) {
     }
   });
 
-  const [uploadContent] = useMutation(UPLOAD_CONTENT_MUTATION, {
-    variables: {
-      courseID: courseID,
-      title: state.title,
-      description: state.description,
-      vurl: state.url,
-      tags: state.tags
-    },
-    onCompleted: ({ uploadContent }) => {
-      console.log("*** uploadContent:", uploadContent);
-      let path = "/course:" + courseID;
-      history.push(path);
-    }
-  });
+  // const [uploadContent] = useMutation(UPLOAD_CONTENT_MUTATION, {
+  //   variables: {
+  //     courseID: courseID,
+  //     title: state.title,
+  //     description: state.description,
+  //     vurl: state.url,
+  //     tags: state.tags
+  //   },
+  //   update(cache, { data: { uploadContent } }) {
+  //     var data = cache.readQuery({
+  //       query: COURSE_QUERY,
+  //       variables: {
+  //         ids: [courseID]
+  //       }
+  //     });
+
+  //     data = data[0];
+
+  //     console.log("in update of uploadContent");
+  //     console.log("uploadContent:", uploadContent);
+  //     console.log("data:", data);
+  //   },
+  //   onCompleted: ({ uploadContent }) => {
+  //     console.log("*** uploadContent:", uploadContent);
+  //     let path = "/course:" + courseID;
+  //     history.push(path);
+  //   }
+  // });
 
   return (
     <Segment style={{ top: 70 }}>
@@ -206,6 +304,7 @@ function UploadPage(props) {
         <Form.Button
           color="blue"
           onClick={() => {
+            console.log("State before test:", state)
             if (uploadType == "upload") {
               uploadContent();
             } else {
@@ -216,7 +315,16 @@ function UploadPage(props) {
           Upload
         </Form.Button>
       </Form>
-      <FileUpload />
+      {/* <FileUpload setFile={setState} otherState={state} /> */}
+      <input
+        type="file"
+        onChange={e => {
+          const [file] = e.target.files
+          
+          console.log("-------------", file)
+          setState({...state, file: file})
+        }}
+      />
     </Segment>
   );
 }

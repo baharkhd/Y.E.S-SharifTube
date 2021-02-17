@@ -26,6 +26,26 @@ const COURSES_QUERY = gql`
   }
 `;
 
+const GET_COURSES_QUERY = gql`
+  query GetCourses($ids: [String!]!) {
+    courses(ids: $ids) {
+      id
+      title
+      summary
+      prof {
+        username
+        name
+        emai
+      }
+      tas {
+        username
+        name
+        email
+      }
+    }
+  }
+`;
+
 const JOIN_COURSE_MUTATION = gql`
   mutation JoinCourse($courseID: String!, $token: String!) {
     addUserToCourse(courseID: $courseID, token: $token) {
@@ -35,6 +55,10 @@ const JOIN_COURSE_MUTATION = gql`
         title
         summary
         createdAt
+        students {
+          name
+          username
+        }
       }
       ... on Exception {
         message
@@ -66,6 +90,18 @@ function JoinCourseModel({ joiningCourse, setState, username }) {
     variables: {
       courseID: courseInfo.courseID,
       token: courseInfo.token
+    },
+
+    update(cache, { data: { addUserToCourse } }) {
+      const data = cache.readQuery({
+        query: GET_COURSES_QUERY,
+        variables: {
+          ids: [courseInfo.courseID]
+        }
+      });
+
+      console.log("addUserToCourse:", addUserToCourse);
+      console.log("data in adding user to course:", data);
     },
     onCompleted: ({ addUserToCourse }) => {
       console.log("add user to coure:", addUserToCourse);
@@ -139,6 +175,7 @@ function JoinCourseModel({ joiningCourse, setState, username }) {
           onClick={() => {
             // Join class
             if (courseInfo.courseID !== "" && courseInfo.token !== "") {
+              // console.log("courseInfo.couresID:", courseInfo.courseID)
               addUserToCourse();
             }
             setState({ joiningCourse: false });

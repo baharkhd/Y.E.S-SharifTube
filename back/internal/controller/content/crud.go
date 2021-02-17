@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/99designs/gqlgen/graphql"
 	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/course"
 	"yes-sharifTube/internal/model/user"
@@ -22,7 +23,7 @@ func GetContents(tags []string, courseID *string, startIdx, amount int) ([]*cont
 	return contents, nil
 }
 
-func CreateContent(authorUsername, courseID, title string, description *string, vurl string, tags []string) (*content.Content, error) {
+func CreateContent(authorUsername, courseID, title string, description *string, upload graphql.Upload, tags []string) (*content.Content, error) {
 	// check if user exists in database
 	if _, err := user.Get(authorUsername); err != nil {
 		return nil, err
@@ -32,19 +33,10 @@ func CreateContent(authorUsername, courseID, title string, description *string, 
 	if err != nil {
 		return nil, err
 	}
-	// create a content
-	cn, err := content.New(title, authorUsername, vurl, courseID, description, nil, tags)
-	if err != nil {
-		return nil, err
-	}
-	//check if user can insert content
-	err = cr.IsUserAllowedToInsertContent(authorUsername)
-	if err != nil {
-		return nil, err
-	}
-	// insert the content into database
-	cn, err = content.Insert(courseID, cn)
-	if err != nil {
+
+	// create new course
+	cn, err := cr.AddNewContent(authorUsername, title, description, upload, tags)
+	if err!=nil{
 		return nil, err
 	}
 	// maintain consistency in cache

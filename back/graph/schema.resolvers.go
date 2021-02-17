@@ -273,7 +273,7 @@ func (r *mutationResolver) UploadContent(ctx context.Context, username *string, 
 			return err.(model.UserNotFoundException), nil
 		}
 	}
-	res, err := contentController.CreateContent(*username, courseID, target.Title, target.Description, target.Vurl, target.Tags)
+	res, err := contentController.CreateContent(*username, courseID, target.Title, target.Description, target.Video, target.Tags)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
