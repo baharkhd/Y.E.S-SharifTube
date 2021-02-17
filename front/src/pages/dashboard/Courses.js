@@ -131,7 +131,7 @@ function Courses(props) {
                     style={{fontSize: '35px'}}>&nbsp;&nbsp;&nbsp;&nbsp;Your Courses</span>
                 </Header>
             </Divider>
-            <Grid columns={4} stackable style={{padding:'20px'}}>
+            <Grid columns={3} stackable style={{padding:'20px'}}>
                 {!courses.loading &&
                 yourClasses.map(course => {
                     let date = new Date(course.createdAt * 1000).toLocaleString("en-US", {
@@ -186,7 +186,7 @@ function Courses(props) {
                     style={{fontSize: '35px'}}>&nbsp;&nbsp;&nbsp;&nbsp;Joined Courses</span>
                 </Header>
             </Divider>
-            <Grid columns={4} stackable style={{padding:'20px'}}>
+            <Grid columns={3} stackable style={{padding:'20px'}}>
                 {!courses.loading &&
                 otherClasses.map(course => {
                     let date = new Date(course.createdAt * 1000).toLocaleString("en-US", {

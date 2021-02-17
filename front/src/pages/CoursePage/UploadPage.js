@@ -16,7 +16,7 @@ import FileUpload from "../FileUpload/FileUpload";
 const fileUploadFrameLStyle ={
   borderColor:"#0021a3",
   margin:'auto',
-  top: '150px',
+  top: '120px',
   width:'70%',
   padding:'20px',
 
@@ -27,14 +27,14 @@ const OFFER_CONTENT_MUTATION = gql`
     $courseID: String!
     $title: String!
     $description: String
-    $furl: String!
+    $video: Upload!
   ) {
     offerContent(
       courseID: $courseID
       target: {
         title: $title
         description: $description
-        furl: $furl
+        video: $video
         # tags: $tags
       }
     ) {
@@ -239,12 +239,6 @@ function UploadPage(props) {
       courseID: courseID,
       title: state.title,
       description: state.description,
-      // video: {
-      //   File: state.file,
-      //   Filename: state.file.name,
-      //   Size: state.file.size,
-      //   ContentType: state.file.type
-      // },
       video: state.file,
       tags: state.tags
     },
@@ -260,8 +254,7 @@ function UploadPage(props) {
       courseID: courseID,
       title: state.title,
       description: state.description,
-      furl: state.url
-      // tags: state.tags
+      video: state.file
     },
     onCompleted: ({ offerContent }) => {
       console.log("*** offerContent:", offerContent);
@@ -303,16 +296,6 @@ function UploadPage(props) {
     <Segment raised inverted style={fileUploadFrameLStyle}>
       {/* <Segment>Where you should upload videos</Segment> */}
       <Form inverted>
-        <Form.Group widths="four">
-          <Form.Field
-            control={Input}
-            label="URL of this content"
-            placeholder="URL"
-            onChange={e => {
-              setState({ ...state, url: e.target.value });
-            }}
-          />
-        </Form.Group>
         <Form.Group widths="four">
           <Form.Field
             control={Input}

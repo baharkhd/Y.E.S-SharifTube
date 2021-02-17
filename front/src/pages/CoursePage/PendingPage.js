@@ -14,6 +14,7 @@ import {
 } from "semantic-ui-react";
 import { useParams } from "react-router-dom";
 import { useQuery, gql, useMutation } from "@apollo/client";
+import constants from "../../constants";
 
 const PENDING_QUERY = gql`
   query GetPending(
@@ -77,8 +78,16 @@ const ACCEPT_PENDING_MUTATION = gql`
 `;
 
 const REJECT_PENDING_MUTATION = gql`
-  mutation RejectPending($courseID: String!, $pendingID: String!) {
-    rejectOfferedContent(courseID: $courseID, pendingID: $pendingID) {
+  mutation RejectPending(
+    $courseID: String!
+    $pendingID: String!
+    $message: String
+  ) {
+    rejectOfferedContent(
+      courseID: $courseID
+      pendingID: $pendingID
+      message: { message: $message }
+    ) {
       ... on Pending {
         id
         title
@@ -94,31 +103,6 @@ const REJECT_PENDING_MUTATION = gql`
   }
 `;
 
-// type Pending{
-//   id: ID!
-//   title: String!
-//   description: String
-//   status: Status!
-//   timestamp:Int!
-//   uploadedBY: User!
-//   furl: String! #todo better implementation for file
-//   courseID: String!
-// }
-
-// input AcceptedPending{
-//   title: String
-//   description: String
-//   tags:[String!]
-//   message:String
-// }
-
-// input RejectedPending{
-//   message:String
-// }
-
-// acceptOfferedContent(username:String, courseID:String!, pendingID:String!, changed:AcceptedPending!): EditOfferedContentPayLoad!
-// rejectOfferedContent(username:String, courseID:String!, pendingID:String!, message:RejectedPending): DeleteOfferedContentPayLoad!
-
 const ChangePendingModal = props => {
   const [state, setState] = useState({
     title: props.title,
@@ -127,13 +111,6 @@ const ChangePendingModal = props => {
     tags: []
   });
 
-  // $courseID: String!
-  //   $pendingID: String!
-  //   $title: String
-  //   $description: String
-  //   $tags: [String!]
-  //   $message: String
-
   const [acceptOfferedContent] = useMutation(ACCEPT_PENDING_MUTATION, {
     variables: {
       courseID: props.courseID,
@@ -141,10 +118,16 @@ const ChangePendingModal = props => {
       title: state.title,
       description: state.description,
       tags: state.tags,
-      message: "test message"
+      message: "test message for accept pending"
     },
     onCompleted: ({ acceptOfferedContent }) => {
       console.log("accept offered contenttttttt:", acceptOfferedContent);
+      console.log("reject offered contentttttttt:", acceptOfferedContent);
+      if (acceptOfferedContent.__typename === "Pending") {
+        props.makeNotif("Success!", "Content was accepted!", "success");
+      } else {
+        props.makeNotif("Error!", acceptOfferedContent.message, "danger");
+      }
     }
   });
 
@@ -157,7 +140,8 @@ const ChangePendingModal = props => {
           <video width="60%" controls>
             <source
               src={
-                "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
+                // "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
+                props.furl
               }
               type="video/mp4"
             />
@@ -229,10 +213,12 @@ const ChangePendingModal = props => {
         <Button
           positive
           onClick={() => {
-            // accept pendins
-            console.log("state bfore accept pending:", state);
-            acceptOfferedContent();
-            // props.setOpen(false);
+            if (state.title.trim() !== "" && state.description.trime() !== "") {
+              acceptOfferedContent();
+              props.setOpen(false);
+            } else {
+              props.makeNotif("Error!", constants.EMPTY_FIELDS, "danger");
+            }
           }}
         >
           Change and Approve!
@@ -258,7 +244,8 @@ const ContentCard = ({
   id,
   courseID,
   description,
-  furl
+  furl,
+  makeNotif
 }) => {
   let date = new Date(time * 1000).toLocaleString("en-US", {
     month: "long",
@@ -274,6 +261,22 @@ const ContentCard = ({
     setState({ modalOpen: val });
   };
 
+  const [rejectOfferedContent] = useMutation(REJECT_PENDING_MUTATION, {
+    variables: {
+      courseID: courseID,
+      pendingID: id,
+      message: "test message for reject pending"
+    },
+    onCompleted: ({ rejectOfferedContent }) => {
+      console.log("reject offered contentttttttt:", rejectOfferedContent);
+      if (rejectOfferedContent.__typename === "Pending") {
+        makeNotif("Success!", "Content was rejected!", "success");
+      } else {
+        makeNotif("Error!", rejectOfferedContent.message, "danger");
+      }
+    }
+  });
+
   return (
     <div>
       <ChangePendingModal
@@ -283,11 +286,13 @@ const ContentCard = ({
         title={title}
         description={description}
         setOpen={setOpen}
+        makeNotif={makeNotif}
+        furl={furl}
       />
       <Card fluid>
-        <Card.Content>
+        {/* <Card.Content>
           <Card.Header>{furl}</Card.Header>
-        </Card.Content>
+        </Card.Content> */}
         <Card.Content>
           <Card.Header>{title}</Card.Header>
         </Card.Content>
@@ -306,14 +311,14 @@ const ContentCard = ({
             >
               Approve
             </Button>
-            {/* <Button
-              color="blue"
+            <Button
+              color="red"
               onClick={() => {
-                setState({ modalOpen: true });
+                rejectOfferedContent();
               }}
             >
-            </Button> */}
-            <Button color="red">Reject</Button>
+              Reject
+            </Button>
           </Button.Group>
         </Card.Content>
       </Card>
@@ -345,13 +350,14 @@ function PendingPage(props) {
 
   return (
     <Segment style={{ top: 70 }}>
-      <Grid columns={3} stackable textAlign="center">
+      <Grid columns={3} stackable textAlign="left">
         {!loading &&
           (data.pendings != null && data.pendings.length !== 0 ? (
             data.pendings.map(content => {
               return (
                 <Grid.Column textAlign="left">
                   <ContentCard
+                    makeNotif={props.makeNotif}
                     title={content.title}
                     time={content.timestamp}
                     uploadedBY={content.uploadedBY}
@@ -372,18 +378,6 @@ function PendingPage(props) {
                 There are no pendings yet
               </Message.Header>
             </Message>
-            // <Grid columns={1} style={{top: 90, position: "absolute", bottom: 0}}>
-            //   <Grid.Column textAlign="center" verticalAlign="middle">
-            //     {/* <Segment textAlign="center"> */}
-            //       <Message warning size="massive" compact>
-            //         <Message.Header>
-            //           <Icon name="th" />
-            //           There are no pendings yet
-            //         </Message.Header>
-            //       </Message>
-            //     {/* </Segment> */}
-            //   </Grid.Column>
-            // </Grid>
           ))}
       </Grid>
     </Segment>
