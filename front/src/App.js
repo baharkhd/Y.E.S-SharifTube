@@ -1,7 +1,7 @@
 import "semantic-ui-css/semantic.min.css";
 import React, { useState } from "react";
 import { Button, Input, Segment } from "semantic-ui-react";
-import { Route, Switch, useParams } from "react-router-dom";
+import { Route, Switch, useParams, Redirect } from "react-router-dom";
 import Header from "./pages/Header.js";
 import Login from "./pages/Login/Login.js";
 import Signup from "./pages/Signup/Signup.js";
@@ -19,21 +19,9 @@ import PendingPage from "./pages/CoursePage/PendingPage.js";
 import UploadPage from "./pages/CoursePage/UploadPage.js";
 import useToken from "./Token/useToken.js";
 import { gql, useQuery } from "@apollo/client";
-
-const TestComponent = props => {
-  let { id, test } = useParams();
-  console.log("????", id.substring(1), test.substring(1));
-  return (
-    <div>
-      <Segment>Test, {id}</Segment>
-      <Segment>Test, {id}</Segment>
-      <Segment>Test, {id}</Segment>
-      <Segment>Test, {id}</Segment>
-      <Segment>Test, {id}</Segment>
-      <Segment>Test, {id}</Segment>
-    </div>
-  );
-};
+import ReactNotification from "react-notifications-component";
+import "react-notifications-component/dist/theme.css";
+import { store } from "react-notifications-component";
 
 const GET_USER_QUERY = gql`
   {
@@ -44,6 +32,22 @@ const GET_USER_QUERY = gql`
 `;
 
 function App() {
+  const makeNotif = (title, error, type) => {
+    store.addNotification({
+      title: title,
+      message: error,
+      type: type,
+      insert: "bottom",
+      container: "bottom-right",
+      animationIn: ["animate__animated", "animate__fadeIn"],
+      animationOut: ["animate__animated", "animate__fadeOut"],
+      dismiss: {
+        duration: 1500,
+        onScreen: false
+      }
+    });
+  };
+
   const isMobile = useMediaQuery({
     query: "(max-device-width: 570px)"
   });
@@ -63,6 +67,7 @@ function App() {
 
   return (
     <div className="App">
+      <ReactNotification isMobile={isMobile} />
       <Header
         token={token}
         setToken={setToken}
@@ -71,116 +76,186 @@ function App() {
         setSidebarOpen={setSidebarOpen}
       />
       <Switch>
-        <Route exact path="/dashboard">
-          <Dashboard
-            isMobile={isMobile}
-            sidebarOpen={sidebarOpen}
-            username={
-              token
-                ? !loading
-                  ? data
-                    ? data.user.username
-                    : username
-                  : ""
-                : ""
-            }
+        {!token && <Redirect exact from="/dashboard" to="/login" />}
+        {!token && <Redirect exact from="/dashboard/panel" to="/login" />}
+        {!token && <Redirect exact from="/dashboard/courses" to="/login" />}
+        {!token && <Redirect exact from="/content" to="/login" />}
+
+        {!token && <Redirect exact from="/course:id" to="/login" />}
+        {!token && (
+          <Redirect
+            exact
+            from="/course:courseID/content:contentID"
+            to="/login"
           />
+        )}
+
+        {!token && (
+          <Redirect exact from="/course:courseID/pendings" to="/login" />
+        )}
+
+        {!token && (
+          <Redirect exact from="/course:courseID/upload/video" to="/login" />
+        )}
+        {!token && (
+          <Redirect
+            exact
+            from="/course:courseID/upload/attachment"
+            to="/login"
+          />
+        )}
+        {!token && (
+          <Redirect exact from="/course:courseID/offer/video" to="/login" />
+        )}
+        {!token && (
+          <Redirect
+            exact
+            from="/course:courseID/offer/attachment"
+            to="/login"
+          />
+        )}
+
+        {token && <Redirect exact from="/login" to="/dashboard" />}
+        {token && <Redirect exact from="/signup" to="/dashboard" />}
+
+        <Route exact path="/dashboard">
+          {token && (
+            <Dashboard
+              makeNotif={makeNotif}
+              isMobile={isMobile}
+              sidebarOpen={sidebarOpen}
+              username={
+                token
+                  ? !loading
+                    ? data
+                      ? data.user.username
+                      : username
+                    : ""
+                  : ""
+              }
+            />
+          )}
         </Route>
 
         <Route exact path="/dashboard/panel">
-          <Dashboard
-            isMobile={isMobile}
-            sidebarOpen={sidebarOpen}
-            isCourse={false}
-            username={
-              token
-                ? !loading
-                  ? data
-                    ? data.user.username
-                    : username
+          {token && (
+            <Dashboard
+              makeNotif={makeNotif}
+              isMobile={isMobile}
+              sidebarOpen={sidebarOpen}
+              isCourse={false}
+              username={
+                token
+                  ? !loading
+                    ? data
+                      ? data.user.username
+                      : username
+                    : ""
                   : ""
-                : ""
-            }
-            // component={<Panel isMobile={isMobile} />}
-          />
+              }
+              // component={<Panel isMobile={isMobile} />}
+            />
+          )}
         </Route>
 
         <Route exact path="/dashboard/courses">
-          <Dashboard
-            isMobile={isMobile}
-            sidebarOpen={sidebarOpen}
-            isCourse={true}
-            username={
-              token
-                ? !loading
-                  ? data
-                    ? data.user.username
-                    : username
+          {token && (
+            <Dashboard
+              makeNotif={makeNotif}
+              isMobile={isMobile}
+              sidebarOpen={sidebarOpen}
+              isCourse={true}
+              username={
+                token
+                  ? !loading
+                    ? data
+                      ? data.user.username
+                      : username
+                    : ""
                   : ""
-                : ""
-            }
-            // component={<Courses isMobile={isMobile} />}
-          />
+              }
+              // component={<Courses isMobile={isMobile} />}
+            />
+          )}
         </Route>
 
         <Route exact path="/content">
-          <ContentPage />
+          {token && <ContentPage makeNotif={makeNotif} />}
         </Route>
         {/* Todo: remove this part! */}
         <Route exact path="/course:id">
-          <CourseDashboard
-            isMobile={isMobile}
-            sidebarOpen={sidebarOpen}
-            username={
-              token
-                ? !loading
-                  ? data
-                    ? data.user.username
-                    : username
+          {token && (
+            <CourseDashboard
+              makeNotif={makeNotif}
+              isMobile={isMobile}
+              sidebarOpen={sidebarOpen}
+              username={
+                token
+                  ? !loading
+                    ? data
+                      ? data.user.username
+                      : username
+                    : ""
                   : ""
-                : ""
-            }
-          />
+              }
+            />
+          )}
         </Route>
         <Route exact path="/">
-          <Homepage />
+          <Homepage makeNotif={makeNotif} />
         </Route>
         <Route exact path="/login">
-          <Login setToken={setToken} setUsername={setUsername} />
+          {!token && (
+            <Login
+              makeNotif={makeNotif}
+              setToken={setToken}
+              setUsername={setUsername}
+              makeNotif={makeNotif}
+            />
+          )}
         </Route>
         <Route exact path="/signup">
-          <Signup setToken={setToken} setUsername={setUsername} />
+          {!token && (
+            <Signup
+              makeNotif={makeNotif}
+              setToken={setToken}
+              setUsername={setUsername}
+            />
+          )}
         </Route>
-        <Route exact path="/search">
+        {/* <Route exact path="/search">
           <SearchIndex />
-        </Route>
+        </Route> */}
         <Route exact path="/course:courseID/content:contentID">
-          <ContentPage />
+          {token && <ContentPage makeNotif={makeNotif} />}
         </Route>
         <Route exact path="/course:courseID/pendings">
-          <PendingPage
-            username={
-              token
-                ? !loading
-                  ? data
-                    ? data.user.username
-                    : username
+          {token && (
+            <PendingPage
+              makeNotif={makeNotif}
+              username={
+                token
+                  ? !loading
+                    ? data
+                      ? data.user.username
+                      : username
+                    : ""
                   : ""
-                : ""
-            }
-          />
+              }
+            />
+          )}
         </Route>
         <Route exact path="/course:courseID/upload/video">
-          <UploadPage fileType="video" />
+          {token && <UploadPage makeNotif={makeNotif} fileType="video" />}
         </Route>
         <Route exact path="/course:courseID/upload/attachment">
-          <UploadPage fileType="attachment" />
+          {token && <UploadPage makeNotif={makeNotif} fileType="attachment" />}
         </Route>
         <Route exact path="/course:courseID/offer/video">
-          <UploadPage />
+          {token && <UploadPage makeNotif={makeNotif} />}
         </Route>
         <Route exact path="/course:courseID/offer/attachment">
-          <UploadPage />
+          {token && <UploadPage makeNotif={makeNotif} />}
         </Route>
       </Switch>
     </div>

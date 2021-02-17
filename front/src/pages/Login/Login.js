@@ -36,26 +36,26 @@ const LoginForm = props => {
       password: state.password
     },
     update(cache, { data: { login } }) {
-      console.log("update in login:", login)
-      console.log("cache in login update fuunction:", cache)
+      console.log("update in login:", login);
+      console.log("cache in login update fuunction:", cache);
     },
     onCompleted: ({ login }) => {
       if (login.__typename == "Token") {
-        console.log("login:", login);
-        console.log("token in logiin:", login.token);
-        props.setUsername(state.username)
+        props.setUsername(state.username);
         // props.setToken(login.token);
         // history.push("/dashboard");
+        props.makeNotif("Success", "You successfully loged in .", "success");
         changeToken(login.token);
       } else {
         switch (login.__typename) {
           case "UserPassMissMatchException":
-            alert(constants.USER_PASS_MISMATCH);
-            setState({ ...state, error: constants.USER_PASS_MISMATCH });
+            // setState({ ...state, error: constants.USER_PASS_MISMATCH });
+            props.makeNotif("Error", constants.USER_PASS_MISMATCH, "danger");
             break;
           case "InternalServerException":
-            alert(constants.INTERNAL_SERVER_EXCEPTION);
-            setState({ ...state, error: constants.INTERNAL_SERVER_EXCEPTION });
+            // alert(constants.INTERNAL_SERVER_EXCEPTION);
+            props.makeNotif("Error", "Login was not successfull .", "danger");
+            // setState({ ...state, error: constants.INTERNAL_SERVER_EXCEPTION });
             break;
         }
       }
@@ -126,7 +126,7 @@ const LoginForm = props => {
       <Message>
         New to us? <a href="/signup">Sign Up</a>
       </Message>
-      {state.error !== "" && <Message negative>{state.error}</Message>}
+      {/* {state.error !== "" && <Message negative>{state.error}</Message>} */}
     </div>
   );
 };
@@ -148,7 +148,11 @@ function Login(props) {
               marginLeft: 20
             }}
           >
-            <LoginForm setToken={props.setToken} setUsername={props.setUsername} />
+            <LoginForm
+              setToken={props.setToken}
+              setUsername={props.setUsername}
+              makeNotif={props.makeNotif}
+            />
           </Grid.Column>
         </Grid.Row>
       </Grid>
