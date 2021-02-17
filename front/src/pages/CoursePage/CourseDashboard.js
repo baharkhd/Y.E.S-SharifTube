@@ -46,6 +46,7 @@ const COURSE_QUERY = gql`
         }
         tags
         timestamp
+        vurl
       }
       prof {
         name

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import App from './App.js'
+import App from "./App.js";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorker from "./serviceWorker.js";
 import { BrowserRouter } from "react-router-dom";
@@ -14,6 +14,7 @@ import {
 } from "apollo-cache-inmemory";
 import { HttpLink } from "apollo-link-http";
 import { ApolloProvider } from "@apollo/client";
+import { createUploadLink } from "apollo-upload-client";
 
 import introspectionQueryResultData from "../src/fragmentTypes.json";
 
@@ -22,8 +23,12 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
 });
 
 const cache = new InMemoryCache({ fragmentMatcher });
-const link = new HttpLink({
-  uri: "http://localhost:8080/query"
+// const link = new HttpLink({
+//   uri: "http://localhost:8080/query"
+// });
+
+const link = createUploadLink({
+  uri: "http://localhost:8080/query",
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -31,7 +36,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      whoami: token ? `Bearer ${token.slice(1,-1)}` : ''
+      whoami: token ? `Bearer ${token.slice(1, -1)}` : ""
     }
   };
 });

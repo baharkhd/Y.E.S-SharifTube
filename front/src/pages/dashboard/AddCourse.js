@@ -56,6 +56,8 @@ function AddCourseModal({ addingCourse, setState }) {
         }
       });
 
+      // const data2
+
       const localData = _.cloneDeep(data);
       console.log("course added in add course:", createCourse);
       console.log("local data in add course:", localData);
