@@ -193,31 +193,6 @@ const UPLOAD_ATTACHMENTT_MUTATION = gql`
   }
 `;
 
-function splitFile(file) {
-  var chunkSize = 1024 * 1024;
-  var fileSize = file.size;
-  var chunks = Math.ceil(file.size / chunkSize, chunkSize);
-  var chunk = 0;
-
-  var blobs = [];
-
-  console.log("file size..", fileSize);
-  console.log("chunks...", chunks);
-
-  while (chunk <= chunks) {
-    var offset = chunk * chunkSize;
-    // console.log("current chunk..", chunk);
-    // console.log("offset...", chunk * chunkSize);
-    // console.log("file blob from offset...", offset);
-    console.log(file.slice(offset, offset + chunkSize));
-    blobs.push(file.slice(offset, offset + chunkSize));
-    chunk++;
-  }
-
-  console.log("blobs:", blobs);
-
-  return blobs;
-}
 
 function UploadPage(props) {
   let { courseID } = useParams();
@@ -236,8 +211,7 @@ function UploadPage(props) {
     url: "",
     tags: [],
     tagInput: "",
-    file: "",
-    files: []
+    file: ""
   });
 
   const [uploadAttachment] = useMutation(UPLOAD_ATTACHMENTT_MUTATION, {
@@ -263,7 +237,7 @@ function UploadPage(props) {
       //   Size: state.file.size,
       //   ContentType: state.file.type
       // },
-      video: state.files,
+      video: state.file,
       tags: state.tags
     },
     onCompleted: ({ uploadContent }) => {
@@ -417,11 +391,8 @@ function UploadPage(props) {
         required
         onChange={e => {
           const [file] = e.target.files;
-
-          const blobs = splitFile(file)
-
           console.log("-------------", file);
-          setState({ ...state, file: file, files: blobs });
+          setState({ ...state, file: file });
         }}
       />
     </Segment>
