@@ -513,6 +513,7 @@ func (c *Course) AddNewContent(authorUsername string, title string, description 
 
 	// storing video in the Object Storage
 	bucket := c.getCourseBucket()
+	upload.Filename= primitive.NewObjectID().Hex()+upload.Filename
 	if err := OSD.Store(bucket, upload.Filename, upload.File,upload.Size); err != nil {
 		return nil, err
 	}
@@ -540,6 +541,7 @@ func (c *Course) AddNewPending(title string, authorUsername string, upload graph
 	}
 
 	// store video in Object Storage
+	upload.Filename= primitive.NewObjectID().Hex()+upload.Filename
 	bucket := c.getCourseBucket()
 	if err := OSD.Store(bucket, upload.Filename, upload.File,upload.Size); err != nil {
 		return nil, err
@@ -564,6 +566,7 @@ func (c *Course) AddNewAttachment(authorUsername string, name string, attach gra
 	}
 
 	// store attachment in object storage
+	attach.Filename= primitive.NewObjectID().Hex()+attach.Filename
 	bucket := c.GetAttachmentBucket()
 	if err := OSD.Store(bucket, attach.Filename, attach.File, attach.Size); err != nil {
 		return nil, err
