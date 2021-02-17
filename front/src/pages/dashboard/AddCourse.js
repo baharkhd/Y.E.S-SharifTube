@@ -125,6 +125,7 @@ function AddCourseModal({ addingCourse, setState }) {
             onChange={e => {
               setInputs({ ...inputs, summary: e.target.value });
             }}
+            style={{resize:'none', height:'180px'}}
           />
         </Form>
       </Modal.Content>

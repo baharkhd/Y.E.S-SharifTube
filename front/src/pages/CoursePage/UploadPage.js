@@ -13,6 +13,15 @@ import { useParams, useHistory, useLocation } from "react-router-dom";
 import constants from "../../constants";
 import FileUpload from "../FileUpload/FileUpload";
 
+const fileUploadFrameLStyle ={
+  borderColor:"#0021a3",
+  margin:'auto',
+  top: '150px',
+  width:'70%',
+  padding:'20px',
+
+}
+
 const OFFER_CONTENT_MUTATION = gql`
   mutation OfferContent(
     $courseID: String!
@@ -274,9 +283,9 @@ function UploadPage(props) {
   // });
 
   return (
-    <Segment style={{ top: 70 }}>
+    <Segment raised inverted style={fileUploadFrameLStyle}>
       {/* <Segment>Where you should upload videos</Segment> */}
-      <Form>
+      <Form inverted>
         <Form.Group widths="four">
           <Form.Field
             control={Input}
@@ -304,6 +313,7 @@ function UploadPage(props) {
           onChange={e => {
             setState({ ...state, description: e.target.value });
           }}
+          style={{resize:'none', height:'180px'}}
         />
 
         {uploadType == "upload" ? (
@@ -347,6 +357,17 @@ function UploadPage(props) {
         ) : (
           <></>
         )}
+        {/* <FileUpload setFile={setState} otherState={state} /> */}
+        <input
+            type="file"
+            onChange={e => {
+              const [file] = e.target.files;
+
+              console.log("-------------", file);
+              setState({ ...state, file: file });
+            }}
+            style={{border:'none', paddingLeft:'0px', backgroundColor:"#1b1c1d", color:"white"}}
+        />
         <Form.Button
           color="blue"
           onClick={() => {
@@ -357,20 +378,11 @@ function UploadPage(props) {
               offerContent();
             }
           }}
+          style={{marginTop:'10px'}}
         >
           Upload
         </Form.Button>
       </Form>
-      {/* <FileUpload setFile={setState} otherState={state} /> */}
-      <input
-        type="file"
-        onChange={e => {
-          const [file] = e.target.files;
-
-          console.log("-------------", file);
-          setState({ ...state, file: file });
-        }}
-      />
     </Segment>
   );
 }
