@@ -14,10 +14,24 @@ import {
   Modal,
   Icon,
   List,
-  Header
+  Header, Message, Label
 } from "semantic-ui-react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/client";
+
+const panelFormLStyle={
+  fontSize:'15px',
+  overFlow:'hidden'
+}
+
+const updateUserPanelLStyle={
+  backgroundColor:'#424571',
+  fontColor:'#ffffff'
+}
+
+const updateUserPanelHFLStyle={
+  backgroundColor:'#fffb00'
+}
 
 const UPDATE_USER_MUTATION = gql`
   mutation UpdateUser($name: String, $password: String, $email: String) {
@@ -124,9 +138,9 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
 
   return (
     <Modal open={modalOpen}>
-      <Modal.Header>Update your account!</Modal.Header>
-      <Modal.Content>
-        <Form>
+      <Modal.Header style={updateUserPanelHFLStyle}>Update your account!</Modal.Header>
+      <Modal.Content style={updateUserPanelLStyle}>
+        <Form inverted>
           <Form.Group widths="equal">
             <Form.Field
               id="form-input-control-first-name-update"
@@ -138,18 +152,6 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
                 setState({ ...state, newName: e.target.value });
               }}
             />
-            {/* 
-            <Form.Field
-              control={Select}
-              options={genderOptions}
-              label={{
-                children: "Gender",
-                htmlFor: "form-select-control-gender-update"
-              }}
-              placeholder="Gender"
-              search
-              searchInput={{ id: "form-select-control-gender-update" }}
-            /> */}
           </Form.Group>
           <Form.Group widths="equal">
             <Form.Field
@@ -185,7 +187,7 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
           </Form.Field>
         </Form>
       </Modal.Content>
-      <Modal.Actions>
+      <Modal.Actions style={updateUserPanelLStyle}>
         <Button
           positive
           primary
@@ -207,53 +209,37 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
 
 const PanelInfo = props => {
   return (
-    <Segment
+    <Segment raised
       style={{
         position: "absolute",
         left: props.isMobile ? 0 : 250,
         right: 0,
-        margin: 30,
-        top: 70
+        margin: '30vh',
+        top: '-10vh',
+        borderColor: "#012968",
       }}
     >
       <Form>
-        <Form.Group widths="equal">
-          <Form.Field
-            id="form-input-control-first-name"
-            control={Input}
-            label="Name"
-            placeholder={props.user.name}
-          />
-
-          {/* <Form.Field
-            control={Select}
-            options={genderOptions}
-            label={{
-              children: "Gender",
-              htmlFor: "form-select-control-gender"
-            }}
-            placeholder="Gender"
-            search
-            searchInput={{ id: "form-select-control-gender" }}
-          /> */}
-        </Form.Group>
-        <Form.Group widths="equal">
-          <Form.Field
-            id="form-input-control-user-name"
-            control={Input}
-            label="User name"
-            placeholder={props.user.username}
-          />
-          {/* <Form.Field>
-            <label>Password</label>
-            <Input type="password" placeholder={props.user.password} />
-          </Form.Field> */}
-        </Form.Group>
-        <Form.Field>
-          <label>Email</label>
-          <Input type="email" placeholder={props.user.email} />
-        </Form.Field>
-
+        <List divided selection style={panelFormLStyle}>
+          <List.Item>
+            <Label color='red' Name>
+              Name
+            </Label>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{props.user.name}</span>
+          </List.Item>
+          <List.Item>
+            <Label color='blue' Username>
+              Username
+            </Label>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{props.user.username}</span>
+          </List.Item>
+          <List.Item>
+            <Label color='orange' Email>
+              Email
+            </Label>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{props.user.email}</span>
+          </List.Item>
+        </List>
         <Form.Field>
           <Button
             positive

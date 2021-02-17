@@ -107,6 +107,10 @@ function Homepage() {
                         if (course.students != null) {
                             memCount += course.students.length
                         }
+                        let memCountLabel = 'Members'
+                        if (memCount === 1) {
+                            memCountLabel = 'Member'
+                        }
 
                         return (
                             <Grid.Column>
@@ -131,10 +135,10 @@ function Homepage() {
                                                 icon={faChalkboardTeacher}/>
                                             <span>&nbsp;&nbsp;</span>
                                             {/*todo click to see person account*/}
-                                            @{course.prof.username}
+                                            {course.prof.username}
                                             <br/>
                                             <Icon name='user'/>
-                                            {memCount} Members
+                                            {memCount} {memCountLabel}
                                         </Card.Content>
                                     </Card>
                                 </Link>

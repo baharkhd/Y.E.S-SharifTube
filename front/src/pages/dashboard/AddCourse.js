@@ -4,6 +4,16 @@ import { useMutation, gql } from "@apollo/client";
 import _ from "lodash";
 // import { gql } from "graphql-tag";
 
+
+const createCoursePanelLStyle={
+  backgroundColor:'#3b3261',
+  fontColor:'#ffffff'
+}
+
+const createCoursePanelHFLStyle={
+  backgroundColor:'#e5700a'
+}
+
 const CREATE_COURSE_MUTATION = gql`
   mutation CreateCourse($title: String!, $summary: String, $token: String!) {
     createCourse(target: { title: $title, summary: $summary, token: $token }) {
@@ -88,9 +98,9 @@ function AddCourseModal({ addingCourse, setState }) {
 
   return (
     <Modal open={addingCourse}>
-      <Modal.Header>Add a new class</Modal.Header>
-      <Modal.Content scrolling>
-        <Form>
+      <Modal.Header style={createCoursePanelHFLStyle}>Add a new class</Modal.Header>
+      <Modal.Content scrolling style={createCoursePanelLStyle}>
+        <Form inverted>
           <Form.Group widths="equal">
             <Form.Field
               control={Input}
@@ -118,7 +128,7 @@ function AddCourseModal({ addingCourse, setState }) {
           />
         </Form>
       </Modal.Content>
-      <Modal.Actions>
+      <Modal.Actions style={createCoursePanelLStyle}>
         <Button
           positive
           onClick={() => {
