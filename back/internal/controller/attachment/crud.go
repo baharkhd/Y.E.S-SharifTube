@@ -1,36 +1,30 @@
 package controller
 
 import (
+	"github.com/99designs/gqlgen/graphql"
 	"yes-sharifTube/internal/model/attachment"
 	"yes-sharifTube/internal/model/course"
 	"yes-sharifTube/internal/model/user"
 )
 
-func CreateAttachment(authorUsername, courseID, name string, description *string, aurl string) (*attachment.Attachment, error) {
+func CreateAttachment(authorUsername, courseID, name string, description *string, attach graphql.Upload) (*attachment.Attachment, error) {
 	// check if user exists in database
 	if _, err := user.Get(authorUsername); err != nil {
 		return nil, err
 	}
+
 	// get the course from database
 	cr, err := course.Get(courseID)
 	if err != nil {
 		return nil, err
 	}
-	// check if user can insert attachment
-	err = cr.IsUserAllowedToInsertAttachment(authorUsername)
+
+	// add new attachment to course
+	an, err := cr.AddNewAttachment(authorUsername, name, attach, description)
 	if err != nil {
 		return nil, err
 	}
-	// create an attachment
-	an, err := attachment.New(name, aurl, courseID, description)
-	if err != nil {
-		return nil, err
-	}
-	// insert the attachment into database
-	an, err = attachment.Insert(courseID, an)
-	if err != nil {
-		return nil, err
-	}
+
 	// maintain consistency in cache
 	cr.AddAttachment(an)
 	cr.UpdateCache()

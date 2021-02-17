@@ -507,24 +507,83 @@ func (c *Course) AddNewContent(authorUsername string, title string, description 
 		return nil, err
 	}
 
-	var vurl string
-	for _, sub := range OSD.GetRoot().Subs {
-		if sub.Id == c.ID.Hex() {
-			 if err:=OSD.Store(sub, upload.Filename, upload.File, upload.Size);err!=nil{
-				 return nil, err
-			 }
-			vurl = OSD.GetURL(sub, upload.Filename)
-			break
-		}
+	// storing video in the Object Storage
+	bucket := c.getCourseBucket()
+	if err := OSD.Store(bucket, upload.Filename, upload.File, upload.Size); err != nil {
+		return nil, err
 	}
+	vurl := OSD.GetURL(bucket, upload.Filename)
+
 	// create a content
 	cn, err := content.New(title, authorUsername, vurl, c.ID.Hex(), description, nil, tags)
 	if err != nil {
 		return nil, nil
 	}
 
-	return cn,nil
+	// maintain consistency in cache
+	c.AddContent(cn)
+	c.UpdateCache()
+
+	return cn, nil
 }
+
+func (c *Course) AddNewPending(title string, authorUsername string, upload graphql.Upload, description *string) (*pending.Pending, error) {
+
+	// check if user can offer
+	err := c.IsUserAllowedToInsertPending(authorUsername)
+	if err != nil {
+		return nil, err
+	}
+
+	// store video in Object Storage
+	bucket := c.getCourseBucket()
+	if err := OSD.Store(bucket, upload.Filename, upload.File, upload.Size); err != nil {
+		return nil, err
+	}
+	vurl := OSD.GetURL(bucket, upload.Filename)
+
+	// create a pending
+	pn, err := pending.New(title, authorUsername, vurl, c.ID.Hex(), description)
+	if err != nil {
+		return nil, err
+	}
+
+	// insert the pending into database
+	pn, err = pending.Insert(c.ID.Hex(), pn)
+	if err != nil {
+		return nil, err
+	}
+	return pn,nil
+}
+
+func (c *Course) AddNewAttachment(authorUsername string, name string, attach graphql.Upload, description *string) (*attachment.Attachment, error) {
+
+	// check if user can insert attachment
+	err := c.IsUserAllowedToInsertAttachment(authorUsername)
+	if err != nil {
+		return nil, err
+	}
+
+	// store attachment in object storage
+	bucket := c.GetAttachmentBucket()
+	if err := OSD.Store(bucket, attach.Filename, attach.File, attach.Size); err != nil {
+		return nil, err
+	}
+	aurl := OSD.GetURL(bucket, attach.Filename)
+
+	// create an attachment
+	an, err := attachment.New(name, aurl, c.ID.Hex(), description)
+	if err != nil {
+		return nil, err
+	}
+	// insert the attachment into database
+	an, err = attachment.Insert(c.ID.Hex(), an)
+	if err != nil {
+		return nil, err
+	}
+	return an,nil
+}
+
 
 func FilterPendsOfCourses(username *string, courses []*Course) []*Course {
 	var crs []*Course

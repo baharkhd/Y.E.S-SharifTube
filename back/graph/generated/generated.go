@@ -1383,7 +1383,7 @@ input EditContent{
 
 input TargetAttachment{
     name: String!
-    aurl: String! # todo actual file
+    attach: Upload!
     description: String
 }
 
@@ -1395,7 +1395,7 @@ input EditAttachment{
 input TargetPending{
     title: String!
     description: String
-    furl: String! # todo actual video
+    video: Upload!
 }
 
 input EditedPending{
@@ -7803,11 +7803,11 @@ func (ec *executionContext) unmarshalInputTargetAttachment(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-		case "aurl":
+		case "attach":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("aurl"))
-			it.Aurl, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attach"))
+			it.Attach, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7947,11 +7947,11 @@ func (ec *executionContext) unmarshalInputTargetPending(ctx context.Context, obj
 			if err != nil {
 				return it, err
 			}
-		case "furl":
+		case "video":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("furl"))
-			it.Furl, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("video"))
+			it.Video, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}

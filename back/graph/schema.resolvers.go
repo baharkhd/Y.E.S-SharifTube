@@ -355,7 +355,7 @@ func (r *mutationResolver) UploadAttachment(ctx context.Context, username *strin
 			return err.(model.UserNotFoundException), nil
 		}
 	}
-	res, err := attachmentController.CreateAttachment(*username, courseID, target.Name, target.Description, target.Aurl)
+	res, err := attachmentController.CreateAttachment(*username, courseID, target.Name, target.Description, target.Attach)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -437,7 +437,7 @@ func (r *mutationResolver) OfferContent(ctx context.Context, username *string, c
 			return err.(model.UserNotFoundException), nil
 		}
 	}
-	res, err := pendingController.CreatePending(*username, courseID, target.Title, target.Description, target.Furl)
+	res, err := pendingController.CreatePending(*username, courseID, target.Title, target.Description, target.Video)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:

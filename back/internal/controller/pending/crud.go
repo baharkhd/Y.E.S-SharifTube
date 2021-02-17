@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"github.com/99designs/gqlgen/graphql"
 	"yes-sharifTube/graph/model"
+	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/course"
 	"yes-sharifTube/internal/model/pending"
 	"yes-sharifTube/internal/model/user"
@@ -20,7 +22,7 @@ func GetPendings(username *string, courseID, uploaderUsername *string, status *m
 	return prs, nil
 }
 
-func CreatePending(authorUsername, courseID, title string, description *string, furl string) (*pending.Pending, error) {
+func CreatePending(authorUsername, courseID, title string, description *string, video graphql.Upload) (*pending.Pending, error) {
 	// check if user exists in database
 	if _, err := user.Get(authorUsername); err != nil {
 		return nil, err
@@ -30,21 +32,13 @@ func CreatePending(authorUsername, courseID, title string, description *string, 
 	if err != nil {
 		return nil, err
 	}
-	// create a pending
-	pn, err := pending.New(title, authorUsername, furl, courseID, description)
+
+	// adding new pending to the model
+	pn, err := cr.AddNewPending(title, authorUsername, video, description)
 	if err != nil {
 		return nil, err
 	}
-	// check if user can offer
-	err = cr.IsUserAllowedToInsertPending(authorUsername)
-	if err != nil {
-		return nil, err
-	}
-	// insert the pending into database
-	pn, err = pending.Insert(courseID, pn)
-	if err != nil {
-		return nil, err
-	}
+
 	// maintain consistency in cache
 	cr.AddPending(pn)
 	cr.UpdateCache()
@@ -148,20 +142,18 @@ func AcceptPending(username, courseID, pendingID string, newTitle, newDescriptio
 	if err != nil {
 		return nil, err
 	}
-	// accept that pending into content
-	//nc, err := content.New(pn.Title, pn.UploadedByUn, pn.Furl, pn.CourseID, &pn.Description, &username, nil)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//_, err = content.Insert(courseID, nc)
-	//if err != nil {
+
+	//accept that pending into content
+	nc, err := content.New(pn.Title, pn.UploadedByUn, pn.Furl, pn.CourseID, &pn.Description, &username, nil)
+	if err != nil {
 		return nil, err
-	//}
-	// maintain consistency in cache
-	//cr.UpdatePending(pn)
-	//cr.AddContent(nc)
-	//cr.UpdateCache()
-	//return pn, nil
+	}
+
+	//maintain consistency in cache
+	cr.UpdatePending(pn)
+	cr.AddContent(nc)
+	cr.UpdateCache()
+	return pn, nil
 }
 
 func RejectPending(username, courseID, pendingID string) (*pending.Pending, error) {
