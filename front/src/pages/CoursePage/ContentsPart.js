@@ -70,7 +70,7 @@ const ContentCard = ({
             <b>{approvedBY ? approvedBY.name : ""}</b> in time <b>{date}</b>
           </Card.Content>
           <Card.Content extra>
-            {tags.map(tag => {
+            {tags && tags.map(tag => {
               return (
                 <Label style={{ marginBottom: 5 }}>
                   <Icon name="hashtag" /> {tag}

@@ -19,21 +19,9 @@ import PendingPage from "./pages/CoursePage/PendingPage.js";
 import UploadPage from "./pages/CoursePage/UploadPage.js";
 import useToken from "./Token/useToken.js";
 import { gql, useQuery } from "@apollo/client";
-
-const TestComponent = props => {
-  let { id, test } = useParams();
-  console.log("????", id.substring(1), test.substring(1));
-  return (
-    <div>
-      <Segment>Test, {id}</Segment>
-      <Segment>Test, {id}</Segment>
-      <Segment>Test, {id}</Segment>
-      <Segment>Test, {id}</Segment>
-      <Segment>Test, {id}</Segment>
-      <Segment>Test, {id}</Segment>
-    </div>
-  );
-};
+import ReactNotification from "react-notifications-component";
+import "react-notifications-component/dist/theme.css";
+import { store } from "react-notifications-component";
 
 const GET_USER_QUERY = gql`
   {
@@ -44,6 +32,22 @@ const GET_USER_QUERY = gql`
 `;
 
 function App() {
+  const makeNotif = (title, error, type) => {
+    store.addNotification({
+      title: title,
+      message: error,
+      type: type,
+      insert: "bottom",
+      container: "bottom-right",
+      animationIn: ["animate__animated", "animate__fadeIn"],
+      animationOut: ["animate__animated", "animate__fadeOut"],
+      dismiss: {
+        duration: 1500,
+        onScreen: false
+      }
+    });
+  };
+
   const isMobile = useMediaQuery({
     query: "(max-device-width: 570px)"
   });
@@ -63,6 +67,7 @@ function App() {
 
   return (
     <div className="App">
+      <ReactNotification isMobile={isMobile} />
       <Header
         token={token}
         setToken={setToken}
@@ -116,6 +121,7 @@ function App() {
         <Route exact path="/dashboard">
           {token && (
             <Dashboard
+              makeNotif={makeNotif}
               isMobile={isMobile}
               sidebarOpen={sidebarOpen}
               username={
@@ -134,6 +140,7 @@ function App() {
         <Route exact path="/dashboard/panel">
           {token && (
             <Dashboard
+              makeNotif={makeNotif}
               isMobile={isMobile}
               sidebarOpen={sidebarOpen}
               isCourse={false}
@@ -154,6 +161,7 @@ function App() {
         <Route exact path="/dashboard/courses">
           {token && (
             <Dashboard
+              makeNotif={makeNotif}
               isMobile={isMobile}
               sidebarOpen={sidebarOpen}
               isCourse={true}
@@ -172,12 +180,13 @@ function App() {
         </Route>
 
         <Route exact path="/content">
-          {token && <ContentPage />}
+          {token && <ContentPage makeNotif={makeNotif} />}
         </Route>
         {/* Todo: remove this part! */}
         <Route exact path="/course:id">
           {token && (
             <CourseDashboard
+              makeNotif={makeNotif}
               isMobile={isMobile}
               sidebarOpen={sidebarOpen}
               username={
@@ -193,23 +202,37 @@ function App() {
           )}
         </Route>
         <Route exact path="/">
-          <Homepage />
+          <Homepage makeNotif={makeNotif} />
         </Route>
         <Route exact path="/login">
-          {!token && <Login setToken={setToken} setUsername={setUsername} />}
+          {!token && (
+            <Login
+              makeNotif={makeNotif}
+              setToken={setToken}
+              setUsername={setUsername}
+              makeNotif={makeNotif}
+            />
+          )}
         </Route>
         <Route exact path="/signup">
-          {!token && <Signup setToken={setToken} setUsername={setUsername} />}
+          {!token && (
+            <Signup
+              makeNotif={makeNotif}
+              setToken={setToken}
+              setUsername={setUsername}
+            />
+          )}
         </Route>
         {/* <Route exact path="/search">
           <SearchIndex />
         </Route> */}
         <Route exact path="/course:courseID/content:contentID">
-          {token && <ContentPage />}
+          {token && <ContentPage makeNotif={makeNotif} />}
         </Route>
         <Route exact path="/course:courseID/pendings">
           {token && (
             <PendingPage
+              makeNotif={makeNotif}
               username={
                 token
                   ? !loading
@@ -223,16 +246,16 @@ function App() {
           )}
         </Route>
         <Route exact path="/course:courseID/upload/video">
-          {token && <UploadPage fileType="video" />}
+          {token && <UploadPage makeNotif={makeNotif} fileType="video" />}
         </Route>
         <Route exact path="/course:courseID/upload/attachment">
-          {token && <UploadPage fileType="attachment" />}
+          {token && <UploadPage makeNotif={makeNotif} fileType="attachment" />}
         </Route>
         <Route exact path="/course:courseID/offer/video">
-          {token && <UploadPage />}
+          {token && <UploadPage makeNotif={makeNotif} />}
         </Route>
         <Route exact path="/course:courseID/offer/attachment">
-          {token && <UploadPage />}
+          {token && <UploadPage makeNotif={makeNotif} />}
         </Route>
       </Switch>
     </div>

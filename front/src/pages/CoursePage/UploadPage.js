@@ -184,6 +184,25 @@ const UPLOAD_ATTACHMENTT_MUTATION = gql`
   }
 `;
 
+function splitFile(file) {
+  var chunkSize = 1024 * 1024;
+  var fileSize = file.size;
+  var chunks = Math.ceil(file.size / chunkSize, chunkSize);
+  var chunk = 0;
+
+  console.log("file size..", fileSize);
+  console.log("chunks...", chunks);
+
+  while (chunk <= chunks) {
+    var offset = chunk * chunkSize;
+    console.log("current chunk..", chunk);
+    console.log("offset...", chunk * chunkSize);
+    console.log("file blob from offset...", offset);
+    console.log(file.slice(offset,offset+chunkSize));
+    chunk++;
+  }
+}
+
 function UploadPage(props) {
   let { courseID } = useParams();
   courseID = courseID.substring(1);
@@ -358,16 +377,17 @@ function UploadPage(props) {
         <Form.Button
           color="blue"
           onClick={() => {
-            console.log("State before test:", state);
-            if (uploadType == "upload") {
-              if (fileType === "attachment") {
-                uploadAttachment();
-              } else {
-                uploadContent();
-              }
-            } else {
-              offerContent();
-            }
+            splitFile(state.file)
+            // console.log("State before test:", state);
+            // if (uploadType == "upload") {
+            //   if (fileType === "attachment") {
+            //     uploadAttachment();
+            //   } else {
+            //     uploadContent();
+            //   }
+            // } else {
+            //   offerContent();
+            // }
           }}
         >
           Upload {fileType === "attachment" ? "Attachment" : "Video"}

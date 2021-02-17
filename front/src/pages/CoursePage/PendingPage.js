@@ -140,7 +140,7 @@ const ChangePendingModal = props => {
       title: state.title,
       description: state.description,
       tags: state.tags,
-      message: ""
+      message: "test message"
     },
     onCompleted: ({acceptOfferedContent}) => {
       console.log("accept offered contenttttttt:", acceptOfferedContent)
