@@ -20,7 +20,7 @@ func (b *BaremetalOSD) GetRoot() *objectstorage.Bucket {
 
 func (b *BaremetalOSD) NewBucket(parent *objectstorage.Bucket, id string) *objectstorage.Bucket {
 	bucket := objectstorage.NewBucket(id, parent)
-	b.Run("/usr/bin/mkdir -p " + bucket.GetPath())
+	b.Run("mkdir -p " + bucket.GetPath())
 	return bucket
 }
 
