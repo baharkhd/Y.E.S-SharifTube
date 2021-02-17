@@ -149,11 +149,11 @@ const ChangePendingModal = props => {
 
   return (
     <Modal open={props.open}>
-      <Modal.Header>Change the content if you want .</Modal.Header>
+      <Modal.Header>Change the offered content if you want .</Modal.Header>
 
       <Modal.Content scrolling>
         <Modal.Content>
-          <video width="600" controls>
+          <video width="60%" controls>
             <source
               src={
                 "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
@@ -229,7 +229,9 @@ const ChangePendingModal = props => {
           positive
           onClick={() => {
             // accept pendins
-            props.setOpen(false);
+            console.log("state bfore accept pending:", state)
+            acceptOfferedContent()
+            // props.setOpen(false);
           }}
         >
           Change and Approve!

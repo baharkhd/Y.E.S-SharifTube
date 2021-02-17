@@ -1,7 +1,7 @@
 import "semantic-ui-css/semantic.min.css";
 import React, { useState } from "react";
 import { Button, Input, Segment } from "semantic-ui-react";
-import { Route, Switch, useParams } from "react-router-dom";
+import { Route, Switch, useParams, Redirect } from "react-router-dom";
 import Header from "./pages/Header.js";
 import Login from "./pages/Login/Login.js";
 import Signup from "./pages/Signup/Signup.js";
@@ -71,116 +71,168 @@ function App() {
         setSidebarOpen={setSidebarOpen}
       />
       <Switch>
-        <Route exact path="/dashboard">
-          <Dashboard
-            isMobile={isMobile}
-            sidebarOpen={sidebarOpen}
-            username={
-              token
-                ? !loading
-                  ? data
-                    ? data.user.username
-                    : username
-                  : ""
-                : ""
-            }
+        {!token && <Redirect exact from="/dashboard" to="/login" />}
+        {!token && <Redirect exact from="/dashboard/panel" to="/login" />}
+        {!token && <Redirect exact from="/dashboard/courses" to="/login" />}
+        {!token && <Redirect exact from="/content" to="/login" />}
+
+        {!token && <Redirect exact from="/course:id" to="/login" />}
+        {!token && (
+          <Redirect
+            exact
+            from="/course:courseID/content:contentID"
+            to="/login"
           />
+        )}
+
+        {!token && (
+          <Redirect exact from="/course:courseID/pendings" to="/login" />
+        )}
+
+        {!token && (
+          <Redirect exact from="/course:courseID/upload/video" to="/login" />
+        )}
+        {!token && (
+          <Redirect
+            exact
+            from="/course:courseID/upload/attachment"
+            to="/login"
+          />
+        )}
+        {!token && (
+          <Redirect exact from="/course:courseID/offer/video" to="/login" />
+        )}
+        {!token && (
+          <Redirect
+            exact
+            from="/course:courseID/offer/attachment"
+            to="/login"
+          />
+        )}
+
+        {token && <Redirect exact from="/login" to="/dashboard" />}
+        {token && <Redirect exact from="/signup" to="/dashboard" />}
+
+        <Route exact path="/dashboard">
+          {token && (
+            <Dashboard
+              isMobile={isMobile}
+              sidebarOpen={sidebarOpen}
+              username={
+                token
+                  ? !loading
+                    ? data
+                      ? data.user.username
+                      : username
+                    : ""
+                  : ""
+              }
+            />
+          )}
         </Route>
 
         <Route exact path="/dashboard/panel">
-          <Dashboard
-            isMobile={isMobile}
-            sidebarOpen={sidebarOpen}
-            isCourse={false}
-            username={
-              token
-                ? !loading
-                  ? data
-                    ? data.user.username
-                    : username
+          {token && (
+            <Dashboard
+              isMobile={isMobile}
+              sidebarOpen={sidebarOpen}
+              isCourse={false}
+              username={
+                token
+                  ? !loading
+                    ? data
+                      ? data.user.username
+                      : username
+                    : ""
                   : ""
-                : ""
-            }
-            // component={<Panel isMobile={isMobile} />}
-          />
+              }
+              // component={<Panel isMobile={isMobile} />}
+            />
+          )}
         </Route>
 
         <Route exact path="/dashboard/courses">
-          <Dashboard
-            isMobile={isMobile}
-            sidebarOpen={sidebarOpen}
-            isCourse={true}
-            username={
-              token
-                ? !loading
-                  ? data
-                    ? data.user.username
-                    : username
+          {token && (
+            <Dashboard
+              isMobile={isMobile}
+              sidebarOpen={sidebarOpen}
+              isCourse={true}
+              username={
+                token
+                  ? !loading
+                    ? data
+                      ? data.user.username
+                      : username
+                    : ""
                   : ""
-                : ""
-            }
-            // component={<Courses isMobile={isMobile} />}
-          />
+              }
+              // component={<Courses isMobile={isMobile} />}
+            />
+          )}
         </Route>
 
         <Route exact path="/content">
-          <ContentPage />
+          {token && <ContentPage />}
         </Route>
         {/* Todo: remove this part! */}
         <Route exact path="/course:id">
-          <CourseDashboard
-            isMobile={isMobile}
-            sidebarOpen={sidebarOpen}
-            username={
-              token
-                ? !loading
-                  ? data
-                    ? data.user.username
-                    : username
+          {token && (
+            <CourseDashboard
+              isMobile={isMobile}
+              sidebarOpen={sidebarOpen}
+              username={
+                token
+                  ? !loading
+                    ? data
+                      ? data.user.username
+                      : username
+                    : ""
                   : ""
-                : ""
-            }
-          />
+              }
+            />
+          )}
         </Route>
         <Route exact path="/">
           <Homepage />
         </Route>
         <Route exact path="/login">
-          <Login setToken={setToken} setUsername={setUsername} />
+          {!token && <Login setToken={setToken} setUsername={setUsername} />}
         </Route>
         <Route exact path="/signup">
-          <Signup setToken={setToken} setUsername={setUsername} />
+          {!token && <Signup setToken={setToken} setUsername={setUsername} />}
         </Route>
-        <Route exact path="/search">
+        {/* <Route exact path="/search">
           <SearchIndex />
-        </Route>
+        </Route> */}
         <Route exact path="/course:courseID/content:contentID">
-          <ContentPage />
+          {token && <ContentPage />}
         </Route>
         <Route exact path="/course:courseID/pendings">
-          <PendingPage
-            username={
-              token
-                ? !loading
-                  ? data
-                    ? data.user.username
-                    : username
+          {token && (
+            <PendingPage
+              username={
+                token
+                  ? !loading
+                    ? data
+                      ? data.user.username
+                      : username
+                    : ""
                   : ""
-                : ""
-            }
-          />
+              }
+            />
+          )}
         </Route>
         <Route exact path="/course:courseID/upload/video">
-          <UploadPage fileType="video" />
+          {token && <UploadPage fileType="video" />}
         </Route>
         <Route exact path="/course:courseID/upload/attachment">
-          <UploadPage fileType="attachment" />
+          {token && <UploadPage fileType="attachment" />}
         </Route>
         <Route exact path="/course:courseID/offer/video">
-          <UploadPage />
+          {token && <UploadPage />}
         </Route>
         <Route exact path="/course:courseID/offer/attachment">
-          <UploadPage />
+          {token && <UploadPage />}
         </Route>
       </Switch>
     </div>
