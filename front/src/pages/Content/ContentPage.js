@@ -15,141 +15,7 @@ import "./ContentPage.css";
 import { useParams } from "react-router-dom";
 import { useQuery, gql, useMutation } from "@apollo/client";
 import _ from "lodash";
-
-const comments = [
-  {
-    author: "bahar",
-    body: "hii guys! :)",
-    timestamp: "10 Feb",
-    replies: [
-      {
-        author: "khodabakhshian",
-        body: "hi bahar:D",
-        timestamp: "11 Feb"
-      },
-      {
-        author: "David",
-        body: "bye bahar:(",
-        timestamp: "12 Feb"
-      },
-      {
-        author: "David",
-        body: "bye bahar:(",
-        timestamp: "12 Feb"
-      },
-      {
-        author: "khodabakhshian",
-        body: "hi bahar:D",
-        timestamp: "11 Feb"
-      }
-    ]
-  },
-  {
-    author: "bahar2",
-    body: "hii guys! :)2",
-    timestamp: "10 Feb2",
-    replies: [
-      {
-        author: "khodabakhshian2",
-        body: "hi bahar:D2",
-        timestamp: "11 Feb2"
-      }
-    ]
-  },
-  {
-    author: "bahar3",
-    body: "hii guys! :)3",
-    timestamp: "10 Feb3",
-    replies: [
-      {
-        author: "khodabakhshian3",
-        body: "hi bahar:D3",
-        timestamp: "11 Feb3"
-      }
-    ]
-  },
-  {
-    author: "bahar",
-    body: "hii guys! :)",
-    timestamp: "10 Feb",
-    replies: [
-      {
-        author: "khodabakhshian",
-        body: "hi bahar:D",
-        timestamp: "11 Feb"
-      },
-      {
-        author: "David",
-        body: "bye bahar:(",
-        timestamp: "12 Feb"
-      },
-      {
-        author: "David",
-        body: "bye bahar:(",
-        timestamp: "12 Feb"
-      },
-      {
-        author: "khodabakhshian",
-        body: "hi bahar:D",
-        timestamp: "11 Feb"
-      }
-    ]
-  },
-  {
-    author: "bahar",
-    body: "hii guys! :)",
-    timestamp: "10 Feb",
-    replies: [
-      {
-        author: "khodabakhshian",
-        body: "hi bahar:D",
-        timestamp: "11 Feb"
-      },
-      {
-        author: "David",
-        body: "bye bahar:(",
-        timestamp: "12 Feb"
-      },
-      {
-        author: "David",
-        body: "bye bahar:(",
-        timestamp: "12 Feb"
-      },
-      {
-        author: "khodabakhshian",
-        body: "hi bahar:D",
-        timestamp: "11 Feb"
-      }
-    ]
-  },
-  {
-    author: "bahar",
-    body: "hii guys! :)",
-    timestamp: "10 Feb",
-    replies: [
-      {
-        author: "khodabakhshian",
-        body: "hi bahar:D",
-        timestamp: "11 Feb"
-      },
-      {
-        author: "David",
-        body: "bye bahar:(",
-        timestamp: "12 Feb"
-      },
-      {
-        author: "David",
-        body: "bye bahar:(",
-        timestamp: "12 Feb"
-      },
-      {
-        author: "khodabakhshian",
-        body: "hi bahar:D",
-        timestamp: "11 Feb"
-      }
-    ]
-  }
-];
+import poster from "./test2.png";
 
 const CONTENT_QUERY = gql`
   query GetContent($id: String!) {
@@ -421,24 +287,26 @@ function ContentPage(props) {
 
   return (
     <div>
-      {!loading && (
+      {!loading && data && (
         <Segment style={{ top: 70, overflow: "hidden", borderRadius: 0 }}>
           <Grid columns={2} textAlign="center" fluid stackable>
             <Grid.Column>
               <Segment>
-                {/* <Placeholder className="test" fluid>
-                  <Placeholder.Image rectangular />
-                </Placeholder> */}
-                <Embed
-                  icon="download"
-                  placeholder="index.jpg"
-                  url="https://sharif-webelopers.ir/static/images/background.jpg"
-                />
-                <Container textAlign="left">
-                  <h1>{data.content.title}</h1>
-                  <p>
-                    {data.content.description}
-                    {/* Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+                <Container textAlign="center" fluid>
+                  <video width="100%" controls poster={poster}>
+                    <source
+                      src={
+                        data.content.vurl
+                        // "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
+                      }
+                      type="video/mp4"
+                    />
+                  </video>
+                  <Container textAlign="left" style={{ left: 20 }}>
+                    <h1>{data.content.title}</h1>
+                    <p>
+                      {data.content.description}
+                      {/* Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
                     Aenean commodo ligula eget dolor. Aenean massa strong. Cum
                     sociis natoque penatibus et magnis dis parturient montes,
                     nascetur ridiculus mus. Donec quam felis, ultricies nec,
@@ -453,7 +321,8 @@ function ContentPage(props) {
                     feugiat a, tellus. Phasellus viverra nulla ut metus varius
                     laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies
                     nisi vel augue. Curabitur ullamcorper ultricies nisi. */}
-                  </p>
+                    </p>
+                  </Container>
                 </Container>
               </Segment>
             </Grid.Column>
