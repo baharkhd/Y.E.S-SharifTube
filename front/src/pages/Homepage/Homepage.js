@@ -68,7 +68,7 @@ function Homepage() {
         <div style={homePageBodyLStyle}>
             <Segment style={homePageCourseListLStyle}>
                 <Grid columns={3}>
-                    {!loading &&
+                    {!loading && data &&
                     data.coursesByKeyWords.map(course => {
                         let date = new Date(course.createdAt * 1000).toLocaleString("en-US", {
                             month: "long",

@@ -240,7 +240,8 @@ const ADD_COMMENT_MUTATION = gql`
 const Reply = ({ author, body, time }) => {
   let date = new Date(time * 1000).toLocaleString("en-US", {
     month: "long",
-    year: "numeric"
+    year: "numeric",
+    day: "numeric"
   });
   return (
     <Feed.Event>
@@ -258,7 +259,8 @@ const Reply = ({ author, body, time }) => {
 const Comment = ({ comment, contentID }) => {
   let date = new Date(comment.timestamp * 1000).toLocaleString("en-US", {
     month: "long",
-    year: "numeric"
+    year: "numeric",
+    day: "numeric"
   });
 
   const [reply, setReply] = useState("");
@@ -424,9 +426,14 @@ function ContentPage(props) {
           <Grid columns={2} textAlign="center" fluid stackable>
             <Grid.Column>
               <Segment>
-                <Placeholder className="test" fluid>
+                {/* <Placeholder className="test" fluid>
                   <Placeholder.Image rectangular />
-                </Placeholder>
+                </Placeholder> */}
+                <Embed
+                  icon="download"
+                  placeholder="index.jpg"
+                  url="https://sharif-webelopers.ir/static/images/background.jpg"
+                />
                 <Container textAlign="left">
                   <h1>{data.content.title}</h1>
                   <p>
