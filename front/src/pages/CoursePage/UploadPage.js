@@ -248,7 +248,7 @@ function UploadPage(props) {
       description: state.description
     },
     onCompleted: ({ uploadAttachment }) => {
-      console.log("upload attachmenttttttttt");
+      console.log("upload attachmenttttttttt", uploadAttachment);
     }
   });
 
