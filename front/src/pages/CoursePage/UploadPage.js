@@ -190,7 +190,8 @@ function UploadPage(props) {
     url: "",
     tags: [],
     tagInput: "",
-    file: ""
+    file: "",
+    loading: false
   });
 
   const [uploadAttachment] = useMutation(UPLOAD_ATTACHMENTT_MUTATION, {
@@ -235,6 +236,7 @@ function UploadPage(props) {
       } else {
         props.makeNotif("Error!", offerContent.message, "danger");
       }
+      setState({ ...state, loading: false });
     }
   });
 
@@ -276,6 +278,7 @@ function UploadPage(props) {
       } else {
         props.makeNotif("Error!", offerContent.message, "danger");
       }
+      setState({ ...state, loading: false });
 
       let path = "/course:" + courseID;
       history.push(path);
@@ -322,6 +325,7 @@ function UploadPage(props) {
       } else {
         props.makeNotif("Error!", offerContent.message, "danger");
       }
+      setState({ ...state, loading: false });
 
       let path = "/course:" + courseID;
       history.push(path);
@@ -410,6 +414,7 @@ function UploadPage(props) {
           }}
         />
         <Form.Button
+          loading={state.loading}
           color="blue"
           onClick={() => {
             console.log("State before test:", state);
@@ -421,11 +426,14 @@ function UploadPage(props) {
             ) {
               if (uploadType == "upload") {
                 if (fileType === "attachment") {
+                  setState({ ...state, loading: true });
                   uploadAttachment();
                 } else {
+                  setState({ ...state, loading: true });
                   uploadContent();
                 }
               } else {
+                setState({ ...state, loading: true });
                 offerContent();
               }
             } else {

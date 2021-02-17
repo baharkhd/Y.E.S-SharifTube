@@ -185,9 +185,10 @@ const ChangePendingModal = props => {
                 positive
                 onClick={() => {
                   if (state.tagInput !== "") {
+                    let newTag = state.tagInput
                     setState({
                       ...state,
-                      tags: [...state.tags, state.tagInput],
+                      tags: [...state.tags, newTag],
                       tagInput: ""
                     });
                   }
