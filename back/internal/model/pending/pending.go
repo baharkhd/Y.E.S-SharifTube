@@ -63,10 +63,10 @@ func RegexValidate(title, description, uploadedByID, furl, courseID, message *st
 		return model.RegexMismatchException{Message: "uploader username field is empty"}
 	}
 	if message != nil && modelUtil.IsSTREmpty(*message) {
-		return model.RegexMismatchException{Message: "description field is empty"}
+		return model.RegexMismatchException{Message: "message field is empty"}
 	}
 	if message != nil && (modelUtil.WordCount(*message) > MessageWordSize || len(*message) > MessageCharSize) {
-		return model.RegexMismatchException{Message: "description field exceeds limit size"}
+		return model.RegexMismatchException{Message: "message field exceeds limit size"}
 	}
 	//todo regex definition for Furl field
 	if furl != nil && modelUtil.IsSTREmpty(*furl) {
