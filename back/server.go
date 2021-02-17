@@ -27,7 +27,7 @@ const queryComplexity = 8
 
 func main() {
 	//setting default Object storage for content model
-	if driver, err := baremetal.New("185.239.105.213:1991", "root", "var/lib/yes");err!=nil{
+	if driver, err := baremetal.New("185.239.105.213:1991", "root", "/var/lib/yes");err!=nil{
 		panic(err)
 	}else {
 		course.OSD=driver
