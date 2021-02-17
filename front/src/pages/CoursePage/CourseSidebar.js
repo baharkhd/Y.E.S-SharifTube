@@ -139,28 +139,24 @@ function SideBar(props) {
                     }}
                     style={sidePanelItemLStyle}
                 >
-                    <FontAwesomeIcon size='2x' icon={faUserPlus}/><br/><br/>
-                    Add TA
+                    <FontAwesomeIcon size='1x' icon={faUserPlus}/><span><b>&nbsp;&nbsp;Add TA</b></span>
                 </Menu.Item>
             )}
             <Link to={uploadPath + "/video"}>
                 <Menu.Item style={sidePanelItemLStyle} as="a">
-                    <FontAwesomeIcon size='2x' icon={faUpload}/><br/><br/>
-                    Upload Videos
+                    <FontAwesomeIcon size='1x' icon={faUpload}/><span><b>&nbsp;&nbsp;Upload Videos</b></span>
                 </Menu.Item>
             </Link>
             <Link to={uploadPath + "/attachment"}>
                 <Menu.Item style={sidePanelItemLStyle} as="a">
-                    <FontAwesomeIcon size='2x' icon={faFileUpload}/><br/><br/>
-                    Upload Attachments
+                    <FontAwesomeIcon size='1x' icon={faFileUpload}/><span><b>&nbsp;&nbsp;Upload Attachment</b></span>
                 </Menu.Item>
             </Link>
             {isProfTA && (
                 // <Link to={"/course:" + id + "/pendings"} component={PendingPage} >
                 <Link to={"/course:" + id + "/pendings"}>
                     <Menu.Item style={sidePanelItemLStyle} as="a">
-                        <FontAwesomeIcon size='2x' icon={faFileImport}/><br/><br/>
-                        Pending Contents
+                        <FontAwesomeIcon size='1x' icon={faFileImport}/><span><b>&nbsp;&nbsp;Pending Contents</b></span>
                     </Menu.Item>
                 </Link>
                 // </Link>
