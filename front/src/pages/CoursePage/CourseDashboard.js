@@ -155,7 +155,10 @@ function CourseDashboard(props) {
       >
         {!response.loading ? (
           course.contents ? (
-            <ContentsPart contents={course.contents} id={id} />
+            <ContentsPart
+              contents={course.contents}
+              id={id}
+            />
           ) : (
             <div>
               <Divider horizontal>
@@ -170,6 +173,31 @@ function CourseDashboard(props) {
         ) : (
           <></>
         )}
+        <Divider horizontal>
+          <Header textAlign="left">
+            <Icon name="file" />
+            Invetories
+          </Header>
+        </Divider>
+        <Grid columns={1} textAlign="left">
+          {course.inventory && course.inventory.length !== 0 ? (
+            course.inventory.map(attach => {
+              return (
+                <Grid.Column>
+                  <Card>
+                    <Card.Content>
+                      <Card.Header>{attach.name}</Card.Header>
+                      <Card.Description>{attach.description}</Card.Description>
+                      <Card.Meta>aurl : {attach.aurl}</Card.Meta>
+                    </Card.Content>
+                  </Card>
+                </Grid.Column>
+              );
+            })
+          ) : (
+            <Segment>There are no attachments yet .</Segment>
+          )}
+        </Grid>
       </Segment>
     </div>
   );

@@ -427,7 +427,8 @@ function ContentPage(props) {
                 <video width="100%" controls>
                   <source
                     src={
-                      "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
+                      // "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
+                      data.content.vurl
                     }
                     type="video/mp4"
                   />
