@@ -17,7 +17,7 @@ type Attachment struct {
 	Name        string             `json:"name" bson:"name"`
 	Description string             `json:"description" bson:"description"`
 	Timestamp   int64              `json:"timestamp" bson:"timestamp"`
-	Aurl        string             `json:"aurl" bson:"aurl"` //todo better implementation
+	Aurl        string             `json:"aurl" bson:"aurl"`
 	CourseID    string             `json:"course" bson:"course"`
 }
 
