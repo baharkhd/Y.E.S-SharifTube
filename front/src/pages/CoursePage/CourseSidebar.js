@@ -129,11 +129,13 @@ function SideBar(props) {
           <Button color="blue">Upload Videos</Button>
         </Link>
       </Menu.Item>
-      <Menu.Item>
-        <Link to={uploadPath + "/attachment"}>
-          <Button color="blue">Upload Attachments</Button>
-        </Link>
-      </Menu.Item>
+      {isProfTA && (
+        <Menu.Item>
+          <Link to={uploadPath + "/attachment"}>
+            <Button color="blue">Upload Attachments</Button>
+          </Link>
+        </Menu.Item>
+      )}
       {isProfTA && (
         // <Link to={"/course:" + id + "/pendings"} component={PendingPage} >
         <Menu.Item>

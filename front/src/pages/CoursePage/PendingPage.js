@@ -76,24 +76,6 @@ const ACCEPT_PENDING_MUTATION = gql`
   }
 `;
 
-const REJECT_PENDING_MUTATION = gql`
-  mutation RejectPending($courseID: String!, $pendingID: String!) {
-    rejectOfferedContent(courseID: $courseID, pendingID: $pendingID) {
-      ... on Pending {
-        id
-        title
-        description
-        furl
-        status
-        timestamp
-      }
-      ... on Exception {
-        message
-      }
-    }
-  }
-`;
-
 // type Pending{
 //   id: ID!
 //   title: String!
@@ -119,6 +101,32 @@ const REJECT_PENDING_MUTATION = gql`
 // acceptOfferedContent(username:String, courseID:String!, pendingID:String!, changed:AcceptedPending!): EditOfferedContentPayLoad!
 // rejectOfferedContent(username:String, courseID:String!, pendingID:String!, message:RejectedPending): DeleteOfferedContentPayLoad!
 
+const REJECT_PENDING_MUTATION = gql`
+  mutation RejectPending(
+    $courseID: String!
+    $pendingID: String!
+    $message: String
+  ) {
+    rejectOfferedContent(
+      courseID: $courseID
+      pendingID: $pendingID
+      message: { message: $message }
+    ) {
+      ... on Pending {
+        id
+        title
+        description
+        furl
+        status
+        timestamp
+      }
+      ... on Exception {
+        message
+      }
+    }
+  }
+`;
+
 const ChangePendingModal = props => {
   const [state, setState] = useState({
     title: props.title,
@@ -127,12 +135,16 @@ const ChangePendingModal = props => {
     tags: []
   });
 
-  // $courseID: String!
-  //   $pendingID: String!
-  //   $title: String
-  //   $description: String
-  //   $tags: [String!]
-  //   $message: String
+  const [rejectOfferedContent] = useMutation(REJECT_PENDING_MUTATION, {
+    variables: {
+      courseID: props.courseID,
+      pendingID: props.pendingID,
+      message: "allaho akbar"
+    },
+    onCompleted: ({ rejectOfferedContent }) => {
+      console.log("rejectOfferedContenttttttt", rejectOfferedContent);
+    }
+  });
 
   const [acceptOfferedContent] = useMutation(ACCEPT_PENDING_MUTATION, {
     variables: {
@@ -232,7 +244,7 @@ const ChangePendingModal = props => {
             // accept pendins
             console.log("state bfore accept pending:", state);
             acceptOfferedContent();
-            // props.setOpen(false);
+            props.setOpen(false);
           }}
         >
           Change and Approve!
@@ -240,6 +252,7 @@ const ChangePendingModal = props => {
         <Button
           negative
           onClick={() => {
+            rejectOfferedContent();
             props.setOpen(false);
           }}
         >
