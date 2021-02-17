@@ -125,17 +125,22 @@ function SideBar(props) {
       )}
 
       <Menu.Item>
-        <Link to={uploadPath}>
+        <Link to={uploadPath + "/video"}>
           <Button color="blue">Upload Videos</Button>
+        </Link>
+      </Menu.Item>
+      <Menu.Item>
+        <Link to={uploadPath + "/attachment"}>
+          <Button color="blue">Upload Attachments</Button>
         </Link>
       </Menu.Item>
       {isProfTA && (
         // <Link to={"/course:" + id + "/pendings"} component={PendingPage} >
-          <Menu.Item>
-            <Link to={"/course:" + id + "/pendings"}>
-              <Button color="black">Pending Contents</Button>
-            </Link>
-          </Menu.Item>
+        <Menu.Item>
+          <Link to={"/course:" + id + "/pendings"}>
+            <Button color="black">Pending Contents</Button>
+          </Link>
+        </Menu.Item>
         // </Link>
       )}
     </Sidebar>

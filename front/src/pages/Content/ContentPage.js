@@ -161,7 +161,7 @@ const CONTENT_QUERY = gql`
       tags
       timestamp
       comments {
-        # id
+        id
         author {
           id
           name
@@ -180,7 +180,6 @@ const CONTENT_QUERY = gql`
           body
           timestamp
         }
-        
       }
     }
   }
@@ -206,7 +205,7 @@ const ADD_COMMENT_MUTATION = gql`
           name
           username
         }
-        # id
+        id
         body
         timestamp
         contentID
@@ -229,7 +228,7 @@ const ADD_COMMENT_MUTATION = gql`
           name
           username
         }
-        # contentID
+        commentID
       }
       ... on Exception {
         message
@@ -275,23 +274,23 @@ const Comment = ({ comment, contentID }) => {
       });
 
       let localData = _.cloneDeep(data);
+      console.log("localData in creating comment:", localData);
+
+      localData.content.comments = localData.content.comments.map(cm => {
+        return cm.id === createComment.commentID
+          ? {
+              ...cm,
+              replies: [...(cm.replies ? cm.replies : []), createComment]
+            }
+          : cm;
+      });
 
       cache.writeQuery({
         query: CONTENT_QUERY,
         data: {
-          content: {
-            ...localData.content,
-            comments: {
-              ...localData.content.comments,
-              replies: {
-                ...localData.content.comments.replies,
-                createComment
-              }
-            }
-          }
+          ...localData
         }
       });
-
       console.log("data in cache--------", data);
       console.log("crreate comment:", createComment);
     },
@@ -386,8 +385,33 @@ function ContentPage(props) {
       contentID: contentID,
       body: newComment
     },
+    update: (cache, { data: { createComment } }) => {
+      const data = cache.readQuery({
+        query: CONTENT_QUERY,
+        variables: {
+          id: contentID
+        }
+      });
+
+      let localData = _.cloneDeep(data);
+      console.log("222 localData in creating comment:", localData);
+
+      localData.content.comments = [
+        ...(localData.content.comments ? localData.content.comments : []),
+        createComment
+      ];
+
+      cache.writeQuery({
+        query: CONTENT_QUERY,
+        data: {
+          ...localData
+        }
+      });
+      console.log("222data in cache--------", data);
+      console.log("222crreate comment:", createComment);
+    },
     onCompleted: ({ createComment }) => {
-      console.log("createCommenttttt:", createComment);
+      console.log("222createCommenttttt:", createComment);
     }
   });
 

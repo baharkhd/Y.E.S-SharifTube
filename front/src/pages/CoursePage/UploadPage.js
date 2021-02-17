@@ -11,7 +11,7 @@ import {
 import { gql, useMutation } from "@apollo/client";
 import { useParams, useHistory, useLocation } from "react-router-dom";
 import constants from "../../constants";
-import FileUpload from '../FileUpload/FileUpload'
+import FileUpload from "../FileUpload/FileUpload";
 
 const OFFER_CONTENT_MUTATION = gql`
   mutation OfferContent(
@@ -47,37 +47,37 @@ const OFFER_CONTENT_MUTATION = gql`
   }
 `;
 
-const UPLOAD_CONTENT_MUTATION = gql`
-  mutation UploadContent(
-    $courseID: String!
-    $title: String!
-    $description: String
-    $vurl: String!
-    $tags: [String!]
-  ) {
-    uploadContent(
-      courseID: $courseID
-      target: {
-        title: $title
-        description: $description
-        vurl: $vurl
-        tags: $tags
-      }
-    ) {
-      ... on Content {
-        id
-        title
-        description
-        vurl
-        tags
-        timestamp
-      }
-      ... on Exception {
-        message
-      }
-    }
-  }
-`;
+// const UPLOAD_CONTENT_MUTATION = gql`
+//   mutation UploadContent(
+//     $courseID: String!
+//     $title: String!
+//     $description: String
+//     $vurl: String!
+//     $tags: [String!]
+//   ) {
+//     uploadContent(
+//       courseID: $courseID
+//       target: {
+//         title: $title
+//         description: $description
+//         vurl: $vurl
+//         tags: $tags
+//       }
+//     ) {
+//       ... on Content {
+//         id
+//         title
+//         description
+//         vurl
+//         tags
+//         timestamp
+//       }
+//       ... on Exception {
+//         message
+//       }
+//     }
+//   }
+// `;
 
 const COURSE_QUERY = gql`
   query GetCoursesByID($ids: [String!]!) {
@@ -106,26 +106,136 @@ const COURSE_QUERY = gql`
   }
 `;
 
-function UploadPage(props) {
+const UPLOAD_MUTATION = gql`
+  mutation UploadContent(
+    $courseID: String!
+    $title: String!
+    $description: String
+    $video: Upload!
+    $tags: [String!]
+  ) {
+    uploadContent(
+      courseID: $courseID
+      target: {
+        title: $title
+        description: $description
+        video: $video
+        tags: $tags
+      }
+    ) {
+      __typename
+      ... on Content {
+        id
+        title
+        description
+        vurl
+        uploadedBY {
+          name
+          username
+        }
+      }
+      ... on Exception {
+        message
+      }
+    }
+  }
+`;
 
-  console.log("+_+_+_+_+_+_+_+_+_+_+ uploadpage tokeeeeeeeeeeeeeeeeeeen:", localStorage.getItem(constants.AUTH_TOKEN))
+// uploadAttachment(username:String, courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad!
+
+// input TargetAttachment{
+//   name: String!
+//   aurl: String! # todo actual file
+//   description: String
+// }
+
+// type Attachment{
+//   id: ID!
+//   name: String!
+//   aurl: String! #todo better implementation for attachment file
+//   description: String
+//   timestamp: Int!
+//   courseID: String!
+// }
+
+const UPLOAD_ATTACHMENTT_MUTATION = gql`
+  mutation UploadAttachment(
+    $courseID: String!
+    $name: String!
+    $attach: Upload!
+    $description: String
+  ) {
+    uploadAttachment(
+      courseID: $courseID
+      target: { name: $name, attach: $attach, description: $description }
+    ) {
+      __typename
+      ... on Attachment {
+        id
+        name
+        description
+        timestamp
+        aurl
+      }
+      ... on Exception {
+        message
+      }
+    }
+  }
+`;
+
+function UploadPage(props) {
+  let { courseID } = useParams();
+  courseID = courseID.substring(1);
+
   const history = useHistory();
 
   let path = useLocation().pathname;
-  console.log("path:", path)
-  var n = path.lastIndexOf("/");
-  var uploadType = path.substring(n + 1);
+  let pathParts = path.split("/");
+  var uploadType = pathParts[2];
+  var fileType = pathParts[3];
 
   const [state, setState] = useState({
     title: "",
     description: "",
     url: "",
     tags: [],
-    tagInput: ""
+    tagInput: "",
+    file: ""
   });
 
-  let { courseID } = useParams();
-  courseID = courseID.substring(1);
+  const [uploadAttachment] = useMutation(UPLOAD_ATTACHMENTT_MUTATION, {
+    variables: {
+      courseID: courseID,
+      name: state.title,
+      attach: state.file,
+      description: state.description
+    },
+    onCompleted: ({ uploadAttachment }) => {
+      console.log("upload attachmenttttttttt");
+    }
+  });
+
+  const [uploadContent] = useMutation(UPLOAD_MUTATION, {
+    variables: {
+      courseID: courseID,
+      title: state.title,
+      description: state.description,
+      // video: {
+      //   File: state.file,
+      //   Filename: state.file.name,
+      //   Size: state.file.size,
+      //   ContentType: state.file.type
+      // },
+      video: state.file,
+      tags: state.tags
+    },
+    onCompleted: ({ uploadContent }) => {
+      console.log("updateContenttttttttt:", uploadContent);
+    }
+  });
+
+  // console.log("+_+_+_+_+_+_+_+_+_+_+ uploadpage tokeeeeeeeeeeeeeeeeeeen:", localStorage.getItem(constants.AUTH_TOKEN))
 
   const [offerContent] = useMutation(OFFER_CONTENT_MUTATION, {
     variables: {
@@ -142,36 +252,34 @@ function UploadPage(props) {
     }
   });
 
-  const [uploadContent] = useMutation(UPLOAD_CONTENT_MUTATION, {
-    variables: {
-      courseID: courseID,
-      title: state.title,
-      description: state.description,
-      vurl: state.url,
-      tags: state.tags
-    },
-    update(cache, {data: {uploadContent}}) {
-      var data = cache.readQuery({
-        query: COURSE_QUERY,
-        variables: {
-          ids: [courseID]
-        }
-      })
+  // const [uploadContent] = useMutation(UPLOAD_CONTENT_MUTATION, {
+  //   variables: {
+  //     courseID: courseID,
+  //     title: state.title,
+  //     description: state.description,
+  //     vurl: state.url,
+  //     tags: state.tags
+  //   },
+  //   update(cache, { data: { uploadContent } }) {
+  //     var data = cache.readQuery({
+  //       query: COURSE_QUERY,
+  //       variables: {
+  //         ids: [courseID]
+  //       }
+  //     });
 
-      data = data[0]
+  //     data = data[0];
 
-      console.log("in update of uploadContent")
-      console.log("uploadContent:", uploadContent)
-      console.log("data:", data)
-
-      
-    },
-    onCompleted: ({ uploadContent }) => {
-      console.log("*** uploadContent:", uploadContent);
-      let path = "/course:" + courseID;
-      history.push(path);
-    }
-  });
+  //     console.log("in update of uploadContent");
+  //     console.log("uploadContent:", uploadContent);
+  //     console.log("data:", data);
+  //   },
+  //   onCompleted: ({ uploadContent }) => {
+  //     console.log("*** uploadContent:", uploadContent);
+  //     let path = "/course:" + courseID;
+  //     history.push(path);
+  //   }
+  // });
 
   return (
     <Segment style={{ top: 70 }}>
@@ -250,17 +358,31 @@ function UploadPage(props) {
         <Form.Button
           color="blue"
           onClick={() => {
+            console.log("State before test:", state);
             if (uploadType == "upload") {
-              uploadContent();
+              if (fileType === "attachment") {
+                uploadAttachment();
+              } else {
+                uploadContent();
+              }
             } else {
               offerContent();
             }
           }}
         >
-          Upload {}
+          Upload {fileType === "attachment" ? "Attachment" : "Video"}
         </Form.Button>
       </Form>
-      <FileUpload />
+      {/* <FileUpload setFile={setState} otherState={state} /> */}
+      <input
+        type="file"
+        onChange={e => {
+          const [file] = e.target.files;
+
+          console.log("-------------", file);
+          setState({ ...state, file: file });
+        }}
+      />
     </Segment>
   );
 }

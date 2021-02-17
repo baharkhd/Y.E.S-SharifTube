@@ -69,7 +69,7 @@ function Courses(props) {
   console.log("loading:", loading);
   console.log("errror:", error);
 
-  let yourClasses, otherClasses;
+  let yourClasses = [], otherClasses = [];
 
   if (courses.data) {
     yourClasses = courses.data.courses.filter(c => {

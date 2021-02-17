@@ -37,6 +37,7 @@ type Pending{
     uploadedBY: User!
     furl: String! #todo better implementation for file
     courseID: String!
+    message: String
 }
 
 type Content{
@@ -166,6 +167,17 @@ input EditedPending{
     description: String
 }
 
+input AcceptedPending{
+    title: String
+    description: String
+    tags:[String!]
+    message:String
+}
+
+input RejectedPending{
+    message:String
+}
+
 input TargetComment{
     body: String!
 }
@@ -292,8 +304,8 @@ type Mutation {
     offerContent(username:String, courseID:String!, target:TargetPending!): OfferContentPayLoad!
     editOfferedContent(username:String, courseID:String!, pendingID:String!, target:EditedPending!): EditOfferedContentPayLoad!
     deleteOfferedContent(username:String, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad!
-    acceptOfferedContent(username:String, courseID:String!, pendingID:String!, changed:EditedPending!): EditOfferedContentPayLoad!
-    rejectOfferedContent(username:String, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad!
+    acceptOfferedContent(username:String, courseID:String!, pendingID:String!, changed:AcceptedPending!): EditOfferedContentPayLoad!
+    rejectOfferedContent(username:String, courseID:String!, pendingID:String!, message:RejectedPending): DeleteOfferedContentPayLoad!
 
     createComment(username:String, contentID:String!, repliedAtID:String, target:TargetComment!): CreateCommentPayLoad!
     updateComment(username:String, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad!

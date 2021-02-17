@@ -83,7 +83,7 @@ func Accept(courseID string, pending *Pending) (*Pending, error) {
 		return nil, model.InternalServerException{Message: err.Error()}
 	}
 	pending.Status = ACCEPTED
-	err = DBD.UpdateStatus(cID, pending.ID, pending.Title, pending.Description, ACCEPTED, pending.Timestamp)
+	err = DBD.UpdateStatus(cID, pending.ID, pending.Title, pending.Description, pending.Message, ACCEPTED, pending.Timestamp)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func Reject(courseID string, pending *Pending) (*Pending, error) {
 		return nil, model.InternalServerException{Message: err.Error()}
 	}
 	pending.Status = REJECTED
-	err = DBD.UpdateStatus(cID, pending.ID, pending.Title, pending.Description, REJECTED, pending.Timestamp)
+	err = DBD.UpdateStatus(cID, pending.ID, pending.Title, pending.Description, pending.Message, REJECTED, pending.Timestamp)
 	if err != nil {
 		return nil, err
 	}

@@ -40,7 +40,7 @@ func New(title, uploadedBy, vurl string, courseID string, description, approvedB
 	if err != nil {
 		return nil, err
 	}
-	c:=&Content{
+	return &Content{
 		Title:        title,
 		Description:  modelUtil.PtrTOStr(description),
 		Timestamp:    time.Now().Unix(),
@@ -50,8 +50,7 @@ func New(title, uploadedBy, vurl string, courseID string, description, approvedB
 		Tags:         tags,
 		Comments:     []*comment.Comment{},
 		CourseID:     courseID,
-	}
-	return insert(courseID, c)
+	}, nil
 }
 
 func RegexValidate(title, description, uploadedBy, courseID, approvedBy *string, tags []string) error {

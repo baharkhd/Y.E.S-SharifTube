@@ -2,9 +2,6 @@ package course
 
 import (
 	"encoding/json"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/coocood/freecache"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 	"yes-sharifTube/graph/model"
 	modelUtil "yes-sharifTube/internal/model"
@@ -13,6 +10,10 @@ import (
 	"yes-sharifTube/internal/model/content"
 	"yes-sharifTube/internal/model/pending"
 	"yes-sharifTube/pkg/objectstorage"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/coocood/freecache"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const CacheExpire = 10 * 60
@@ -484,6 +485,9 @@ func (c *Course) FilterPending(username *string, pnd *pending.Pending) *pending.
 		pnd.Furl = ""
 		pnd.Description = ""
 	}
+	if username == nil || *username != pnd.UploadedByUn {
+		pnd.Message = ""
+	}
 	return pnd
 }
 
@@ -542,15 +546,13 @@ func (c *Course) AddNewPending(title string, authorUsername string, upload []*gr
 	}
 	vurl := OSD.GetURL(bucket, upload[0].Filename)
 
-
 	// create a pending
 	pn, err := pending.New(title, authorUsername, vurl, c.ID.Hex(), description)
 	if err != nil {
 		return nil, err
 	}
 
-
-	return pn,nil
+	return pn, nil
 }
 
 func (c *Course) AddNewAttachment(authorUsername string, name string, attach graphql.Upload, description *string) (*attachment.Attachment, error) {
@@ -573,9 +575,8 @@ func (c *Course) AddNewAttachment(authorUsername string, name string, attach gra
 	if err != nil {
 		return nil, err
 	}
-	return an,nil
+	return an, nil
 }
-
 
 func FilterPendsOfCourses(username *string, courses []*Course) []*Course {
 	var crs []*Course
