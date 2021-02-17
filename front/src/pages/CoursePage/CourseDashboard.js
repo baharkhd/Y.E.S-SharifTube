@@ -176,12 +176,12 @@ function CourseDashboard(props) {
             Invetories
           </Header>
         </Divider>
-        <Grid columns={1} textAlign="left">
-          {!response.loading &&
-          course &&
-          course.inventory &&
-          course.inventory.length !== 0 ? (
-            course.inventory.map(attach => {
+        {!response.loading &&
+        course &&
+        course.inventory &&
+        course.inventory.length !== 0 ? (
+          <Grid columns={1} textAlign="left">
+            {course.inventory.map(attach => {
               return (
                 <Grid.Column>
                   <a
@@ -200,11 +200,11 @@ function CourseDashboard(props) {
                   </a>
                 </Grid.Column>
               );
-            })
-          ) : (
-            <Segment>There are no attachments yet .</Segment>
-          )}
-        </Grid>
+            })}
+          </Grid>
+        ) : (
+          <Segment>There are no attachments yet .</Segment>
+        )}
       </Segment>
     </div>
   );
