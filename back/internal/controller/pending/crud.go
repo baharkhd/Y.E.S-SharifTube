@@ -23,7 +23,7 @@ func GetPendings(username *string, courseID, uploaderUsername *string, status *m
 	return prs, nil
 }
 
-func CreatePending(authorUsername, courseID, title string, description *string, video []*graphql.Upload) (*pending.Pending, error) {
+func CreatePending(authorUsername, courseID, title string, description *string, video graphql.Upload) (*pending.Pending, error) {
 	// check if user exists in database
 	if _, err := user.Get(authorUsername); err != nil {
 		return nil, err
