@@ -7,21 +7,42 @@ import Icon from "semantic-ui-react/dist/commonjs/elements/Icon";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChalkboardTeacher} from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
 import Input from "semantic-ui-react/dist/commonjs/elements/Input";
-// import './Homepage.css'
-const homePageBodyLStyle =
-    {
-        height: '100vh',
-        backgroundColor: '#abe0fd'
-    }
 
-const homePageCourseListLStyle =
-    {
-        top: 70,
-        backgroundColor: '#13678e',
-        border: 'none',
-        borderRadius: '0px'
-    }
+const homePageBodyLStyle = {
+    height: '100vh',
+    backgroundColor: '#abe0fd'
+}
 
+const homePageCourseListLStyle = {
+    backgroundColor: '#13678e',
+    border: 'none',
+    borderRadius: '0px',
+    margin: 'auto',
+    width: '90%',
+    height: '80%',
+    marginTop: 0,
+    overflow: 'auto'
+}
+
+const homepageSearchContainerStyle = {
+    margin: 'auto',
+    width: '50%',
+    padding: '20px'
+}
+
+const homepageSearchLStyle = {
+    color: '#007fc1',
+}
+
+const courseContentExtraLStyle = {
+    color: '#023849',
+    overFlow: 'hidden'
+}
+
+const courseDescriptionStyle = {
+    overflow: 'hidden',
+    height: '20px'
+}
 const COURSES_QUERY = gql`
   query GetCoursesByFilter($keyWords: [String!]!, $amount: Int!, $start: Int!) {
     coursesByKeyWords(keyWords: $keyWords, amount: $amount, start: $start) {
@@ -67,9 +88,11 @@ function Homepage() {
 
     return (
         <div style={homePageBodyLStyle}>
-            <Input icon='search' placeholder='Search...' className={Homepage.HomepageSearch}/>
+            <div style={homepageSearchContainerStyle}>
+                <Input fluid icon='search' placeholder='Search for courses...' size='big' style={homepageSearchLStyle}/>
+            </div>
             <Segment style={homePageCourseListLStyle}>
-                <Grid columns={3}>
+                <Grid columns={4}>
                     {!loading &&
                     data.coursesByKeyWords.map(course => {
                         let date = new Date(course.createdAt * 1000).toLocaleString("en-US", {
@@ -90,21 +113,25 @@ function Homepage() {
                                 <Link to={"/course:" + course.id}>
                                     <Card
                                         onClick={() => {
-                                            console.log("course:", course);
                                         }}
+                                        style={{width: '100vh'}}
                                     >
                                         {/*todo image handling*/}
                                         <Image src={imageSrc} wrapped ui={false}/>
-                                        <Card.Content>
-                                            <Card.Header>{course.title}</Card.Header>
+                                        <Card.Content style={{overflow: 'hidden'}}>
+                                            <Card.Header style={{overflow: 'hidden'}}>{course.title}</Card.Header>
                                             <Card.Meta>
                                                 <span className='date'>{date}</span>
                                             </Card.Meta>
-                                            <Card.Description>{course.summary}</Card.Description>
+                                            <Card.Description
+                                                style={courseDescriptionStyle}>{course.summary}</Card.Description>
                                         </Card.Content>
-                                        <Card.Content extra>
+                                        <Card.Content extra style={courseContentExtraLStyle}>
                                             <FontAwesomeIcon
-                                                icon={faChalkboardTeacher}/><span>&nbsp;&nbsp;</span>{course.prof.username}
+                                                icon={faChalkboardTeacher}/>
+                                            <span>&nbsp;&nbsp;</span>
+                                            {/*todo click to see person account*/}
+                                            @{course.prof.username}
                                             <br/>
                                             <Icon name='user'/>
                                             {memCount} Members
