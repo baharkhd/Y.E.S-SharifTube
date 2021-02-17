@@ -65,6 +65,13 @@ const COURSE_QUERY = gql`
         description
         id
       }
+      inventory {
+        id
+        name
+        aurl
+        description
+        timestamp
+      }
     }
   }
 `;
@@ -150,7 +157,15 @@ function CourseDashboard(props) {
           course.contents ? (
             <ContentsPart contents={course.contents} id={id} />
           ) : (
-            <Segment>There are no videos yet.</Segment>
+            <div>
+              <Divider horizontal>
+                <Header textAlign="left">
+                  <Icon name="video play" />
+                  Videos
+                </Header>
+              </Divider>
+              <Segment>There are no videos yet.</Segment>
+            </div>
           )
         ) : (
           <></>

@@ -9,7 +9,8 @@ import {
   Modal,
   Form,
   Input,
-  TextArea
+  TextArea,
+  Message
 } from "semantic-ui-react";
 import { useParams } from "react-router-dom";
 import { useQuery, gql, useMutation } from "@apollo/client";
@@ -142,8 +143,8 @@ const ChangePendingModal = props => {
       tags: state.tags,
       message: "test message"
     },
-    onCompleted: ({acceptOfferedContent}) => {
-      console.log("accept offered contenttttttt:", acceptOfferedContent)
+    onCompleted: ({ acceptOfferedContent }) => {
+      console.log("accept offered contenttttttt:", acceptOfferedContent);
     }
   });
 
@@ -229,8 +230,8 @@ const ChangePendingModal = props => {
           positive
           onClick={() => {
             // accept pendins
-            console.log("state bfore accept pending:", state)
-            acceptOfferedContent()
+            console.log("state bfore accept pending:", state);
+            acceptOfferedContent();
             // props.setOpen(false);
           }}
         >
@@ -344,9 +345,9 @@ function PendingPage(props) {
 
   return (
     <Segment style={{ top: 70 }}>
-      <Grid columns={3} stackable>
+      <Grid columns={3} stackable textAlign="center">
         {!loading &&
-          (data.pendings ? (
+          (data.pendings != null && data.pendings.length !== 0 ? (
             data.pendings.map(content => {
               return (
                 <Grid.Column textAlign="left">
@@ -365,7 +366,24 @@ function PendingPage(props) {
               );
             })
           ) : (
-            <Segment>There are no pending contents yet</Segment>
+            <Message warning size="massive" compact>
+              <Message.Header>
+                <Icon name="th" />
+                There are no pendings yet
+              </Message.Header>
+            </Message>
+            // <Grid columns={1} style={{top: 90, position: "absolute", bottom: 0}}>
+            //   <Grid.Column textAlign="center" verticalAlign="middle">
+            //     {/* <Segment textAlign="center"> */}
+            //       <Message warning size="massive" compact>
+            //         <Message.Header>
+            //           <Icon name="th" />
+            //           There are no pendings yet
+            //         </Message.Header>
+            //       </Message>
+            //     {/* </Segment> */}
+            //   </Grid.Column>
+            // </Grid>
           ))}
       </Grid>
     </Segment>
