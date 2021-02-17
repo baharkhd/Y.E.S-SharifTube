@@ -504,7 +504,7 @@ func (c *Course) FilterPendsOfCourse(username *string) *Course {
 	return c
 }
 
-func (c *Course) AddNewContent(authorUsername string, title string, description *string, upload []*graphql.Upload, tags []string) (*content.Content, error) {
+func (c *Course) AddNewContent(authorUsername string, title string, description *string, upload graphql.Upload, tags []string) (*content.Content, error) {
 	//check if user can insert content
 	err := c.IsUserAllowedToInsertContent(authorUsername)
 	if err != nil {
@@ -513,10 +513,10 @@ func (c *Course) AddNewContent(authorUsername string, title string, description 
 
 	// storing video in the Object Storage
 	bucket := c.getCourseBucket()
-	if err := OSD.StoreMulti(bucket, upload[0].Filename, upload); err != nil {
+	if err := OSD.Store(bucket, upload.Filename, upload.File,upload.Size); err != nil {
 		return nil, err
 	}
-	vurl := OSD.GetURL(bucket, upload[0].Filename)
+	vurl := OSD.GetURL(bucket, upload.Filename)
 
 	// create a content
 	cn, err := content.New(title, authorUsername, vurl, c.ID.Hex(), description, nil, tags)
@@ -531,7 +531,7 @@ func (c *Course) AddNewContent(authorUsername string, title string, description 
 	return cn, nil
 }
 
-func (c *Course) AddNewPending(title string, authorUsername string, upload []*graphql.Upload, description *string) (*pending.Pending, error) {
+func (c *Course) AddNewPending(title string, authorUsername string, upload graphql.Upload, description *string) (*pending.Pending, error) {
 
 	// check if user can offer
 	err := c.IsUserAllowedToInsertPending(authorUsername)
@@ -541,10 +541,10 @@ func (c *Course) AddNewPending(title string, authorUsername string, upload []*gr
 
 	// store video in Object Storage
 	bucket := c.getCourseBucket()
-	if err := OSD.StoreMulti(bucket, upload[0].Filename, upload); err != nil {
+	if err := OSD.Store(bucket, upload.Filename, upload.File,upload.Size); err != nil {
 		return nil, err
 	}
-	vurl := OSD.GetURL(bucket, upload[0].Filename)
+	vurl := OSD.GetURL(bucket, upload.Filename)
 
 	// create a pending
 	pn, err := pending.New(title, authorUsername, vurl, c.ID.Hex(), description)

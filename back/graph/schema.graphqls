@@ -135,7 +135,7 @@ input EditedCourse{
 input TargetContent{
     title: String!
     description: String
-    video: [Upload!]!
+    video: Upload!
     tags: [String!]
 }
 
@@ -159,7 +159,7 @@ input EditAttachment{
 input TargetPending{
     title: String!
     description: String
-    video: [Upload!]!
+    video: Upload!
 }
 
 input EditedPending{
