@@ -120,7 +120,7 @@ const UPLOAD_MUTATION = gql`
     $courseID: String!
     $title: String!
     $description: String
-    $video: [Upload!]!
+    $video: Upload!
     $tags: [String!]
   ) {
     uploadContent(
@@ -192,7 +192,6 @@ const UPLOAD_ATTACHMENTT_MUTATION = gql`
     }
   }
 `;
-
 
 function UploadPage(props) {
   let { courseID } = useParams();
@@ -295,16 +294,6 @@ function UploadPage(props) {
     <Segment style={{ top: 70 }}>
       {/* <Segment>Where you should upload videos</Segment> */}
       <Form>
-        <Form.Group widths="four">
-          <Form.Field
-            control={Input}
-            label="URL of this content"
-            placeholder="URL"
-            onChange={e => {
-              setState({ ...state, url: e.target.value });
-            }}
-          />
-        </Form.Group>
         <Form.Group widths="four">
           <Form.Field
             control={Input}
