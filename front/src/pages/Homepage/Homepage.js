@@ -6,7 +6,8 @@ import Image from "semantic-ui-react/dist/commonjs/elements/Image";
 import Icon from "semantic-ui-react/dist/commonjs/elements/Icon";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChalkboardTeacher} from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
-
+import Input from "semantic-ui-react/dist/commonjs/elements/Input";
+import './Homepage.css'
 const homePageBodyLStyle =
     {
         height: '100vh',
@@ -66,6 +67,7 @@ function Homepage() {
 
     return (
         <div style={homePageBodyLStyle}>
+            <Input icon='search' placeholder='Search...' className={Homepage.HomepageSearch}/>
             <Segment style={homePageCourseListLStyle}>
                 <Grid columns={3}>
                     {!loading &&
@@ -74,17 +76,16 @@ function Homepage() {
                             month: "long",
                             year: "numeric"
                         });
-                        let imageSrc='https://source.unsplash.com/user/erondu'
+                        let imageSrc = 'https://source.unsplash.com/user/erondu'
                         let memCount = 1
-                        if (course.tas != null){
+                        if (course.tas != null) {
                             memCount += course.tas.length
                         }
-                        if (course.students != null){
+                        if (course.students != null) {
                             memCount += course.students.length
                         }
 
                         return (
-                            
                             <Grid.Column>
                                 <Link to={"/course:" + course.id}>
                                     <Card
@@ -102,7 +103,8 @@ function Homepage() {
                                             <Card.Description>{course.summary}</Card.Description>
                                         </Card.Content>
                                         <Card.Content extra>
-                                            <FontAwesomeIcon icon={faChalkboardTeacher} /><span>&nbsp;&nbsp;</span>{course.prof.username}
+                                            <FontAwesomeIcon
+                                                icon={faChalkboardTeacher}/><span>&nbsp;&nbsp;</span>{course.prof.username}
                                             <br/>
                                             <Icon name='user'/>
                                             {memCount} Members
@@ -110,6 +112,7 @@ function Homepage() {
                                     </Card>
                                 </Link>
                             </Grid.Column>
+
                         );
                     })}
                 </Grid>

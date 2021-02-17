@@ -513,7 +513,7 @@ func (r *mutationResolver) DeleteOfferedContent(ctx context.Context, username *s
 	return reformatPending(res), nil
 }
 
-func (r *mutationResolver) AcceptOfferedContent(ctx context.Context, username *string, courseID string, pendingID string, changed model.EditedPending) (model.EditOfferedContentPayLoad, error) {
+func (r *mutationResolver) AcceptOfferedContent(ctx context.Context, username *string, courseID string, pendingID string, changed model.AcceptedPending) (model.EditOfferedContentPayLoad, error) {
 	if username == nil {
 		var err error
 		username, err = fetchUsername(ctx)
@@ -521,7 +521,7 @@ func (r *mutationResolver) AcceptOfferedContent(ctx context.Context, username *s
 			return err.(model.UserNotFoundException), nil
 		}
 	}
-	res, err := pendingController.AcceptPending(*username, courseID, pendingID, changed.Title, changed.Description)
+	res, err := pendingController.AcceptPending(*username, courseID, pendingID, changed.Title, changed.Description, changed.Message, changed.Tags)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:
@@ -545,7 +545,7 @@ func (r *mutationResolver) AcceptOfferedContent(ctx context.Context, username *s
 	return reformatPending(res), nil
 }
 
-func (r *mutationResolver) RejectOfferedContent(ctx context.Context, username *string, courseID string, pendingID string) (model.DeleteOfferedContentPayLoad, error) {
+func (r *mutationResolver) RejectOfferedContent(ctx context.Context, username *string, courseID string, pendingID string, message *model.RejectedPending) (model.DeleteOfferedContentPayLoad, error) {
 	if username == nil {
 		var err error
 		username, err = fetchUsername(ctx)
@@ -553,7 +553,7 @@ func (r *mutationResolver) RejectOfferedContent(ctx context.Context, username *s
 			return err.(model.UserNotFoundException), nil
 		}
 	}
-	res, err := pendingController.RejectPending(*username, courseID, pendingID)
+	res, err := pendingController.RejectPending(*username, courseID, pendingID, message.Message)
 	if err != nil {
 		switch err.(type) {
 		case model.UserNotFoundException:

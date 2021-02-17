@@ -104,6 +104,13 @@ type UploadContentPayLoad interface {
 	IsUploadContentPayLoad()
 }
 
+type AcceptedPending struct {
+	Title       *string  `json:"title"`
+	Description *string  `json:"description"`
+	Tags        []string `json:"tags"`
+	Message     *string  `json:"message"`
+}
+
 type Attachment struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
@@ -333,6 +340,7 @@ type Pending struct {
 	UploadedBy  *User   `json:"uploadedBY"`
 	Furl        string  `json:"furl"`
 	CourseID    string  `json:"courseID"`
+	Message     *string `json:"message"`
 }
 
 func (Pending) IsOfferContentPayLoad()         {}
@@ -368,6 +376,10 @@ func (RegexMismatchException) IsOfferContentPayLoad()       {}
 func (RegexMismatchException) IsEditOfferedContentPayLoad() {}
 func (RegexMismatchException) IsCreateCommentPayLoad()      {}
 func (RegexMismatchException) IsEditCommentPayLoad()        {}
+
+type RejectedPending struct {
+	Message *string `json:"message"`
+}
 
 type Reply struct {
 	ID        string `json:"id"`

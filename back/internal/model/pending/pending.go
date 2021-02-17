@@ -12,6 +12,8 @@ const TitleWordSize = 30
 const TitleCharSize = 150
 const DescriptionWordSize = 200
 const DescriptionCharSize = 600
+const MessageWordSize = 200
+const MessageCharSize = 600
 
 type Pending struct {
 	ID           primitive.ObjectID `bson:"_id" json:"id,omitempty"`
@@ -22,12 +24,13 @@ type Pending struct {
 	UploadedByUn string             `json:"uploaded_by" bson:"uploaded_by"`
 	Furl         string             `json:"furl" bson:"furl"` //todo better implementation
 	CourseID     string             `json:"course" bson:"course"`
+	Message      string             `json:"message" bson:"message"`
 }
 
 var DBD DBDriver
 
 func New(title, uploadedByID, furl, courseID string, description *string) (*Pending, error) {
-	err := RegexValidate(&title, description, &uploadedByID, &furl, &courseID)
+	err := RegexValidate(&title, description, &uploadedByID, &furl, &courseID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -38,11 +41,12 @@ func New(title, uploadedByID, furl, courseID string, description *string) (*Pend
 		Timestamp:    time.Now().Unix(),
 		UploadedByUn: uploadedByID,
 		Furl:         furl,
+		Message:      "",
 		CourseID:     courseID,
 	}, nil
 }
 
-func RegexValidate(title, description, uploadedByID, furl, courseID *string) error {
+func RegexValidate(title, description, uploadedByID, furl, courseID, message *string) error {
 	if title != nil && modelUtil.IsSTREmpty(*title) {
 		return model.RegexMismatchException{Message: "title field is empty"}
 	}
@@ -58,6 +62,12 @@ func RegexValidate(title, description, uploadedByID, furl, courseID *string) err
 	if uploadedByID != nil && modelUtil.IsSTREmpty(*uploadedByID) {
 		return model.RegexMismatchException{Message: "uploader username field is empty"}
 	}
+	if message != nil && modelUtil.IsSTREmpty(*message) {
+		return model.RegexMismatchException{Message: "description field is empty"}
+	}
+	if message != nil && (modelUtil.WordCount(*message) > MessageWordSize || len(*message) > MessageCharSize) {
+		return model.RegexMismatchException{Message: "description field exceeds limit size"}
+	}
 	//todo regex definition for Furl field
 	if furl != nil && modelUtil.IsSTREmpty(*furl) {
 		return model.RegexMismatchException{Message: "file URL is empty"}
@@ -71,11 +81,11 @@ func RegexValidate(title, description, uploadedByID, furl, courseID *string) err
 	return nil
 }
 
-func (p *Pending) Update(newTitle, newDescription *string) error {
+func (p *Pending) Update(newTitle, newDescription, message *string) error {
 	if newTitle == nil && newDescription == nil {
 		return model.EmptyFieldsException{Message: model.EmptyKeyErrorMessage}
 	}
-	err := RegexValidate(newTitle, newDescription, nil, nil, nil)
+	err := RegexValidate(newTitle, newDescription, nil, nil, nil, message)
 	if err != nil {
 		return err
 	}
@@ -84,6 +94,9 @@ func (p *Pending) Update(newTitle, newDescription *string) error {
 	}
 	if newDescription != nil {
 		p.Description = *newDescription
+	}
+	if message != nil {
+		p.Message = *message
 	}
 	p.Timestamp = time.Now().Unix()
 	return nil

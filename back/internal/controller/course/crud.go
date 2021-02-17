@@ -25,7 +25,8 @@ func GetCoursesByKeyWords(username *string, keywords []string, startIdx, amount 
 
 func CreateCourse(authorUsername, title string, summery *string, token string) (*course.Course, error) {
 	// check if user exists in database
-	if _, err := user.Get(authorUsername); err != nil {
+	usr, err := user.Get(authorUsername)
+	if err != nil {
 		return nil, err
 	}
 	// create a user
@@ -38,6 +39,9 @@ func CreateCourse(authorUsername, title string, summery *string, token string) (
 	if err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	usr.Enroll(cr.ID.Hex())
+	usr.UpdateCache()
 	return cr.FilterPendsOfCourse(&authorUsername), nil
 }
 
@@ -69,7 +73,8 @@ func UpdateCourse(authorUsername, courseID string, newTitle, newSummery, newToke
 
 func DeleteCourse(authorUsername, courseID string) (*course.Course, error) {
 	// check if user exists in database
-	if _, err := user.Get(authorUsername); err != nil {
+	usr, err := user.Get(authorUsername)
+	if err != nil {
 		return nil, err
 	}
 	// get the course from database
@@ -85,6 +90,10 @@ func DeleteCourse(authorUsername, courseID string) (*course.Course, error) {
 	if err = course.Delete(cr); err != nil {
 		return nil, err
 	}
+	// maintain consistency in cache
+	user.DeleteUsersOfCourseFromCache(cr)
+	usr.Leave(courseID)
+	usr.UpdateCache()
 	return cr.FilterPendsOfCourse(&authorUsername), nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"github.com/coocood/freecache"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"yes-sharifTube/graph/model"
+	"yes-sharifTube/internal/model/course"
 )
 
 const CacheExpire = 10 * 60
@@ -99,4 +100,14 @@ func (u *User) Cache() error {
 func (u *User) UpdateCache() {
 	DeleteFromCache(u.Username)
 	_ = u.Cache()
+}
+
+func DeleteUsersOfCourseFromCache(c *course.Course){
+	DeleteFromCache(c.ProfUn)
+	for _, ta := range c.TaUns {
+		DeleteFromCache(ta)
+	}
+	for _, std := range c.StdUns {
+		DeleteFromCache(std)
+	}
 }

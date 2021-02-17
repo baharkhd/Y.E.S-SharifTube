@@ -10,5 +10,5 @@ type DBDriver interface {
 	Insert(courseID primitive.ObjectID, pending *Pending) (*Pending, error)
 	UpdateInfo(courseID, pendingID primitive.ObjectID, title, description string, timestamp int64)  error
 	Delete(courseID, pendingID primitive.ObjectID) error
-	UpdateStatus(courseID, pendingID primitive.ObjectID, newTitle, newDescription string, status Status, timestamp int64) error
+	UpdateStatus(courseID, pendingID primitive.ObjectID, newTitle, newDescription,message string, status Status, timestamp int64) error
 }

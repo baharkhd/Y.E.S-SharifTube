@@ -197,7 +197,7 @@ func (p PendingMongoDriver) Delete(courseID, pendingID primitive.ObjectID) error
 	return nil
 }
 
-func (p PendingMongoDriver) UpdateStatus(courseID, pendingID primitive.ObjectID, newTitle, newDescription string, status pending.Status, timestamp int64) error {
+func (p PendingMongoDriver) UpdateStatus(courseID, pendingID primitive.ObjectID, newTitle, newDescription, message string, status pending.Status, timestamp int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), LongTimeOut*time.Millisecond)
 	defer cancel()
 
@@ -210,6 +210,7 @@ func (p PendingMongoDriver) UpdateStatus(courseID, pendingID primitive.ObjectID,
 			"pends.$.title":       newTitle,
 			"pends.$.description": newDescription,
 			"pends.$.status":      status,
+			"pends.$.message":     message,
 			"pends.$.timestamp":   timestamp,
 		},
 	}

@@ -110,6 +110,7 @@ func reformatPending(p *pending.Pending) *model.Pending {
 		UploadedBy:  reformatUser(user.GetS(p.UploadedByUn)),
 		Furl:        p.Furl,
 		CourseID:    p.CourseID,
+		Message:     &p.Message,
 	}
 }
 

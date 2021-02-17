@@ -68,7 +68,7 @@ func UpdatePending(authorUsername, courseID, pendingID string, newTitle, newDesc
 		return nil, err
 	}
 	// update the pending
-	err = pn.Update(newTitle, newDescription)
+	err = pn.Update(newTitle, newDescription, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func DeletePending(authorUsername, courseID, pendingID string) (*pending.Pending
 	return pn, nil
 }
 
-func AcceptPending(username, courseID, pendingID string, newTitle, newDescription *string) (*pending.Pending, error) {
+func AcceptPending(username, courseID, pendingID string, newTitle, newDescription, message *string, tags []string) (*pending.Pending, error) {
 	// check if user exists in database
 	if _, err := user.Get(username); err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func AcceptPending(username, courseID, pendingID string, newTitle, newDescriptio
 		return nil, err
 	}
 	// update the pending
-	err = pn.Update(newTitle, newDescription)
+	err = pn.Update(newTitle, newDescription, message)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func AcceptPending(username, courseID, pendingID string, newTitle, newDescriptio
 		return nil, err
 	}
 	// accept that pending into content
-	nc, err := content.New(pn.Title, pn.UploadedByUn, pn.Furl, pn.CourseID, &pn.Description, &username, nil)
+	nc, err := content.New(pn.Title, pn.UploadedByUn, pn.Furl, pn.CourseID, &pn.Description, &username, tags)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func AcceptPending(username, courseID, pendingID string, newTitle, newDescriptio
 	return pn, nil
 }
 
-func RejectPending(username, courseID, pendingID string) (*pending.Pending, error) {
+func RejectPending(username, courseID, pendingID string, message *string) (*pending.Pending, error) {
 	// check if user exists in database
 	if _, err := user.Get(username); err != nil {
 		return nil, err
@@ -182,6 +182,11 @@ func RejectPending(username, courseID, pendingID string) (*pending.Pending, erro
 	}
 	// check if user can reject offer
 	err = cr.IsUserAllowedToRejectPending(username, pn)
+	if err != nil {
+		return nil, err
+	}
+	// update the pending
+	err = pn.Update(nil, nil, message)
 	if err != nil {
 		return nil, err
 	}

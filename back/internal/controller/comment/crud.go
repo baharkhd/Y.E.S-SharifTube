@@ -161,12 +161,12 @@ func DeleteComment(authorUsername, contentID, commentID string) (*comment.Commen
 	if err != nil {
 		return nil, nil, err
 	}
-	if rcmt != nil {
-		return nil, rcmt, nil
-	}
 	// maintain consistency in cache
 	cr.UpdateContent(con)
 	con.UpdateCache()
 	cr.UpdateCache()
+	if rcmt != nil {
+		return nil, rcmt, nil
+	}
 	return ccmt, nil, nil
 }

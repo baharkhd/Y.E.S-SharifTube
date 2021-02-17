@@ -479,6 +479,9 @@ func (c *Course) FilterPending(username *string, pnd *pending.Pending) *pending.
 		pnd.Furl = ""
 		pnd.Description = ""
 	}
+	if username == nil || *username != pnd.UploadedByUn {
+		pnd.Message = ""
+	}
 	return pnd
 }
 
