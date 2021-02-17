@@ -65,6 +65,13 @@ const COURSE_QUERY = gql`
         description
         id
       }
+      inventory {
+        id
+        name
+        aurl
+        description
+        timestamp
+      }
     }
   }
 `;
@@ -150,11 +157,54 @@ function CourseDashboard(props) {
           course.contents ? (
             <ContentsPart contents={course.contents} id={id} />
           ) : (
-            <Segment>There are no videos yet.</Segment>
+            <div>
+              <Divider horizontal>
+                <Header textAlign="left">
+                  <Icon name="video play" />
+                  Videos
+                </Header>
+              </Divider>
+              <Segment>There are no videos yet.</Segment>
+            </div>
           )
         ) : (
           <></>
         )}
+        <Divider horizontal>
+          <Header textAlign="left">
+            <Icon name="file" />
+            Invetories
+          </Header>
+        </Divider>
+        <Grid columns={1} textAlign="left">
+          {!response.loading &&
+          course &&
+          course.inventory &&
+          course.inventory.length !== 0 ? (
+            course.inventory.map(attach => {
+              return (
+                <Grid.Column>
+                  <a
+                    href="https://sharif-webelopers.ir/static/images/background.jpg"
+                    download
+                  >
+                    <Card>
+                      <Card.Content>
+                        <Card.Header>{attach.name}</Card.Header>
+                        <Card.Description>
+                          {attach.description}
+                        </Card.Description>
+                        <Card.Meta>aurl : {attach.aurl}</Card.Meta>
+                      </Card.Content>
+                    </Card>
+                  </a>
+                </Grid.Column>
+              );
+            })
+          ) : (
+            <Segment>There are no attachments yet .</Segment>
+          )}
+        </Grid>
       </Segment>
     </div>
   );

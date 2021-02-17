@@ -115,6 +115,15 @@ const COURSE_QUERY = gql`
   }
 `;
 
+// uploadContent(username:String, courseID:String!, target:TargetContent!): UploadContentPayLoad!
+
+// input TargetContent{
+//   title: String!
+//   description: String
+//   video: [Upload!]!
+//   tags: [String!]
+// }
+
 const UPLOAD_MUTATION = gql`
   mutation UploadContent(
     $courseID: String!
@@ -168,22 +177,29 @@ const UPLOAD_MUTATION = gql`
 // }
 
 const UPLOAD_ATTACHMENTT_MUTATION = gql`
-  mutation UploadAttachment($courseID: String!, $name: String!, $aurl: String!, $description: String) {
-  uploadAttachment(courseID: $courseID, target: {name: $name, aurl: $aurl, description: $description}) {
-    __typename
-    ... on Attachment {
-      id
-      name
-      aurl
-      description
-      timestamp
+  mutation UploadAttachment(
+    $courseID: String!
+    $name: String!
+    $attach: Upload!
+    $description: String
+  ) {
+    uploadAttachment(
+      courseID: $courseID
+      target: { name: $name, attach: $attach, description: $description }
+    ) {
+      __typename
+      ... on Attachment {
+        id
+        name
+        description
+        timestamp
+        aurl
+      }
+      ... on Exception {
+        message
+      }
     }
-    ... on Exception {
-      message
-    }
-
   }
-}
 `;
 
 function UploadPage(props) {
@@ -193,8 +209,9 @@ function UploadPage(props) {
   const history = useHistory();
 
   let path = useLocation().pathname;
-  var n = path.lastIndexOf("/");
-  var uploadType = path.substring(n + 1);
+  let pathParts = path.split("/");
+  var uploadType = pathParts[2];
+  var fileType = pathParts[3];
 
   const [state, setState] = useState({
     title: "",
@@ -209,11 +226,11 @@ function UploadPage(props) {
     variables: {
       courseID: courseID,
       name: state.title,
-      // aurl: "?????",
+      attach: state.file,
       description: state.description
     },
-    onCompleted: ({uploadAttachment}) => {
-      console.log("upload attachmenttttttttt")
+    onCompleted: ({ uploadAttachment }) => {
+      console.log("upload attachmenttttttttt", uploadAttachment);
     }
   });
 
@@ -373,14 +390,18 @@ function UploadPage(props) {
           onClick={() => {
             console.log("State before test:", state);
             if (uploadType == "upload") {
-              uploadContent();
+              if (fileType === "attachment") {
+                uploadAttachment();
+              } else {
+                uploadContent();
+              }
             } else {
               offerContent();
             }
           }}
           style={{marginTop:'10px'}}
         >
-          Upload
+          Upload {fileType === "attachment" ? "Attachment" : "Video"}
         </Form.Button>
       </Form>
     </Segment>

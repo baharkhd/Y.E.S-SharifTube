@@ -9,10 +9,11 @@ import {
   Modal,
   Form,
   Input,
-  TextArea
+  TextArea,
+  Message
 } from "semantic-ui-react";
 import { useParams } from "react-router-dom";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql, useMutation } from "@apollo/client";
 
 const PENDING_QUERY = gql`
   query GetPending(
@@ -41,26 +42,24 @@ const PENDING_QUERY = gql`
   }
 `;
 
-// input EditedPending{
-//   title: String
-//   description: String
-// }
-
-// acceptOfferedContent(username:String, courseID:String!, pendingID:String!, changed:EditedPending!): EditOfferedContentPayLoad!
-
-// rejectOfferedContent(username:String, courseID:String!, pendingID:String!): DeleteOfferedContentPayLoad!
-
 const ACCEPT_PENDING_MUTATION = gql`
   mutation AcceptPending(
     $courseID: String!
     $pendingID: String!
     $title: String
     $description: String
+    $tags: [String!]
+    $message: String
   ) {
     acceptOfferedContent(
       courseID: $courseID
       pendingID: $pendingID
-      changed: { title: $title, description: $description }
+      changed: {
+        title: $title
+        description: $description
+        tags: $tags
+        message: $message
+      }
     ) {
       ... on Pending {
         id
@@ -106,6 +105,20 @@ const REJECT_PENDING_MUTATION = gql`
 //   courseID: String!
 // }
 
+// input AcceptedPending{
+//   title: String
+//   description: String
+//   tags:[String!]
+//   message:String
+// }
+
+// input RejectedPending{
+//   message:String
+// }
+
+// acceptOfferedContent(username:String, courseID:String!, pendingID:String!, changed:AcceptedPending!): EditOfferedContentPayLoad!
+// rejectOfferedContent(username:String, courseID:String!, pendingID:String!, message:RejectedPending): DeleteOfferedContentPayLoad!
+
 const ChangePendingModal = props => {
   const [state, setState] = useState({
     title: props.title,
@@ -113,10 +126,45 @@ const ChangePendingModal = props => {
     tagInput: "",
     tags: []
   });
+
+  // $courseID: String!
+  //   $pendingID: String!
+  //   $title: String
+  //   $description: String
+  //   $tags: [String!]
+  //   $message: String
+
+  const [acceptOfferedContent] = useMutation(ACCEPT_PENDING_MUTATION, {
+    variables: {
+      courseID: props.courseID,
+      pendingID: props.pendingID,
+      title: state.title,
+      description: state.description,
+      tags: state.tags,
+      message: "test message"
+    },
+    onCompleted: ({ acceptOfferedContent }) => {
+      console.log("accept offered contenttttttt:", acceptOfferedContent);
+    }
+  });
+
   return (
     <Modal open={props.open}>
-      <Modal.Header>Change the content if you want :)</Modal.Header>
-      <Modal.Content>
+      <Modal.Header>Change the offered content if you want .</Modal.Header>
+
+      <Modal.Content scrolling>
+        <Modal.Content>
+          <video width="60%" controls>
+            <source
+              src={
+                "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
+              }
+              type="video/mp4"
+            />
+            {/* <source  type="" /> */}
+            Your browser does not support HTML video.
+          </video>
+        </Modal.Content>
         <Form>
           <Form.Group>
             <Form.Field
@@ -140,6 +188,7 @@ const ChangePendingModal = props => {
           <Form.Group>
             <Form.Field
               control={Input}
+              value={state.tagInput}
               // label="Tags"
               placeholder="Add a tag"
               onChange={e => {
@@ -154,7 +203,8 @@ const ChangePendingModal = props => {
                   if (state.tagInput !== "") {
                     setState({
                       ...state,
-                      tags: [...state.tags, state.tagInput]
+                      tags: [...state.tags, state.tagInput],
+                      tagInput: ""
                     });
                   }
                 }}
@@ -176,8 +226,25 @@ const ChangePendingModal = props => {
         </Form>
       </Modal.Content>
       <Modal.Actions>
-        <Button positive>Change and Approve!</Button>
-        <Button negative>Cancel</Button>
+        <Button
+          positive
+          onClick={() => {
+            // accept pendins
+            console.log("state bfore accept pending:", state);
+            acceptOfferedContent();
+            // props.setOpen(false);
+          }}
+        >
+          Change and Approve!
+        </Button>
+        <Button
+          negative
+          onClick={() => {
+            props.setOpen(false);
+          }}
+        >
+          Cancel
+        </Button>
       </Modal.Actions>
     </Modal>
   );
@@ -197,8 +264,26 @@ const ContentCard = ({
     month: "long",
     year: "numeric"
   });
+
+  const [state, setState] = useState({
+    modalOpen: false
+    // contentID
+  });
+
+  const setOpen = val => {
+    setState({ modalOpen: val });
+  };
+
   return (
     <div>
+      <ChangePendingModal
+        pendingID={id}
+        courseID={courseID}
+        open={state.modalOpen}
+        title={title}
+        description={description}
+        setOpen={setOpen}
+      />
       <Card fluid>
         <Card.Content>
           <Card.Header>{furl}</Card.Header>
@@ -213,8 +298,21 @@ const ContentCard = ({
 
         <Card.Content>
           <Button.Group fluid>
-            <Button positive>Approve</Button>
-            {/* <Button color="blue">salam</Button> */}
+            <Button
+              positive
+              onClick={() => {
+                setState({ modalOpen: true });
+              }}
+            >
+              Approve
+            </Button>
+            {/* <Button
+              color="blue"
+              onClick={() => {
+                setState({ modalOpen: true });
+              }}
+            >
+            </Button> */}
             <Button color="red">Reject</Button>
           </Button.Group>
         </Card.Content>
@@ -226,11 +324,6 @@ const ContentCard = ({
 function PendingPage(props) {
   let { courseID } = useParams();
   courseID = courseID.substring(1);
-
-  const [state, setState] = useState({
-    modalOpen: false
-    // contentID
-  });
 
   // ($coureID: String, $status: Status, $uploaderUsername: String, $start: Int!, amount: Int!)
 
@@ -252,10 +345,9 @@ function PendingPage(props) {
 
   return (
     <Segment style={{ top: 70 }}>
-      <ChangePendingModal open={state.modalOpen} />
-      <Grid columns={3} stackable>
+      <Grid columns={3} stackable textAlign="center">
         {!loading &&
-          (data.pendings ? (
+          (data.pendings != null && data.pendings.length !== 0 ? (
             data.pendings.map(content => {
               return (
                 <Grid.Column textAlign="left">
@@ -274,7 +366,24 @@ function PendingPage(props) {
               );
             })
           ) : (
-            <Segment>There are no pending contents yet</Segment>
+            <Message warning size="massive" compact>
+              <Message.Header>
+                <Icon name="th" />
+                There are no pendings yet
+              </Message.Header>
+            </Message>
+            // <Grid columns={1} style={{top: 90, position: "absolute", bottom: 0}}>
+            //   <Grid.Column textAlign="center" verticalAlign="middle">
+            //     {/* <Segment textAlign="center"> */}
+            //       <Message warning size="massive" compact>
+            //         <Message.Header>
+            //           <Icon name="th" />
+            //           There are no pendings yet
+            //         </Message.Header>
+            //       </Message>
+            //     {/* </Segment> */}
+            //   </Grid.Column>
+            // </Grid>
           ))}
       </Grid>
     </Segment>

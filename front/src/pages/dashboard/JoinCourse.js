@@ -26,6 +26,8 @@ const courseContentExtraLStyle = {
     color: '#023849',
     overFlow: 'hidden'
 }
+import { useMutation, gql, useQuery } from "@apollo/client";
+import constants from "../../constants";
 
 const COURSES_QUERY = gql`
   query GetCoursesByFilter($keyWords: [String!]!, $amount: Int!, $start: Int!) {
@@ -83,11 +85,11 @@ const JOIN_COURSE_MUTATION = gql`
   }
 `;
 
-function JoinCourseModel({joiningCourse, setState, username}) {
-    const [courseInfo, setCourseInfo] = useState({
-        courseID: "",
-        token: ""
-    });
+function JoinCourseModel({ joiningCourse, setState, username, makeNotif }) {
+  const [courseInfo, setCourseInfo] = useState({
+    courseID: "",
+    token: ""
+  });
 
     const {data, loading, error} = useQuery(COURSES_QUERY, {
         fetchPolicy: "cache-and-network",
@@ -116,18 +118,18 @@ function JoinCourseModel({joiningCourse, setState, username}) {
                 }
             });
 
-            console.log("addUserToCourse:", addUserToCourse);
-            console.log("data in adding user to course:", data);
-        },
-        onCompleted: ({addUserToCourse}) => {
-            console.log("add user to coure:", addUserToCourse);
-            if (addUserToCourse.__typename == "Course") {
-                alert("you successfully added to the class :D");
-            } else {
-                alert(addUserToCourse.message);
-            }
-        }
-    });
+      console.log("addUserToCourse:", addUserToCourse);
+      console.log("data in adding user to course:", data);
+    },
+    onCompleted: ({ addUserToCourse }) => {
+      console.log("add user to coure:", addUserToCourse);
+      if (addUserToCourse.__typename == "Course") {
+        makeNotif("Success!", "You successfully joined a course .", "success");
+      } else {
+        makeNotif("Error!", addUserToCourse.message, "danger");
+      }
+    }
+  });
 
     return (
         <Modal open={joiningCourse}>
@@ -206,15 +208,20 @@ function JoinCourseModel({joiningCourse, setState, username}) {
                 <Button
                     positive
                     onClick={() => {
-                        // Join class
-                        if (courseInfo.courseID !== "" && courseInfo.token !== "") {
-                            // console.log("courseInfo.couresID:", courseInfo.courseID)
-                            addUserToCourse();
-                        }
-                        setState({joiningCourse: false});
+                      // Join class
+                      if (
+                          courseInfo.courseID.trim() !== "" &&
+                          courseInfo.token.trim() !== ""
+                      ) {
+                        // console.log("courseInfo.couresID:", courseInfo.courseID)
+                        addUserToCourse();
+                      } else {
+                        makeNotif("Error!", constants.EMPTY_FIELDS, "danger");
+                      }
+                      setState({ joiningCourse: false });
                     }}
                 >
-                    Join
+                  Join
                 </Button>
                 <Button
                     negative

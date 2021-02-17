@@ -37,19 +37,33 @@ const Dashboard = props => {
     nextFetchPolicy: "cache-first"
   });
 
-  console.log("user in dashboard:", state.user)
+  console.log("user in dashboard:", state.user);
   console.log("data:", data);
   console.log("loading:", loading);
   console.log("error:", error);
 
   return (
     <div>
-      <SideBar isMobile={props.isMobile} open={props.sidebarOpen} username={props.username} />
+      <SideBar
+        isMobile={props.isMobile}
+        open={props.sidebarOpen}
+        username={props.username}
+        makeNotif={props.makeNotif}
+      />
       {!loading &&
         (!props.isCourse ? (
-          <Panel isMobile={props.isMobile} user={data.user} setState={setState} />
+          <Panel
+            isMobile={props.isMobile}
+            user={data.user}
+            setState={setState}
+            makeNotif={props.makeNotif}
+          />
         ) : (
-          <Courses isMobile={props.isMobile} user={data.user} />
+          <Courses
+            isMobile={props.isMobile}
+            user={data.user}
+            makeNotif={props.makeNotif}
+          />
         ))}
     </div>
   );

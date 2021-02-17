@@ -17,7 +17,7 @@ type Attachment struct {
 	Name        string             `json:"name" bson:"name"`
 	Description string             `json:"description" bson:"description"`
 	Timestamp   int64              `json:"timestamp" bson:"timestamp"`
-	Aurl        string             `json:"aurl" bson:"aurl"` //todo better implementation
+	Aurl        string             `json:"aurl" bson:"aurl"`
 	CourseID    string             `json:"course" bson:"course"`
 }
 
@@ -28,13 +28,20 @@ func New(name, aurl, courseID string, description *string) (*Attachment, error) 
 	if err != nil {
 		return nil, err
 	}
-	return &Attachment{
+	a:= &Attachment{
 		Name:        name,
 		Description: modelUtil.PtrTOStr(description),
 		Timestamp:   time.Now().Unix(),
 		Aurl:        aurl,
 		CourseID:    courseID,
-	}, nil
+	}
+
+	// insert the attachment into database
+	an, err := Insert(courseID, a)
+	if err != nil {
+		return nil, err
+	}
+	return an,nil
 }
 
 func RegexValidate(name, description, aurl, courseID *string) error {

@@ -374,6 +374,7 @@ type RegexMismatchException struct {
 }
 
 func (RegexMismatchException) IsException()                 {}
+func (RegexMismatchException) IsCreateUserPayload()         {}
 func (RegexMismatchException) IsCreateCoursePayload()       {}
 func (RegexMismatchException) IsUpdateCourseInfoPayload()   {}
 func (RegexMismatchException) IsUploadContentPayLoad()      {}
@@ -402,9 +403,9 @@ func (Reply) IsEditCommentPayLoad()   {}
 func (Reply) IsDeleteCommentPayLoad() {}
 
 type TargetAttachment struct {
-	Name        string  `json:"name"`
-	Aurl        string  `json:"aurl"`
-	Description *string `json:"description"`
+	Name        string         `json:"name"`
+	Attach      graphql.Upload `json:"attach"`
+	Description *string        `json:"description"`
 }
 
 type TargetComment struct {
@@ -425,9 +426,9 @@ type TargetCourse struct {
 }
 
 type TargetPending struct {
-	Title       string  `json:"title"`
-	Description *string `json:"description"`
-	Furl        string  `json:"furl"`
+	Title       string         `json:"title"`
+	Description *string        `json:"description"`
+	Video       graphql.Upload `json:"video"`
 }
 
 type TargetUser struct {

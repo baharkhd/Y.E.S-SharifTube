@@ -1392,7 +1392,7 @@ input EditContent{
 
 input TargetAttachment{
     name: String!
-    aurl: String! # todo actual file
+    attach: Upload!
     description: String
 }
 
@@ -1404,7 +1404,7 @@ input EditAttachment{
 input TargetPending{
     title: String!
     description: String
-    furl: String! # todo actual video
+    video: Upload!
 }
 
 input EditedPending{
@@ -1490,7 +1490,7 @@ type OperationSuccessfull{
     message:String!
 }
 
-union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
+union CreateUserPayload = User | DuplicateUsernameException | RegexMismatchException | InternalServerException
 union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | InternalServerException
 union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | OperationSuccessfull    | InternalServerException
 
@@ -7928,11 +7928,11 @@ func (ec *executionContext) unmarshalInputTargetAttachment(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-		case "aurl":
+		case "attach":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("aurl"))
-			it.Aurl, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attach"))
+			it.Attach, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8072,11 +8072,11 @@ func (ec *executionContext) unmarshalInputTargetPending(ctx context.Context, obj
 			if err != nil {
 				return it, err
 			}
-		case "furl":
+		case "video":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("furl"))
-			it.Furl, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("video"))
+			it.Video, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8312,6 +8312,13 @@ func (ec *executionContext) _CreateUserPayload(ctx context.Context, sel ast.Sele
 			return graphql.Null
 		}
 		return ec._DuplicateUsernameException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -10346,7 +10353,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var regexMismatchExceptionImplementors = []string{"RegexMismatchException", "Exception", "CreateCoursePayload", "UpdateCourseInfoPayload", "UploadContentPayLoad", "EditContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad"}
+var regexMismatchExceptionImplementors = []string{"RegexMismatchException", "Exception", "CreateUserPayload", "CreateCoursePayload", "UpdateCourseInfoPayload", "UploadContentPayLoad", "EditContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad"}
 
 func (ec *executionContext) _RegexMismatchException(ctx context.Context, sel ast.SelectionSet, obj *model.RegexMismatchException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, regexMismatchExceptionImplementors)

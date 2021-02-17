@@ -19,18 +19,19 @@ import (
 	"yes-sharifTube/internal/model/pending"
 	"yes-sharifTube/internal/model/user"
 	"yes-sharifTube/pkg/database/mongodb"
+	"yes-sharifTube/pkg/objectstorage/baremetal"
 )
 
 const defaultPort = "8080"
 const queryComplexity = 8
 
 func main() {
-	// setting default Object storage for content model
-	//if driver, err := baremetal.New("localhost:22", "kycilius", "/home/kycilius/Documents/dev-null/shariftube");err!=nil{
-	//	panic(err)
-	//}else {
-	//	course.OSD=driver
-	//}
+	//setting default Object storage for content model
+	if driver, err := baremetal.New("localhost:22", "kycilius", "/home/kycilius/Documents/dev-null/shariftube");err!=nil{
+		panic(err)
+	}else {
+		course.OSD=driver
+	}
 
 
 	//setting a mongodb driver for DBDriver filed of user model

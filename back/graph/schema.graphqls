@@ -147,7 +147,7 @@ input EditContent{
 
 input TargetAttachment{
     name: String!
-    aurl: String! # todo actual file
+    attach: Upload!
     description: String
 }
 
@@ -159,7 +159,7 @@ input EditAttachment{
 input TargetPending{
     title: String!
     description: String
-    furl: String! # todo actual video
+    video: Upload!
 }
 
 input EditedPending{
@@ -245,7 +245,7 @@ type OperationSuccessfull{
     message:String!
 }
 
-union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
+union CreateUserPayload = User | DuplicateUsernameException | RegexMismatchException | InternalServerException
 union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | InternalServerException
 union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | OperationSuccessfull    | InternalServerException
 

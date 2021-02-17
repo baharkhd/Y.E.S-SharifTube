@@ -31,11 +31,16 @@ function SideBar(props) {
 
     return (
         <div>
-            <AddCourseModal addingCourse={state.addingCourse} setState={setState}/>
+            <AddCourseModal
+                addingCourse={state.addingCourse}
+                setState={setState}
+                makeNotif={props.makeNotif}
+            />
             <JoinCourseModel
                 joiningCourse={state.joiningCourse}
                 setState={setState}
                 username={props.username}
+                makeNotif={props.makeNotif}
             />
             <Sidebar
                 as={Menu}

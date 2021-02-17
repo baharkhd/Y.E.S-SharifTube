@@ -99,22 +99,22 @@ const RegisterForm = props => {
         },
         onCompleted: ({login}) => {
             if (login.__typename == "Token") {
-                console.log("login:", login);
-                console.log("token in logiin:", login.token);
                 props.setUsername(state.username);
                 // props.setToken(login.token);
                 // history.push("/dashboard");
-                changeToken(login.token);
+              props.makeNotif("Success", "You successfully loged in .", "success");
+              changeToken(login.token);
             } else {
                 switch (login.__typename) {
                     case "UserPassMissMatchException":
-                        alert(constants.USER_PASS_MISMATCH);
-                        setState({...state, error: constants.USER_PASS_MISMATCH});
-                        break;
+                      // setState({ ...state, error: constants.USER_PASS_MISMATCH });
+                      props.makeNotif("Error", constants.USER_PASS_MISMATCH, "danger");
+                      break;
                     case "InternalServerException":
-                        alert(constants.INTERNAL_SERVER_EXCEPTION);
-                        setState({...state, error: constants.INTERNAL_SERVER_EXCEPTION});
-                        break;
+                      // alert(constants.INTERNAL_SERVER_EXCEPTION);
+                      props.makeNotif("Error", "Login was not successfull .", "danger");
+                      // setState({ ...state, error: constants.INTERNAL_SERVER_EXCEPTION });
+                      break;
                 }
             }
         }
@@ -132,7 +132,15 @@ const RegisterForm = props => {
             if (createUser.__typename == "User") {
                 login();
             } else {
-                alert(createUser.__typename);
+              if (createUser.__typename === "DuplicateUsernameException") {
+                props.makeNotif(
+                    "Error",
+                    constants.DUPLICATE_USERNAME_ERROR,
+                    "danger"
+                );
+              } else {
+                props.makeNotif("Error", "Signup was not successfull .", "danger");
+              }
             }
         }
     });
@@ -209,19 +217,27 @@ const RegisterForm = props => {
                     control={Button}
                     onClick={() => {
                         //   handleRegister();
+                      if (
+                          state.name.trim() !== "" &&
+                          state.username.trim() !== "" &&
+                          state.email.trim() !== "" &&
+                          state.password.trim() !== "" &&
+                          state.confirmPass.trim() !== ""
+                      ) {
                         if (state.password === state.confirmPass) {
-                            createUser();
+                          createUser();
                         } else {
-                            alert("Passwords mismatch")
+                          props.makeNotif("Error", constants.PASSWORDS_DIFFER, "danger");
                         }
-
+                      } else {
+                        props.makeNotif("Error!", constants.EMPTY_FIELDS, "danger");
+                      }
                     }}
                 />
             </Segment>
             <Message>
                 Already have an account? <a href="/login">Login</a>
             </Message>
-            {state.error !== "" && <Message negative>{state.error}</Message>}
         </Form>
     );
 };
@@ -240,7 +256,11 @@ function Signup(props) {
                         <Grid.Column
                             style={{maxWidth: 450, marginRight: 20, marginLeft: 20}}
                         >
-                            <RegisterForm setUsername={props.setUsername} setToken={props.setToken}/>
+                          <RegisterForm
+                              setUsername={props.setUsername}
+                              setToken={props.setToken}
+                              makeNotif={props.makeNotif}
+                          />
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>

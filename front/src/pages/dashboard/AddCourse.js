@@ -3,6 +3,7 @@ import { Modal, Button, Form, Label, Input, TextArea } from "semantic-ui-react";
 import { useMutation, gql } from "@apollo/client";
 import _ from "lodash";
 // import { gql } from "graphql-tag";
+import constants from "../../constants";
 
 
 const createCoursePanelLStyle={
@@ -47,7 +48,7 @@ const COURSES_QUERY = gql`
   }
 `;
 
-function AddCourseModal({ addingCourse, setState }) {
+function AddCourseModal({ addingCourse, setState, makeNotif }) {
   const [inputs, setInputs] = useState({
     title: "",
     summary: "",
@@ -89,9 +90,9 @@ function AddCourseModal({ addingCourse, setState }) {
     onCompleted: ({ createCourse }) => {
       console.log("createCourse:", createCourse);
       if (createCourse.__typename == "Course") {
-        alert("you successfully created your own class :D");
+        makeNotif("Success!", "Course successfully created .", "success");
       } else {
-        alert(createCourse.message);
+        makeNotif("Error!", createCourse.message, "danger");
       }
     }
   });
@@ -134,7 +135,16 @@ function AddCourseModal({ addingCourse, setState }) {
           positive
           onClick={() => {
             // Add class
-            createCourse();
+            if (
+              inputs.title.trim() !== "" &&
+              inputs.summary.trim() !== "" &&
+              inputs.token.trim() !== ""
+            ) {
+              createCourse();
+            } else {
+              makeNotif("Error!", constants.EMPTY_FIELDS, "danger");
+            }
+
             setState({ addingCourse: false });
           }}
         >

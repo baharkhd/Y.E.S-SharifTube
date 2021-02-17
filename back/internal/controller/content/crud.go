@@ -39,9 +39,6 @@ func CreateContent(authorUsername, courseID, title string, description *string, 
 	if err!=nil{
 		return nil, err
 	}
-	// maintain consistency in cache
-	cr.AddContent(cn)
-	cr.UpdateCache()
 	return cn, nil
 }
 

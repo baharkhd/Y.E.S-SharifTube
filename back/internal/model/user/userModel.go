@@ -51,9 +51,12 @@ func (u *User) updateName(name string) *User {
 	return u
 }
 
-func (u *User) updateEmail(email string) *User {
+func (u *User) updateEmail(email string) (*User,error) {
+	if !validateEmail(email){
+		return nil,model.RegexMismatchException{Message: "email doesnt match"}
+	}
 	u.Email = email
-	return u
+	return u,nil
 }
 
 func (u *User) updatePassword(password string) error {

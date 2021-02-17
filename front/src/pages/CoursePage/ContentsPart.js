@@ -7,7 +7,8 @@ import {
   Grid,
   Card,
   Icon,
-  Label
+  Label,
+  Segment
 } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import _ from "lodash";
@@ -70,13 +71,14 @@ const ContentCard = ({
             <b>{approvedBY ? approvedBY.name : ""}</b> in time <b>{date}</b>
           </Card.Content>
           <Card.Content extra>
-            {tags.map(tag => {
-              return (
-                <Label style={{ marginBottom: 5 }}>
-                  <Icon name="hashtag" /> {tag}
-                </Label>
-              );
-            })}
+            {tags &&
+              tags.map(tag => {
+                return (
+                  <Label style={{ marginBottom: 5 }}>
+                    <Icon name="hashtag" /> {tag}
+                  </Label>
+                );
+              })}
           </Card.Content>
         </Card>
       </Link>
@@ -198,15 +200,6 @@ function ContentsPart({ contents, id }) {
             </Grid.Column>
           );
         })}
-      </Grid>
-      <Divider horizontal>
-        <Header textAlign="left">
-          <Icon name="file" />
-          Invetories
-        </Header>
-      </Divider>
-      <Grid columns={1} textAlign="left">
-        <Grid.Column>Sample inventory</Grid.Column>
       </Grid>
     </div>
   );

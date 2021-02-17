@@ -58,7 +58,7 @@ func newFrom(toBe model.EditedUser) User {
 		_ = targetUser.updatePassword(*(toBe.Password))
 	}
 	if toBe.Email != nil {
-		targetUser.updateEmail(*toBe.Email)
+		_, _ = targetUser.updateEmail(*toBe.Email)
 	}
 	return targetUser
 }
@@ -104,7 +104,9 @@ func New(name, email, username, password string) (*User, error) {
 	if _, stat := DBD.Get(&username); stat == status.SUCCESSFUL {
 		return nil, model.DuplicateUsernameException{}
 	}
-
+	if !validate(username,name,email){
+		return nil,model.RegexMismatchException{Message: "entered fields are invalid"}
+	}
 	// hashing password
 	hashedPass, err := hashAndSalt([]byte(password))
 	if err != nil {
@@ -196,7 +198,10 @@ func (u *User) UpdateName(name string) (*User, error) {
 }
 
 func (u *User) UpdateEmail(email string) (*User, error) {
-	u.updateEmail(email)
+	_, err := u.updateEmail(email)
+	if err!=nil{
+		return nil, err
+	}
 	return update(u.Username, User{Email: u.Email})
 }
 
