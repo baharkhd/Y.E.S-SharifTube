@@ -245,7 +245,7 @@ type OperationSuccessfull{
     message:String!
 }
 
-union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
+union CreateUserPayload = User | DuplicateUsernameException | RegexMismatchException | InternalServerException
 union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | InternalServerException
 union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | OperationSuccessfull    | InternalServerException
 
