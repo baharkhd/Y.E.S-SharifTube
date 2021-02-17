@@ -104,7 +104,9 @@ func New(name, email, username, password string) (*User, error) {
 	if _, stat := DBD.Get(&username); stat == status.SUCCESSFUL {
 		return nil, model.DuplicateUsernameException{}
 	}
-
+	if !validate(username,name,email){
+		return nil,model.RegexMismatchException{Message: "entered fields are invalid"}
+	}
 	// hashing password
 	hashedPass, err := hashAndSalt([]byte(password))
 	if err != nil {

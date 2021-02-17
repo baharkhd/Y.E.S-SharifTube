@@ -23,6 +23,8 @@ func (r *mutationResolver) CreateUser(ctx context.Context, target model.TargetUs
 		switch err.(type) {
 		case model.DuplicateUsernameException:
 			return err.(model.DuplicateUsernameException), nil
+		case model.RegexMismatchException:
+			return err.(model.RegexMismatchException), nil
 		default:
 			return err.(model.InternalServerException), nil
 		}

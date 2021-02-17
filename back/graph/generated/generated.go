@@ -1490,7 +1490,7 @@ type OperationSuccessfull{
     message:String!
 }
 
-union CreateUserPayload = User | DuplicateUsernameException | InternalServerException
+union CreateUserPayload = User | DuplicateUsernameException | RegexMismatchException | InternalServerException
 union UpdateUserPayload = User | UserNotFoundException | UserNotAllowedException | InternalServerException
 union DeleteUserPayload = User | UserNotFoundException | UserNotAllowedException | OperationSuccessfull    | InternalServerException
 
@@ -8312,6 +8312,13 @@ func (ec *executionContext) _CreateUserPayload(ctx context.Context, sel ast.Sele
 			return graphql.Null
 		}
 		return ec._DuplicateUsernameException(ctx, sel, obj)
+	case model.RegexMismatchException:
+		return ec._RegexMismatchException(ctx, sel, &obj)
+	case *model.RegexMismatchException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegexMismatchException(ctx, sel, obj)
 	case model.InternalServerException:
 		return ec._InternalServerException(ctx, sel, &obj)
 	case *model.InternalServerException:
@@ -10346,7 +10353,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var regexMismatchExceptionImplementors = []string{"RegexMismatchException", "Exception", "CreateCoursePayload", "UpdateCourseInfoPayload", "UploadContentPayLoad", "EditContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad"}
+var regexMismatchExceptionImplementors = []string{"RegexMismatchException", "Exception", "CreateUserPayload", "CreateCoursePayload", "UpdateCourseInfoPayload", "UploadContentPayLoad", "EditContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad"}
 
 func (ec *executionContext) _RegexMismatchException(ctx context.Context, sel ast.SelectionSet, obj *model.RegexMismatchException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, regexMismatchExceptionImplementors)

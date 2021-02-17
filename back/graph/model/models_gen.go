@@ -374,6 +374,7 @@ type RegexMismatchException struct {
 }
 
 func (RegexMismatchException) IsException()                 {}
+func (RegexMismatchException) IsCreateUserPayload()         {}
 func (RegexMismatchException) IsCreateCoursePayload()       {}
 func (RegexMismatchException) IsUpdateCourseInfoPayload()   {}
 func (RegexMismatchException) IsUploadContentPayLoad()      {}
