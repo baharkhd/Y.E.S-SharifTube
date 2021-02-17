@@ -155,10 +155,7 @@ function CourseDashboard(props) {
       >
         {!response.loading ? (
           course.contents ? (
-            <ContentsPart
-              contents={course.contents}
-              id={id}
-            />
+            <ContentsPart contents={course.contents} id={id} />
           ) : (
             <div>
               <Divider horizontal>
@@ -180,17 +177,27 @@ function CourseDashboard(props) {
           </Header>
         </Divider>
         <Grid columns={1} textAlign="left">
-          {course.inventory && course.inventory.length !== 0 ? (
+          {!response.loading &&
+          course &&
+          course.inventory &&
+          course.inventory.length !== 0 ? (
             course.inventory.map(attach => {
               return (
                 <Grid.Column>
-                  <Card>
-                    <Card.Content>
-                      <Card.Header>{attach.name}</Card.Header>
-                      <Card.Description>{attach.description}</Card.Description>
-                      <Card.Meta>aurl : {attach.aurl}</Card.Meta>
-                    </Card.Content>
-                  </Card>
+                  <a
+                    href="https://sharif-webelopers.ir/static/images/background.jpg"
+                    download
+                  >
+                    <Card>
+                      <Card.Content>
+                        <Card.Header>{attach.name}</Card.Header>
+                        <Card.Description>
+                          {attach.description}
+                        </Card.Description>
+                        <Card.Meta>aurl : {attach.aurl}</Card.Meta>
+                      </Card.Content>
+                    </Card>
+                  </a>
                 </Grid.Column>
               );
             })
