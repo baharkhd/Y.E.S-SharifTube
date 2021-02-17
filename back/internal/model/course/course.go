@@ -542,17 +542,14 @@ func (c *Course) AddNewPending(title string, authorUsername string, upload []*gr
 	}
 	vurl := OSD.GetURL(bucket, upload[0].Filename)
 
+
 	// create a pending
 	pn, err := pending.New(title, authorUsername, vurl, c.ID.Hex(), description)
 	if err != nil {
 		return nil, err
 	}
 
-	// insert the pending into database
-	pn, err = pending.Insert(c.ID.Hex(), pn)
-	if err != nil {
-		return nil, err
-	}
+
 	return pn,nil
 }
 
@@ -573,11 +570,6 @@ func (c *Course) AddNewAttachment(authorUsername string, name string, attach gra
 
 	// create an attachment
 	an, err := attachment.New(name, aurl, c.ID.Hex(), description)
-	if err != nil {
-		return nil, err
-	}
-	// insert the attachment into database
-	an, err = attachment.Insert(c.ID.Hex(), an)
 	if err != nil {
 		return nil, err
 	}

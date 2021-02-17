@@ -28,13 +28,20 @@ func New(name, aurl, courseID string, description *string) (*Attachment, error) 
 	if err != nil {
 		return nil, err
 	}
-	return &Attachment{
+	a:= &Attachment{
 		Name:        name,
 		Description: modelUtil.PtrTOStr(description),
 		Timestamp:   time.Now().Unix(),
 		Aurl:        aurl,
 		CourseID:    courseID,
-	}, nil
+	}
+
+	// insert the attachment into database
+	an, err := Insert(courseID, a)
+	if err != nil {
+		return nil, err
+	}
+	return an,nil
 }
 
 func RegexValidate(name, description, aurl, courseID *string) error {

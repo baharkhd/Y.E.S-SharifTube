@@ -31,7 +31,7 @@ func New(title, uploadedByID, furl, courseID string, description *string) (*Pend
 	if err != nil {
 		return nil, err
 	}
-	return &Pending{
+	p:= &Pending{
 		Title:        title,
 		Description:  modelUtil.PtrTOStr(description),
 		Status:       PENDING,
@@ -39,7 +39,14 @@ func New(title, uploadedByID, furl, courseID string, description *string) (*Pend
 		UploadedByUn: uploadedByID,
 		Furl:         furl,
 		CourseID:     courseID,
-	}, nil
+	}
+	// insert the pending into database
+	pn, err := Insert(courseID, p)
+	if err != nil {
+		return nil, err
+	}
+	return pn,err
+
 }
 
 func RegexValidate(title, description, uploadedByID, furl, courseID *string) error {

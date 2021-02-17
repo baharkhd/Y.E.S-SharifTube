@@ -38,7 +38,6 @@ func CreatePending(authorUsername, courseID, title string, description *string, 
 	if err != nil {
 		return nil, err
 	}
-
 	// maintain consistency in cache
 	cr.AddPending(pn)
 	cr.UpdateCache()
