@@ -10,6 +10,7 @@ import {
   Card
 } from "semantic-ui-react";
 import { useMutation, gql, useQuery } from "@apollo/client";
+import constants from "../../constants";
 
 const COURSES_QUERY = gql`
   query GetCoursesByFilter($keyWords: [String!]!, $amount: Int!, $start: Int!) {
@@ -67,7 +68,7 @@ const JOIN_COURSE_MUTATION = gql`
   }
 `;
 
-function JoinCourseModel({ joiningCourse, setState, username }) {
+function JoinCourseModel({ joiningCourse, setState, username, makeNotif }) {
   const [courseInfo, setCourseInfo] = useState({
     courseID: "",
     token: ""
@@ -106,9 +107,9 @@ function JoinCourseModel({ joiningCourse, setState, username }) {
     onCompleted: ({ addUserToCourse }) => {
       console.log("add user to coure:", addUserToCourse);
       if (addUserToCourse.__typename == "Course") {
-        alert("you successfully added to the class :D");
+        makeNotif("Success!", "You successfully joined a course .", "success");
       } else {
-        alert(addUserToCourse.message);
+        makeNotif("Error!", addUserToCourse.message, "danger");
       }
     }
   });
@@ -174,9 +175,14 @@ function JoinCourseModel({ joiningCourse, setState, username }) {
           positive
           onClick={() => {
             // Join class
-            if (courseInfo.courseID !== "" && courseInfo.token !== "") {
+            if (
+              courseInfo.courseID.trim() !== "" &&
+              courseInfo.token.trim() !== ""
+            ) {
               // console.log("courseInfo.couresID:", courseInfo.courseID)
               addUserToCourse();
+            } else {
+              makeNotif("Error!", constants.EMPTY_FIELDS, "danger");
             }
             setState({ joiningCourse: false });
           }}

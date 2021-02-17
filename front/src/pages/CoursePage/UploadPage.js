@@ -248,7 +248,7 @@ function UploadPage(props) {
       description: state.description
     },
     onCompleted: ({ uploadAttachment }) => {
-      console.log("upload attachmenttttttttt");
+      console.log("upload attachmenttttttttt", uploadAttachment);
     }
   });
 
@@ -413,6 +413,8 @@ function UploadPage(props) {
       {/* <FileUpload setFile={setState} otherState={state} /> */}
       <input
         type="file"
+        multiple
+        required
         onChange={e => {
           const [file] = e.target.files;
 

@@ -196,10 +196,20 @@ const RegisterForm = props => {
           control={Button}
           onClick={() => {
             //   handleRegister();
-            if (state.password === state.confirmPass) {
-              createUser();
+            if (
+              state.name.trim() !== "" &&
+              state.username.trim() !== "" &&
+              state.email.trim() !== "" &&
+              state.password.trim() !== "" &&
+              state.confirmPass.trim() !== ""
+            ) {
+              if (state.password === state.confirmPass) {
+                createUser();
+              } else {
+                props.makeNotif("Error", constants.PASSWORDS_DIFFER, "danger");
+              }
             } else {
-              props.makeNotif("Error", constants.PASSWORDS_DIFFER, "danger");
+              props.makeNotif("Error!", constants.EMPTY_FIELDS, "danger");
             }
           }}
         />
@@ -207,7 +217,6 @@ const RegisterForm = props => {
       <Message>
         Already have an account? <a href="/login">Login</a>
       </Message>
-      {/* {state.error !== "" && <Message negative>{state.error}</Message>} */}
     </Form>
   );
 };
