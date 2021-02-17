@@ -63,11 +63,10 @@ const LoginForm = props => {
   });
 
   function handleLogin() {
-    if (state.username && state.password) {
-      // console.log("handliing login?????????");
+    if (state.username.trim() !== "" && state.password.trim() !== "") {
       login();
-      // setState({ ...state, error: "" });
-      // history.push("/dashboard");
+    } else {
+      props.makeNotif("Error!", constants.EMPTY_FIELDS, "danger")
     }
   }
 

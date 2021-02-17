@@ -18,6 +18,7 @@ import {
 } from "semantic-ui-react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/client";
+import constants from '../../constants'
 
 const UPDATE_USER_MUTATION = gql`
   mutation UpdateUser($name: String, $password: String, $email: String) {
@@ -48,7 +49,13 @@ const genderOptions = [
   { key: "o", text: "Other", value: "other" }
 ];
 
-const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
+const UpdatePanelModal = ({
+  modalOpen,
+  setModalOpen,
+  user,
+  setUser,
+  makeNotif
+}) => {
   // console.log("user in update modal:", user);
   const [state, setState] = useState({
     newName: user.name,
@@ -69,7 +76,7 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
         query: GET_USER_QUERY
       });
 
-      console.log("updateUser:", updateUser)
+      console.log("updateUser:", updateUser);
       console.log("????????????????????????", data);
 
       const localData = _.cloneDeep(data);
@@ -116,9 +123,14 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
       });
     },
     onCompleted: ({ updateUser }) => {
-      console.log("updateUser", updateUser);
+      // console.log("updateUser", updateUser);
       // setUser({ user: { ...user, ...updateUser } });
-      console.log("new state:", state);
+      // console.log("new state:", state);
+      makeNotif(
+        "Success!",
+        "Your personal information successfully updated!",
+        "success"
+      );
     }
   });
 
@@ -138,18 +150,6 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
                 setState({ ...state, newName: e.target.value });
               }}
             />
-            {/* 
-            <Form.Field
-              control={Select}
-              options={genderOptions}
-              label={{
-                children: "Gender",
-                htmlFor: "form-select-control-gender-update"
-              }}
-              placeholder="Gender"
-              search
-              searchInput={{ id: "form-select-control-gender-update" }}
-            /> */}
           </Form.Group>
           <Form.Group widths="equal">
             <Form.Field
@@ -191,7 +191,15 @@ const UpdatePanelModal = ({ modalOpen, setModalOpen, user, setUser }) => {
           primary
           onClick={() => {
             // Todo: update information
-            updateUser();
+            if (
+              state.newName.trim() !== "" &&
+              state.newEmail.trim() !== "" &&
+              state.newPass.trim() !== ""
+            ) {
+              updateUser();
+            } else {
+              makeNotif("Error!", constants.EMPTY_FIELDS, "danger");
+            }
             setModalOpen(false);
           }}
         >
@@ -278,6 +286,7 @@ function Panel(props) {
         setModalOpen={setModalOpen}
         user={props.user}
         setUser={props.setState}
+        makeNotif={props.makeNotif}
       />
       <PanelInfo
         setModalOpen={setModalOpen}

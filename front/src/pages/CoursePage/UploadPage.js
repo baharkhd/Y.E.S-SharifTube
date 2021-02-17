@@ -413,6 +413,8 @@ function UploadPage(props) {
       {/* <FileUpload setFile={setState} otherState={state} /> */}
       <input
         type="file"
+        multiple
+        required
         onChange={e => {
           const [file] = e.target.files;
 

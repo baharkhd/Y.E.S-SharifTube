@@ -17,11 +17,16 @@ function SideBar(props) {
 
   return (
     <div>
-      <AddCourseModal addingCourse={state.addingCourse} setState={setState} />
+      <AddCourseModal
+        addingCourse={state.addingCourse}
+        setState={setState}
+        makeNotif={props.makeNotif}
+      />
       <JoinCourseModel
         joiningCourse={state.joiningCourse}
         setState={setState}
         username={props.username}
+        makeNotif={props.makeNotif}
       />
       <Sidebar
         as={Menu}
@@ -69,7 +74,7 @@ function SideBar(props) {
               setState({ addingCourse: true });
             }}
           >
-            Add New Class
+            Add New Course
           </Button>
         </Menu.Item>
         <Menu.Item as="a">
@@ -79,7 +84,7 @@ function SideBar(props) {
               setState({ joiningCourse: true });
             }}
           >
-            Join Other Classes
+            Join Other Courses
           </Button>
         </Menu.Item>
       </Sidebar>
