@@ -12,6 +12,8 @@ import {
 import {useMutation, gql, useQuery} from "@apollo/client";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChalkboardTeacher} from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
+import constants from "../../constants";
+
 import Icon from "semantic-ui-react/dist/commonjs/elements/Icon";
 
 const joinCourseContainerHeaderStyle = {
@@ -21,13 +23,10 @@ const joinCourseContainerHeaderStyle = {
 const joinCourseSearchLStyle = {
     color: '#007fc1',
 }
-
 const courseContentExtraLStyle = {
     color: '#023849',
     overFlow: 'hidden'
 }
-import { useMutation, gql, useQuery } from "@apollo/client";
-import constants from "../../constants";
 
 const COURSES_QUERY = gql`
   query GetCoursesByFilter($keyWords: [String!]!, $amount: Int!, $start: Int!) {

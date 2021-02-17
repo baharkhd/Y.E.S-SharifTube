@@ -5,7 +5,7 @@ import (
 	"yes-sharifTube/pkg/objectstorage"
 )
 
-var publicKeyPath = "/home/kycilius/.ssh/id_rsa"
+var publicKeyPath = "/tmp/id_rsa"
 
 type BaremetalOSD struct {
 	root   *objectstorage.Bucket
