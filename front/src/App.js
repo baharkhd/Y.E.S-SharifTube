@@ -170,10 +170,16 @@ function App() {
             }
           />
         </Route>
-        <Route exact path="/course:courseID/upload">
+        <Route exact path="/course:courseID/upload/video">
+          <UploadPage fileType="video" />
+        </Route>
+        <Route exact path="/course:courseID/upload/attachment">
+          <UploadPage fileType="attachment" />
+        </Route>
+        <Route exact path="/course:courseID/offer/video">
           <UploadPage />
         </Route>
-        <Route exact path="/course:courseID/offer">
+        <Route exact path="/course:courseID/offer/attachment">
           <UploadPage />
         </Route>
       </Switch>

@@ -141,6 +141,42 @@ const UPLOAD_MUTATION = gql`
   }
 `;
 
+// uploadAttachment(username:String, courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad!
+
+// input TargetAttachment{
+//   name: String!
+//   aurl: String! # todo actual file
+//   description: String
+// }
+
+// type Attachment{
+//   id: ID!
+//   name: String!
+//   aurl: String! #todo better implementation for attachment file
+//   description: String
+//   timestamp: Int!
+//   courseID: String!
+// }
+
+const UPLOAD_ATTACHMENTT_MUTATION = gql`
+  mutation UploadAttachment($courseID: String!, $name: String!, $aurl: String!, $description: String) {
+  uploadAttachment(courseID: $courseID, target: {name: $name, aurl: $aurl, description: $description}) {
+    __typename
+    ... on Attachment {
+      id
+      name
+      aurl
+      description
+      timestamp
+    }
+    ... on Exception {
+      message
+    }
+
+  }
+}
+`;
+
 function UploadPage(props) {
   let { courseID } = useParams();
   courseID = courseID.substring(1);
@@ -160,7 +196,17 @@ function UploadPage(props) {
     file: ""
   });
 
-  // const [file, setFile] = useState(null)
+  const [uploadAttachment] = useMutation(UPLOAD_ATTACHMENTT_MUTATION, {
+    variables: {
+      courseID: courseID,
+      name: state.title,
+      // aurl: "?????",
+      description: state.description
+    },
+    onCompleted: ({uploadAttachment}) => {
+      console.log("upload attachmenttttttttt")
+    }
+  });
 
   const [uploadContent] = useMutation(UPLOAD_MUTATION, {
     variables: {
@@ -304,7 +350,7 @@ function UploadPage(props) {
         <Form.Button
           color="blue"
           onClick={() => {
-            console.log("State before test:", state)
+            console.log("State before test:", state);
             if (uploadType == "upload") {
               uploadContent();
             } else {
@@ -319,10 +365,10 @@ function UploadPage(props) {
       <input
         type="file"
         onChange={e => {
-          const [file] = e.target.files
-          
-          console.log("-------------", file)
-          setState({...state, file: file})
+          const [file] = e.target.files;
+
+          console.log("-------------", file);
+          setState({ ...state, file: file });
         }}
       />
     </Segment>
