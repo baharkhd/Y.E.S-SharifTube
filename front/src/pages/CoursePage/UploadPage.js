@@ -112,6 +112,7 @@ function UploadPage(props) {
   const history = useHistory();
 
   let path = useLocation().pathname;
+  console.log("path:", path)
   var n = path.lastIndexOf("/");
   var uploadType = path.substring(n + 1);
 
@@ -256,7 +257,7 @@ function UploadPage(props) {
             }
           }}
         >
-          Upload
+          Upload {}
         </Form.Button>
       </Form>
       <FileUpload />
