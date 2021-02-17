@@ -213,7 +213,7 @@ const ChangePendingModal = props => {
         <Button
           positive
           onClick={() => {
-            if (state.title.trim() !== "" && state.description.trime() !== "") {
+            if (state.title.trim() !== "" && state.description.trim() !== "") {
               acceptOfferedContent();
               props.setOpen(false);
             } else {

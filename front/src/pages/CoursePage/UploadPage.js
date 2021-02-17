@@ -12,15 +12,15 @@ import { gql, useMutation } from "@apollo/client";
 import { useParams, useHistory, useLocation } from "react-router-dom";
 import constants from "../../constants";
 import FileUpload from "../FileUpload/FileUpload";
+import _ from "lodash";
 
-const fileUploadFrameLStyle ={
-  borderColor:"#0021a3",
-  margin:'auto',
-  top: '120px',
-  width:'70%',
-  padding:'20px',
-
-}
+const fileUploadFrameLStyle = {
+  borderColor: "#0021a3",
+  margin: "auto",
+  top: "120px",
+  width: "70%",
+  padding: "20px"
+};
 
 const OFFER_CONTENT_MUTATION = gql`
   mutation OfferContent(
@@ -56,38 +56,6 @@ const OFFER_CONTENT_MUTATION = gql`
   }
 `;
 
-// const UPLOAD_CONTENT_MUTATION = gql`
-//   mutation UploadContent(
-//     $courseID: String!
-//     $title: String!
-//     $description: String
-//     $vurl: String!
-//     $tags: [String!]
-//   ) {
-//     uploadContent(
-//       courseID: $courseID
-//       target: {
-//         title: $title
-//         description: $description
-//         vurl: $vurl
-//         tags: $tags
-//       }
-//     ) {
-//       ... on Content {
-//         id
-//         title
-//         description
-//         vurl
-//         tags
-//         timestamp
-//       }
-//       ... on Exception {
-//         message
-//       }
-//     }
-//   }
-// `;
-
 const COURSE_QUERY = gql`
   query GetCoursesByID($ids: [String!]!) {
     courses(ids: $ids) {
@@ -98,6 +66,17 @@ const COURSE_QUERY = gql`
         id
         title
         description
+        uploadedBY {
+          name
+          username
+        }
+        approvedBY {
+          name
+          username
+        }
+        tags
+        timestamp
+        vurl
       }
       prof {
         name
@@ -111,18 +90,21 @@ const COURSE_QUERY = gql`
       students {
         username
       }
+      pends {
+        title
+        description
+        id
+      }
+      inventory {
+        id
+        name
+        aurl
+        description
+        timestamp
+      }
     }
   }
 `;
-
-// uploadContent(username:String, courseID:String!, target:TargetContent!): UploadContentPayLoad!
-
-// input TargetContent{
-//   title: String!
-//   description: String
-//   video: [Upload!]!
-//   tags: [String!]
-// }
 
 const UPLOAD_MUTATION = gql`
   mutation UploadContent(
@@ -147,10 +129,16 @@ const UPLOAD_MUTATION = gql`
         title
         description
         vurl
+        approvedBY {
+          name
+          username
+        }
         uploadedBY {
           name
           username
         }
+        tags
+        timestamp
       }
       ... on Exception {
         message
@@ -158,23 +146,6 @@ const UPLOAD_MUTATION = gql`
     }
   }
 `;
-
-// uploadAttachment(username:String, courseID:String!, target:TargetAttachment!): UploadAttachmentPayLoad!
-
-// input TargetAttachment{
-//   name: String!
-//   aurl: String! # todo actual file
-//   description: String
-// }
-
-// type Attachment{
-//   id: ID!
-//   name: String!
-//   aurl: String! #todo better implementation for attachment file
-//   description: String
-//   timestamp: Int!
-//   courseID: String!
-// }
 
 const UPLOAD_ATTACHMENTT_MUTATION = gql`
   mutation UploadAttachment(
@@ -229,8 +200,41 @@ function UploadPage(props) {
       attach: state.file,
       description: state.description
     },
+    update: (cache, { data: { uploadAttachment } }) => {
+      const data = cache.readQuery({
+        query: COURSE_QUERY,
+        variables: {
+          ids: [courseID]
+        }
+      });
+
+      var localData = _.cloneDeep(data);
+
+      localData.courses[0].inventory = localData.courses[0].inventory
+        ? [...localData.courses[0].inventory, uploadAttachment]
+        : [localData.courses[0].inventory];
+
+      // console.log("localData:", localData);
+      // console.log("uploadAttachment:", uploadAttachment);
+
+      cache.writeQuery({
+        query: COURSE_QUERY,
+        data: {
+          ...localData
+        }
+      });
+    },
     onCompleted: ({ uploadAttachment }) => {
       console.log("upload attachmenttttttttt", uploadAttachment);
+      if (uploadAttachment.__typename === "Attachment") {
+        props.makeNotif(
+          "Success!",
+          "Attachment was successfully uploaded .",
+          "success"
+        );
+      } else {
+        props.makeNotif("Error!", offerContent.message, "danger");
+      }
     }
   });
 
@@ -242,12 +246,41 @@ function UploadPage(props) {
       video: state.file,
       tags: state.tags
     },
+    update: (cache, { data: { uploadContent } }) => {
+      const data = cache.readQuery({
+        query: COURSE_QUERY,
+        variables: {
+          ids: [courseID]
+        }
+      });
+
+      var localData = _.cloneDeep(data);
+      localData.courses[0].contents = localData.courses[0].contents
+        ? [...localData.courses[0].contents, uploadContent]
+        : [uploadContent];
+
+      cache.writeQuery({
+        query: COURSE_QUERY,
+        data: {
+          ...localData
+        }
+      });
+    },
     onCompleted: ({ uploadContent }) => {
-      console.log("updateContenttttttttt:", uploadContent);
+      if (uploadContent.__typename === "Content") {
+        props.makeNotif(
+          "Success!",
+          "Content was successfully uploaded .",
+          "success"
+        );
+      } else {
+        props.makeNotif("Error!", offerContent.message, "danger");
+      }
+
+      let path = "/course:" + courseID;
+      history.push(path);
     }
   });
-
-  // console.log("+_+_+_+_+_+_+_+_+_+_+ uploadpage tokeeeeeeeeeeeeeeeeeeen:", localStorage.getItem(constants.AUTH_TOKEN))
 
   const [offerContent] = useMutation(OFFER_CONTENT_MUTATION, {
     variables: {
@@ -256,41 +289,44 @@ function UploadPage(props) {
       description: state.description,
       video: state.file
     },
+    update: (cache, { data: { offerContent } }) => {
+      const data = cache.readQuery({
+        query: COURSE_QUERY,
+        variables: {
+          ids: [courseID]
+        }
+      });
+
+      var localData = _.cloneDeep(data);
+
+      localData.courses[0].pends = localData.courses[0].pends
+        ? [...localData.courses[0].pends, offerContent]
+        : [offerContent];
+
+      cache.writeQuery({
+        query: COURSE_QUERY,
+        data: {
+          ...localData
+        }
+      });
+    },
     onCompleted: ({ offerContent }) => {
       console.log("*** offerContent:", offerContent);
+
+      if (offerContent.__typename === "Pending") {
+        props.makeNotif(
+          "Success!",
+          "Pending was successfully sent .",
+          "success"
+        );
+      } else {
+        props.makeNotif("Error!", offerContent.message, "danger");
+      }
+
       let path = "/course:" + courseID;
       history.push(path);
     }
   });
-
-  // const [uploadContent] = useMutation(UPLOAD_CONTENT_MUTATION, {
-  //   variables: {
-  //     courseID: courseID,
-  //     title: state.title,
-  //     description: state.description,
-  //     vurl: state.url,
-  //     tags: state.tags
-  //   },
-  //   update(cache, { data: { uploadContent } }) {
-  //     var data = cache.readQuery({
-  //       query: COURSE_QUERY,
-  //       variables: {
-  //         ids: [courseID]
-  //       }
-  //     });
-
-  //     data = data[0];
-
-  //     console.log("in update of uploadContent");
-  //     console.log("uploadContent:", uploadContent);
-  //     console.log("data:", data);
-  //   },
-  //   onCompleted: ({ uploadContent }) => {
-  //     console.log("*** uploadContent:", uploadContent);
-  //     let path = "/course:" + courseID;
-  //     history.push(path);
-  //   }
-  // });
 
   return (
     <Segment raised inverted style={fileUploadFrameLStyle}>
@@ -313,7 +349,7 @@ function UploadPage(props) {
           onChange={e => {
             setState({ ...state, description: e.target.value });
           }}
-          style={{resize:'none', height:'180px'}}
+          style={{ resize: "none", height: "180px" }}
         />
 
         {uploadType == "upload" ? (
@@ -359,30 +395,44 @@ function UploadPage(props) {
         )}
         {/* <FileUpload setFile={setState} otherState={state} /> */}
         <input
-            type="file"
-            onChange={e => {
-              const [file] = e.target.files;
+          type="file"
+          onChange={e => {
+            const [file] = e.target.files;
 
-              console.log("-------------", file);
-              setState({ ...state, file: file });
-            }}
-            style={{border:'none', paddingLeft:'0px', backgroundColor:"#1b1c1d", color:"white"}}
+            console.log("-------------", file);
+            setState({ ...state, file: file });
+          }}
+          style={{
+            border: "none",
+            paddingLeft: "0px",
+            backgroundColor: "#1b1c1d",
+            color: "white"
+          }}
         />
         <Form.Button
           color="blue"
           onClick={() => {
             console.log("State before test:", state);
-            if (uploadType == "upload") {
-              if (fileType === "attachment") {
-                uploadAttachment();
+
+            if (
+              state.title.trim() !== "" &&
+              state.description.trim() !== "" &&
+              state.file
+            ) {
+              if (uploadType == "upload") {
+                if (fileType === "attachment") {
+                  uploadAttachment();
+                } else {
+                  uploadContent();
+                }
               } else {
-                uploadContent();
+                offerContent();
               }
             } else {
-              offerContent();
+              props.makeNotif("Error!", constants.EMPTY_FIELDS, "danger");
             }
           }}
-          style={{marginTop:'10px'}}
+          style={{ marginTop: "10px" }}
         >
           Upload {fileType === "attachment" ? "Attachment" : "Video"}
         </Form.Button>

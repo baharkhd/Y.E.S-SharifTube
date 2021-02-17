@@ -112,15 +112,17 @@ function ContentsPart({ contents, id }) {
 
       const isMatch = result => {
         var tag;
-        console.log("tags:", result.tags);
-        for (tag of result.tags) {
-          let check = re.test(tag);
-          console.log("checkkkk:", check, ", tag:", tag);
-          if (check) {
-            return true;
-          }
+        if (result.tags) {
+            for (tag of result.tags) {
+                let check = re.test(tag);
+                if (check) {
+                  return true;
+                }
+              }
+              return false;
+        } else {
+            return false
         }
-        return false;
       };
 
       let newArray = _.filter(contents, function(ss) {

@@ -18,13 +18,6 @@ import { useParams, Link } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
 import ContentsPart from "./ContentsPart";
 
-// const GET_USER_QUERY = gql`
-//   {
-//     user {
-//       username
-//     }
-//   }
-// `;
 
 const COURSE_QUERY = gql`
   query GetCoursesByID($ids: [String!]!) {
@@ -86,14 +79,13 @@ function CourseDashboard(props) {
   // const [contentsToSearch, setContents] = useState([]);
 
   const response = useQuery(COURSE_QUERY, {
-    // fetchPolicy: "cache-and-network",
-    // nextFetchPolicy: "cache-first",
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
     variables: {
       ids: [id]
     }
   });
 
-  // const userResponse = useQuery(GET_USER_QUERY)
 
   let course = null;
   if (!response.loading && response.data) {
@@ -114,13 +106,6 @@ function CourseDashboard(props) {
     response.loading,
     response.error
   );
-
-  // let isProfTA;
-  // if (!response.loading && course) {
-  //   isProfTA =
-  //     props.courseTAs.some(ta => ta.username === props.username) ||
-  //     props.username === course.prof.username;
-  // }
 
   return (
     <div>
@@ -180,21 +165,20 @@ function CourseDashboard(props) {
         course &&
         course.inventory &&
         course.inventory.length !== 0 ? (
-          <Grid columns={1} textAlign="left">
+          <Grid columns={2} textAlign="left">
             {course.inventory.map(attach => {
               return (
                 <Grid.Column>
                   <a
-                    href="https://sharif-webelopers.ir/static/images/background.jpg"
+                    href={attach.aurl}
                     download
                   >
-                    <Card>
+                    <Card fluid>
                       <Card.Content>
                         <Card.Header>{attach.name}</Card.Header>
                         <Card.Description>
                           {attach.description}
                         </Card.Description>
-                        <Card.Meta>aurl : {attach.aurl}</Card.Meta>
                       </Card.Content>
                     </Card>
                   </a>
