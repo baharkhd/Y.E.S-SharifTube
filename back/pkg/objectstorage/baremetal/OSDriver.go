@@ -59,7 +59,8 @@ func (b BaremetalOSD) store(pathInStorage string, file io.Reader, size int64) er
 	defer session.Close()
 
 	go func() {
-		hostIn, _ :=session.StdinPipe()
+		hostIn, err :=session.StdinPipe()
+		_=err
 		defer hostIn.Close()
 		fmt.Fprintf(hostIn, "C0664 %d %s\n", size, path.Base(pathInStorage))
 		io.Copy(hostIn, file)
