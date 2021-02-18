@@ -7,8 +7,10 @@ import constants from "../../constants";
 
 const fileUploadFrameLStyle = {
   borderColor: "#0021a3",
+  position:'absolute',
   margin: "auto",
   top: "120px",
+  left:"15%",
   width: "70%",
   padding: "20px"
 };

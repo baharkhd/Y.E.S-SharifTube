@@ -1,7 +1,7 @@
 import { gql, useQuery } from "@apollo/client";
 import React from "react";
 import { useParams } from "react-router-dom";
-import { Card, Divider, Grid, Header, Icon, Segment } from "semantic-ui-react";
+import {Card, Container, Divider, Grid, Header, Icon, Segment} from "semantic-ui-react";
 import ContentsPart from "./ContentsPart";
 import "./CourseDashboard.css";
 import SideBar from "./CourseSidebar.js";
@@ -105,13 +105,15 @@ function CourseDashboard(props) {
       )}
       <Segment
         style={{
-          position: "absolute",
-          left: props.isMobile ? 0 : 250,
-          right: 0,
-          bottom : 0,
-          margin: 10,
-          top: 70,
-          // backgroundColor: "#203e59"
+            position: "absolute",
+            left: props.isMobile ? 0 : 250,
+            right: 0,
+            margin: 30,
+            top: 70,
+            height: '85vh',
+            overflowY: 'auto',
+            padding: '20px',
+            borderColor: '#042b61'
         }}
       >
         {!response.loading ? (
@@ -125,7 +127,9 @@ function CourseDashboard(props) {
                   Videos
                 </Header>
               </Divider>
-              <Segment>There are no videos yet.</Segment>
+                <Container textAlign="center" style={{marginTop: '40px'}}>
+                    <Header as='h2' style={{color: 'red'}}>There are no videos yet.</Header>
+                </Container>
             </div>
           )
         ) : (
@@ -163,7 +167,9 @@ function CourseDashboard(props) {
             })}
           </Grid>
         ) : (
-          <Segment>There are no attachments yet .</Segment>
+            <Container textAlign="center" style={{marginTop: '40px'}}>
+                <Header as='h2' style={{color: 'red'}}>There are no attachments yet.</Header>
+            </Container>
         )}
       </Segment>
     </div>
