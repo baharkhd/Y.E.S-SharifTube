@@ -201,6 +201,10 @@ type ComplexityRoot struct {
 		Timestamp func(childComplexity int) int
 	}
 
+	Stream struct {
+		Surl func(childComplexity int) int
+	}
+
 	Token struct {
 		Token func(childComplexity int) int
 	}
@@ -261,7 +265,7 @@ type MutationResolver interface {
 	CreateComment(ctx context.Context, username *string, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error)
 	UpdateComment(ctx context.Context, username *string, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error)
 	DeleteComment(ctx context.Context, username *string, contentID string, commentID string) (model.DeleteCommentPayLoad, error)
-	Stream(ctx context.Context, vurl string) (string, error)
+	Stream(ctx context.Context, vurl string) (*model.Stream, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, username *string) (*model.User, error)
@@ -1116,6 +1120,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Reply.Timestamp(childComplexity), true
 
+	case "Stream.surl":
+		if e.complexity.Stream.Surl == nil {
+			break
+		}
+
+		return e.complexity.Stream.Surl(childComplexity), true
+
 	case "Token.token":
 		if e.complexity.Token.Token == nil {
 			break
@@ -1310,6 +1321,9 @@ type Content{
     comments(start: Int!=0, amount: Int!=5): [Comment!]
     tags: [String!]
     courseID: String!
+}
+type Stream{
+    surl: String!
 }
 
 type Attachment{
@@ -1534,7 +1548,7 @@ union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotF
 union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException | RegexMismatchException
 union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | EmptyFieldsException | CommentNotFoundException | RegexMismatchException | InternalServerException
 union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
-union StreamPayload = OperationSuccessfull | InternalServerException
+#union StreamPayload = OperationSuccessfull | InternalServerException
 
 type Mutation {
     createUser(target:TargetUser!): CreateUserPayload!
@@ -1570,7 +1584,7 @@ type Mutation {
     updateComment(username:String, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad!
     deleteComment(username:String, contentID:String!, commentID:String!): DeleteCommentPayLoad!
 
-    stream(vurl: String!): String!
+    stream(vurl: String!): Stream!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -5218,9 +5232,9 @@ func (ec *executionContext) _Mutation_stream(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.Stream)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNStream2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐStream(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OfferedContentNotPendingException_message(ctx context.Context, field graphql.CollectedField, obj *model.OfferedContentNotPendingException) (ret graphql.Marshaler) {
@@ -6196,6 +6210,41 @@ func (ec *executionContext) _Reply_commentID(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.CommentID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Stream_surl(ctx context.Context, field graphql.CollectedField, obj *model.Stream) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Stream",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Surl, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9339,29 +9388,6 @@ func (ec *executionContext) _PromoteToTAPayload(ctx context.Context, sel ast.Sel
 	}
 }
 
-func (ec *executionContext) _StreamPayload(ctx context.Context, sel ast.SelectionSet, obj model.StreamPayload) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.OperationSuccessfull:
-		return ec._OperationSuccessfull(ctx, sel, &obj)
-	case *model.OperationSuccessfull:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._OperationSuccessfull(ctx, sel, obj)
-	case model.InternalServerException:
-		return ec._InternalServerException(ctx, sel, &obj)
-	case *model.InternalServerException:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._InternalServerException(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
 func (ec *executionContext) _UpdateCourseInfoPayload(ctx context.Context, sel ast.SelectionSet, obj model.UpdateCourseInfoPayload) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -9996,7 +10022,7 @@ func (ec *executionContext) _IncorrectTokenException(ctx context.Context, sel as
 	return out
 }
 
-var internalServerExceptionImplementors = []string{"InternalServerException", "Exception", "CreateUserPayload", "UpdateUserPayload", "DeleteUserPayload", "LoginPayload", "CreateCoursePayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "DeleteUserFromCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad", "StreamPayload"}
+var internalServerExceptionImplementors = []string{"InternalServerException", "Exception", "CreateUserPayload", "UpdateUserPayload", "DeleteUserPayload", "LoginPayload", "CreateCoursePayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "DeleteUserFromCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
 
 func (ec *executionContext) _InternalServerException(ctx context.Context, sel ast.SelectionSet, obj *model.InternalServerException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, internalServerExceptionImplementors)
@@ -10211,7 +10237,7 @@ func (ec *executionContext) _OfferedContentNotPendingException(ctx context.Conte
 	return out
 }
 
-var operationSuccessfullImplementors = []string{"OperationSuccessfull", "DeleteUserPayload", "StreamPayload"}
+var operationSuccessfullImplementors = []string{"OperationSuccessfull", "DeleteUserPayload"}
 
 func (ec *executionContext) _OperationSuccessfull(ctx context.Context, sel ast.SelectionSet, obj *model.OperationSuccessfull) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, operationSuccessfullImplementors)
@@ -10514,6 +10540,33 @@ func (ec *executionContext) _Reply(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "commentID":
 			out.Values[i] = ec._Reply_commentID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var streamImplementors = []string{"Stream"}
+
+func (ec *executionContext) _Stream(ctx context.Context, sel ast.SelectionSet, obj *model.Stream) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, streamImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Stream")
+		case "surl":
+			out.Values[i] = ec._Stream_surl(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -11436,6 +11489,20 @@ func (ec *executionContext) unmarshalNStatus2yesᚑsharifTubeᚋgraphᚋmodelᚐ
 
 func (ec *executionContext) marshalNStatus2yesᚑsharifTubeᚋgraphᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v model.Status) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNStream2yesᚑsharifTubeᚋgraphᚋmodelᚐStream(ctx context.Context, sel ast.SelectionSet, v model.Stream) graphql.Marshaler {
+	return ec._Stream(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNStream2ᚖyesᚑsharifTubeᚋgraphᚋmodelᚐStream(ctx context.Context, sel ast.SelectionSet, v *model.Stream) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Stream(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
