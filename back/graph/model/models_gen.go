@@ -90,10 +90,6 @@ type PromoteToTAPayload interface {
 	IsPromoteToTAPayload()
 }
 
-type StreamPayload interface {
-	IsStreamPayload()
-}
-
 type UpdateCourseInfoPayload interface {
 	IsUpdateCourseInfoPayload()
 }
@@ -323,7 +319,6 @@ func (InternalServerException) IsDeleteOfferedContentPayLoad() {}
 func (InternalServerException) IsCreateCommentPayLoad()        {}
 func (InternalServerException) IsEditCommentPayLoad()          {}
 func (InternalServerException) IsDeleteCommentPayLoad()        {}
-func (InternalServerException) IsStreamPayload()               {}
 
 type Login struct {
 	Username string `json:"username"`
@@ -343,7 +338,6 @@ type OperationSuccessfull struct {
 }
 
 func (OperationSuccessfull) IsDeleteUserPayload() {}
-func (OperationSuccessfull) IsStreamPayload()     {}
 
 type Pending struct {
 	ID          string  `json:"id"`
@@ -407,6 +401,10 @@ type Reply struct {
 func (Reply) IsCreateCommentPayLoad() {}
 func (Reply) IsEditCommentPayLoad()   {}
 func (Reply) IsDeleteCommentPayLoad() {}
+
+type Stream struct {
+	Surl string `json:"surl"`
+}
 
 type TargetAttachment struct {
 	Name        string         `json:"name"`

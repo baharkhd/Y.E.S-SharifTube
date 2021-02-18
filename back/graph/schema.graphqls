@@ -52,6 +52,9 @@ type Content{
     tags: [String!]
     courseID: String!
 }
+type Stream{
+    surl: String!
+}
 
 type Attachment{
     id: ID!
@@ -275,7 +278,7 @@ union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotF
 union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException | RegexMismatchException
 union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | EmptyFieldsException | CommentNotFoundException | RegexMismatchException | InternalServerException
 union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
-union StreamPayload = OperationSuccessfull | InternalServerException
+#union StreamPayload = OperationSuccessfull | InternalServerException
 
 type Mutation {
     createUser(target:TargetUser!): CreateUserPayload!
@@ -311,5 +314,5 @@ type Mutation {
     updateComment(username:String, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad!
     deleteComment(username:String, contentID:String!, commentID:String!): DeleteCommentPayLoad!
 
-    stream(vurl: String!): String!
+    stream(vurl: String!): Stream!
 }

@@ -12,7 +12,8 @@ const fileUploadFrameLStyle = {
   top: "120px",
   left:"15%",
   width: "70%",
-  padding: "20px"
+  padding: "20px",
+  overflow: 'auto'
 };
 
 const OFFER_CONTENT_MUTATION = gql`
