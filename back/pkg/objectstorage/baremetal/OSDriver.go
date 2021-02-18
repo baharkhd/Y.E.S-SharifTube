@@ -44,7 +44,8 @@ func (b BaremetalOSD) Update(bucket *objectstorage.Bucket, filename string, file
 
 func (b BaremetalOSD) GetURL(bucket *objectstorage.Bucket, filename string) string {
 	hostname := strings.Split(b.host, ":")[0]
-	return "http://"+strings.Replace(fmt.Sprintf("%s/%s/%s", hostname, bucket.GetPath(), filename),"//","/",1)
+	path:= "/yes"+bucket.GetPath()[len(b.root.GetPath()):]
+	return "http://"+strings.Replace(fmt.Sprintf("%s/%s/%s", hostname, path, filename),"//","/",1)
 }
 
 func (b BaremetalOSD) store(pathInStorage string, file io.Reader, size int64) error {
