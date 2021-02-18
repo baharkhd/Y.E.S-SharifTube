@@ -2,8 +2,25 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import _ from "lodash";
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Container, Feed, Grid, Icon, Input, Segment } from "semantic-ui-react";
+import {
+  Button,
+  Container,
+  Feed,
+  Grid,
+  Icon,
+  Input,
+  Segment,
+  List
+} from "semantic-ui-react";
 import "./ContentPage.css";
+
+// const STREAM_MUTATION = gql`
+//   mutation Stream($vurl: String!) {
+//     stream(vurl: $vurl) {
+
+//     }
+//   }
+// `;
 
 const CONTENT_QUERY = gql`
   query GetContent($id: String!) {
@@ -263,7 +280,7 @@ function ContentPage(props) {
   return (
     <div>
       {!loading && (
-        <Segment style={{top: 70}}>
+        <Segment style={{ top: 70, position: "absolute" }}>
           <Grid columns={2} textAlign="center" fluid stackable>
             <Grid.Column>
               <Segment>
@@ -279,14 +296,25 @@ function ContentPage(props) {
                   Your browser does not support HTML video.
                 </video>
                 <Container textAlign="left">
-                  <h1>{data.content.title}</h1>
-                  <p>
-                    {data.content.description}
-                  </p>
+                  <List horizontal>
+                    <List.Item>
+                      <a href={data.content.vurl} download>
+                        <Button color="blue" icon floated="right">
+                          <Icon name="download" />
+                        </Button>
+                      </a>
+                    </List.Item>
+
+                    <List.Item>
+                      <h1>{data.content.title}</h1>
+                    </List.Item>
+                  </List>
+
+                  <p>{data.content.description}</p>
                 </Container>
               </Segment>
             </Grid.Column>
-            <Grid.Column style={{height: "100%", overflow: "auto"}}>
+            <Grid.Column style={{ height: "100%", overflow: "auto" }}>
               <Segment>
                 <Input
                   fluid
