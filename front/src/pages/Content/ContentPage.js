@@ -283,11 +283,11 @@ function ContentPage(props) {
     },
     onCompleted({ content }) {
       if (content.__typename === "Content") {
-        stream({
-          variables: {
-            vurl: content.vurl
-          }
-        });
+        // stream({
+        //   variables: {
+        //     vurl: content.vurl
+        //   }
+        // });
       }
     }
   });
@@ -338,8 +338,8 @@ function ContentPage(props) {
                   <source
                     src={
                       // "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
-                      // data.content.vurl
-                      surl !== "" ? surl : ""
+                      data.content.vurl
+                      // surl !== "" ? surl : ""
                     }
                     type="video/mp4"
                   />
@@ -354,7 +354,7 @@ function ContentPage(props) {
                           color="blue"
                           icon
                           floated="right"
-                          loading={streamLoading}
+                          loading={loading}
                         >
                           <Icon name="download" />
                         </Button>
