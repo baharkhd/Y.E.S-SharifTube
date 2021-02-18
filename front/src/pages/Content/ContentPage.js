@@ -12,7 +12,6 @@ import {
   Segment,
   List
 } from "semantic-ui-react";
-import "./ContentPage.css";
 
 const STREAM_MUTATION = gql`
   mutation Stream($vurl: String!) {
