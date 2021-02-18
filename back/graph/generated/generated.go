@@ -147,6 +147,7 @@ type ComplexityRoot struct {
 		PromoteUserToTa      func(childComplexity int, username *string, courseID string, targetUsername string) int
 		RefreshToken         func(childComplexity int) int
 		RejectOfferedContent func(childComplexity int, username *string, courseID string, pendingID string, message *model.RejectedPending) int
+		Stream               func(childComplexity int, vurl string) int
 		UpdateComment        func(childComplexity int, username *string, contentID string, commentID string, target model.EditedComment) int
 		UpdateCourseInfo     func(childComplexity int, username *string, courseID string, toBe model.EditedCourse) int
 		UpdateUser           func(childComplexity int, toBe model.EditedUser) int
@@ -260,6 +261,7 @@ type MutationResolver interface {
 	CreateComment(ctx context.Context, username *string, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error)
 	UpdateComment(ctx context.Context, username *string, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error)
 	DeleteComment(ctx context.Context, username *string, contentID string, commentID string) (model.DeleteCommentPayLoad, error)
+	Stream(ctx context.Context, vurl string) (model.StreamPayload, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, username *string) (*model.User, error)
@@ -831,6 +833,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RejectOfferedContent(childComplexity, args["username"].(*string), args["courseID"].(string), args["pendingID"].(string), args["message"].(*model.RejectedPending)), true
+
+	case "Mutation.stream":
+		if e.complexity.Mutation.Stream == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_stream_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Stream(childComplexity, args["vurl"].(string)), true
 
 	case "Mutation.updateComment":
 		if e.complexity.Mutation.UpdateComment == nil {
@@ -1520,7 +1534,7 @@ union DeleteOfferedContentPayLoad = Pending | UserNotFoundException | CourseNotF
 union CreateCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | CommentNotFoundException | UserNotAllowedException | InternalServerException | RegexMismatchException
 union EditCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | EmptyFieldsException | CommentNotFoundException | RegexMismatchException | InternalServerException
 union DeleteCommentPayLoad = Comment | Reply | UserNotFoundException | ContentNotFoundException | UserNotAllowedException | CommentNotFoundException | InternalServerException
-
+union StreamPayload = OperationSuccessfull | InternalServerException
 
 type Mutation {
     createUser(target:TargetUser!): CreateUserPayload!
@@ -1555,6 +1569,8 @@ type Mutation {
     createComment(username:String, contentID:String!, repliedAtID:String, target:TargetComment!): CreateCommentPayLoad!
     updateComment(username:String, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad!
     deleteComment(username:String, contentID:String!, commentID:String!): DeleteCommentPayLoad!
+
+    stream(vurl: String!): StreamPayload!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -2235,6 +2251,21 @@ func (ec *executionContext) field_Mutation_rejectOfferedContent_args(ctx context
 		}
 	}
 	args["message"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_stream_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["vurl"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vurl"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vurl"] = arg0
 	return args, nil
 }
 
@@ -5148,6 +5179,48 @@ func (ec *executionContext) _Mutation_deleteComment(ctx context.Context, field g
 	res := resTmp.(model.DeleteCommentPayLoad)
 	fc.Result = res
 	return ec.marshalNDeleteCommentPayLoad2yesᚑsharifTubeᚋgraphᚋmodelᚐDeleteCommentPayLoad(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_stream(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_stream_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Stream(rctx, args["vurl"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.StreamPayload)
+	fc.Result = res
+	return ec.marshalNStreamPayload2yesᚑsharifTubeᚋgraphᚋmodelᚐStreamPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OfferedContentNotPendingException_message(ctx context.Context, field graphql.CollectedField, obj *model.OfferedContentNotPendingException) (ret graphql.Marshaler) {
@@ -9266,6 +9339,29 @@ func (ec *executionContext) _PromoteToTAPayload(ctx context.Context, sel ast.Sel
 	}
 }
 
+func (ec *executionContext) _StreamPayload(ctx context.Context, sel ast.SelectionSet, obj model.StreamPayload) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.OperationSuccessfull:
+		return ec._OperationSuccessfull(ctx, sel, &obj)
+	case *model.OperationSuccessfull:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._OperationSuccessfull(ctx, sel, obj)
+	case model.InternalServerException:
+		return ec._InternalServerException(ctx, sel, &obj)
+	case *model.InternalServerException:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._InternalServerException(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 func (ec *executionContext) _UpdateCourseInfoPayload(ctx context.Context, sel ast.SelectionSet, obj model.UpdateCourseInfoPayload) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -9900,7 +9996,7 @@ func (ec *executionContext) _IncorrectTokenException(ctx context.Context, sel as
 	return out
 }
 
-var internalServerExceptionImplementors = []string{"InternalServerException", "Exception", "CreateUserPayload", "UpdateUserPayload", "DeleteUserPayload", "LoginPayload", "CreateCoursePayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "DeleteUserFromCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad"}
+var internalServerExceptionImplementors = []string{"InternalServerException", "Exception", "CreateUserPayload", "UpdateUserPayload", "DeleteUserPayload", "LoginPayload", "CreateCoursePayload", "UpdateCourseInfoPayload", "DeleteCoursePayload", "AddUserToCoursePayload", "DeleteUserFromCoursePayload", "PromoteToTAPayload", "DemoteToSTDPayload", "UploadContentPayLoad", "EditContentPayLoad", "DeleteContentPayLoad", "UploadAttachmentPayLoad", "EditAttachmentPayLoad", "DeleteAttachmentPayLoad", "OfferContentPayLoad", "EditOfferedContentPayLoad", "DeleteOfferedContentPayLoad", "CreateCommentPayLoad", "EditCommentPayLoad", "DeleteCommentPayLoad", "StreamPayload"}
 
 func (ec *executionContext) _InternalServerException(ctx context.Context, sel ast.SelectionSet, obj *model.InternalServerException) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, internalServerExceptionImplementors)
@@ -10072,6 +10168,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "stream":
+			out.Values[i] = ec._Mutation_stream(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10110,7 +10211,7 @@ func (ec *executionContext) _OfferedContentNotPendingException(ctx context.Conte
 	return out
 }
 
-var operationSuccessfullImplementors = []string{"OperationSuccessfull", "DeleteUserPayload"}
+var operationSuccessfullImplementors = []string{"OperationSuccessfull", "DeleteUserPayload", "StreamPayload"}
 
 func (ec *executionContext) _OperationSuccessfull(ctx context.Context, sel ast.SelectionSet, obj *model.OperationSuccessfull) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, operationSuccessfullImplementors)
@@ -11335,6 +11436,16 @@ func (ec *executionContext) unmarshalNStatus2yesᚑsharifTubeᚋgraphᚋmodelᚐ
 
 func (ec *executionContext) marshalNStatus2yesᚑsharifTubeᚋgraphᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v model.Status) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNStreamPayload2yesᚑsharifTubeᚋgraphᚋmodelᚐStreamPayload(ctx context.Context, sel ast.SelectionSet, v model.StreamPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._StreamPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

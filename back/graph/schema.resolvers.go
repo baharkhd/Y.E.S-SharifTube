@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"yes-sharifTube/graph/generated"
 	"yes-sharifTube/graph/model"
 	attachmentController "yes-sharifTube/internal/controller/attachment"
@@ -18,7 +19,7 @@ import (
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, target model.TargetUser) (model.CreateUserPayload, error) {
-	println("user: " + extractUsernameFromContext(ctx))
+	fmt.Println("user: " + extractUsernameFromContext(ctx))
 	newUser, err := user.New(deref(target.Name), deref(target.Email), target.Username, target.Password)
 	if err != nil {
 		switch err.(type) {
@@ -672,6 +673,11 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, username *string, 
 	}
 }
 
+func (r *mutationResolver) Stream(ctx context.Context, vurl string) (model.StreamPayload, error) {
+	course.Stream(vurl)
+	return model.OperationSuccessfull{},nil
+}
+
 func (r *queryResolver) User(ctx context.Context, username *string) (*model.User, error) {
 	target, err := user.Get(getUsername(ctx, username))
 	return reformatUser(target), err
@@ -702,7 +708,6 @@ func (r *queryResolver) CoursesByKeyWords(ctx context.Context, keyWords []string
 
 func (r *queryResolver) Content(ctx context.Context, id string) (*model.Content, error) {
 	res, err := contentController.GetContent(id)
-	course.Stream(res.Vurl)
 	if err != nil {
 		return nil, err
 	}
