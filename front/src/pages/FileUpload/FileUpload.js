@@ -1,9 +1,7 @@
-import React, { useCallback, useState } from "react";
-import { useDropzone } from "react-dropzone";
-// import { useMutation } from "@apollo/client";
-import { useMutation } from "@apollo/client";
 import gql from "graphql-tag";
-import { Segment, Input, Icon } from "semantic-ui-react";
+import React, { useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import { Icon, Segment } from "semantic-ui-react";
 
 // uploadContent(username:String, courseID:String!, target:TargetContent!): UploadContentPayLoad!
 

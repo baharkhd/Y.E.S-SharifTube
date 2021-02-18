@@ -1,18 +1,9 @@
-import React, { useState } from "react";
-import {
-  Segment,
-  Input,
-  Form,
-  TextArea,
-  Label,
-  Button,
-  Icon
-} from "semantic-ui-react";
 import { gql, useMutation } from "@apollo/client";
-import { useParams, useHistory, useLocation } from "react-router-dom";
-import constants from "../../constants";
-import FileUpload from "../FileUpload/FileUpload";
 import _ from "lodash";
+import React, { useState } from "react";
+import { useHistory, useLocation, useParams } from "react-router-dom";
+import { Form, Icon, Input, Label, Segment, TextArea } from "semantic-ui-react";
+import constants from "../../constants";
 
 const fileUploadFrameLStyle = {
   borderColor: "#0021a3",

@@ -1,7 +1,7 @@
+import { gql, useQuery } from "@apollo/client";
 import React from "react";
-import { Modal, Header, Button, Icon, Input } from "semantic-ui-react";
+import { Button, Header, Icon, Modal } from "semantic-ui-react";
 import Autocomplete from "./AutoComplete";
-import { useQuery, gql } from "@apollo/client";
 
 // users(start: Int!=0, amount: Int!=5): [User!]!
 
@@ -34,17 +34,11 @@ const AddTAModal = ({ open, setOpen, courseID, students }) => {
     <Modal open={open} size="tiny">
       <Header icon="add user" content="Add TA" />
       <Modal.Content>
-        {/* <Input icon="users" iconPosition="left" placeholder="Search users..." /> */}
         {!loading && (
           <Autocomplete suggestions={usernames} courseID={courseID} />
         )}
       </Modal.Content>
       <Modal.Actions>
-          
-        {/* <Button color="green" onClick={() => setOpen({ addingTA: false })}> */}
-          {/* <Icon name="checkmark" /> */}
-          {/* Add */}
-        {/* </Button> */}
 
         <Button color="red" onClick={() => setOpen({ addingTA: false })}>
           <Icon name="remove" /> 

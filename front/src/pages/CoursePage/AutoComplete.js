@@ -1,9 +1,8 @@
-import React, { Component, useState } from "react";
-import PropTypes from "prop-types";
-import { Segment, Input, List, Button, Icon } from "semantic-ui-react";
 import { gql, useMutation } from "@apollo/client";
+import _ from 'lodash';
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import _ from 'lodash'
+import { Button, Input, List } from "semantic-ui-react";
 
 const ADD_TA_MUTATION = gql`
   mutation AddTA($courseID: String!, $targetUsername: String!) {

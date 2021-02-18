@@ -1,6 +1,6 @@
 @keyframes hoverAnimation {
     from {background-color: white}
-    to {background-color: #bdd3de}
+    to {background-color: #d3dfed}
   }
 
 .ui.card.fluid.Content:hover {

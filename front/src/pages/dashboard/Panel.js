@@ -1,24 +1,9 @@
-import React, { useState } from "react";
-import _ from "lodash";
-import {
-  Grid,
-  Input,
-  Segment,
-  Form,
-  Button,
-  Checkbox,
-  TextArea,
-  Select,
-  Menu,
-  Image,
-  Modal,
-  Icon,
-  List,
-  Header, Message, Label
-} from "semantic-ui-react";
-import gql from "graphql-tag";
 import { useMutation } from "@apollo/client";
-import constants from '../../constants'
+import gql from "graphql-tag";
+import _ from "lodash";
+import React, { useState } from "react";
+import { Button, Form, Input, Label, List, Modal, Segment } from "semantic-ui-react";
+import constants from '../../constants';
 
 const panelFormLStyle={
   fontSize:'15px',
@@ -234,27 +219,29 @@ const PanelInfo = props => {
         position: "absolute",
         left: props.isMobile ? 0 : 250,
         right: 0,
-        margin: '30vh',
-        top: '-10vh',
+        margin: 45,
+        top: 90,
         borderColor: "#012968",
+        backgroundColor: "#cadbeb",
+        boxShadow: "0 8px 6px -6px black",
       }}
     >
       <Form>
         <List divided selection style={panelFormLStyle}>
           <List.Item>
-            <Label color='red' Name>
+            <Label style={{backgroundColor: "#203e59", color: "white"}} Name>
               Name
             </Label>
             <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{props.user.name}</span>
           </List.Item>
           <List.Item>
-            <Label color='blue' Username>
+            <Label  Username style={{backgroundColor: "#203e59", color: "white"}}>
               Username
             </Label>
             <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{props.user.username}</span>
           </List.Item>
           <List.Item>
-            <Label color='orange' Email>
+            <Label style={{backgroundColor: "#203e59", color: "white"}} Email>
               Email
             </Label>
             <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{props.user.email}</span>

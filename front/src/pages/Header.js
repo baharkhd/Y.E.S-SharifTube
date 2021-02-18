@@ -1,8 +1,6 @@
 import React, { useState } from "react";
+import { useHistory, useLocation } from "react-router-dom";
 import { Menu, Segment } from "semantic-ui-react";
-import { useHistory, Link, useLocation } from "react-router-dom";
-import constants from "../constants";
-import { async } from "q";
 
 const LoggedInHeader = props => {
   return (
@@ -14,7 +12,10 @@ const LoggedInHeader = props => {
         position: "fixed",
         right: "0px",
         left: "0px",
-        zIndex: 100
+        zIndex: 100,
+        boxShadow: "0 8px 6px -6px black"
+
+        
       }}
     >
       <Menu pointing secondary inverted>
@@ -120,7 +121,7 @@ const Header = props => {
   }
 
   return (
-    <div>
+    <div style={{position: "fixed", width: "100%"}}>
       {!props.token ? (
         <MainHeader
           handleItemClick={handleItemClick}

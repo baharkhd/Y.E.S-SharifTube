@@ -1,20 +1,10 @@
-import React, {useState} from "react";
-import {
-    Modal,
-    Button,
-    Form,
-    Label,
-    Input,
-    TextArea,
-    Grid,
-    Card
-} from "semantic-ui-react";
-import {useMutation, gql, useQuery} from "@apollo/client";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faChalkboardTeacher} from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
+import { gql, useMutation, useQuery } from "@apollo/client";
+import { faChalkboardTeacher } from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState } from "react";
+import { Button, Card, Grid, Input, Modal } from "semantic-ui-react";
 import constants from "../../constants";
 
-import Icon from "semantic-ui-react/dist/commonjs/elements/Icon";
 
 const joinCourseContainerHeaderStyle = {
     backgroundColor: "#4b4b4b"

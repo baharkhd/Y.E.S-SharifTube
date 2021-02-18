@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Modal, Button, Form, Label, Input, TextArea } from "semantic-ui-react";
-import { useMutation, gql } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import _ from "lodash";
+import React, { useState } from "react";
+import { Button, Form, Input, Modal } from "semantic-ui-react";
 // import { gql } from "graphql-tag";
 import constants from "../../constants";
 

@@ -1,15 +1,13 @@
+import { faSearchPlus } from "@fortawesome/free-solid-svg-icons/faSearchPlus";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
-import { Sidebar, Menu, Button, Icon } from "semantic-ui-react";
-import { useHistory, Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import { Icon, Menu, Sidebar } from "semantic-ui-react";
 import AddCourseModal from "./AddCourse.js";
 import JoinCourseModel from "./JoinCourse.js";
-import { faChalkboardTeacher } from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons/faPlusCircle";
-import { faSearchPlus } from "@fortawesome/free-solid-svg-icons/faSearchPlus";
 
 const sidePanelLStyle = {
-  backgroundColor: "#5383ff",
+  backgroundColor: "#478dcc",
   width: 250,
   top: 70
 };

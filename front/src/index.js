@@ -1,22 +1,18 @@
+import { ApolloProvider } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
+import { InMemoryCache, IntrospectionFragmentMatcher } from "apollo-cache-inmemory";
+import { ApolloClient } from "apollo-client";
+import { createUploadLink } from "apollo-upload-client";
 import React from "react";
 import ReactDOM from "react-dom";
+import { BrowserRouter } from "react-router-dom";
+import introspectionQueryResultData from "../src/fragmentTypes.json";
 import App from "./App.js";
+import constants from "./constants.js";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorker from "./serviceWorker.js";
-import { BrowserRouter } from "react-router-dom";
-import constants from "./constants.js";
-import { setContext } from "@apollo/client/link/context";
 
-import { ApolloClient } from "apollo-client";
-import {
-  InMemoryCache,
-  IntrospectionFragmentMatcher
-} from "apollo-cache-inmemory";
-import { HttpLink } from "apollo-link-http";
-import { ApolloProvider } from "@apollo/client";
-import { createUploadLink } from "apollo-upload-client";
 
-import introspectionQueryResultData from "../src/fragmentTypes.json";
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData

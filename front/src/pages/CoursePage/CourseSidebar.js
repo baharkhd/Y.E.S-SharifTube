@@ -1,168 +1,150 @@
-import React, {useState} from "react";
-import {Sidebar, Menu, Button, Icon, List} from "semantic-ui-react";
-import {useHistory, Link, useParams} from "react-router-dom";
-import {gql, useMutation} from "@apollo/client";
+import { faChalkboardTeacher } from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
+import { faFileImport } from "@fortawesome/free-solid-svg-icons/faFileImport";
+import { faFileUpload } from "@fortawesome/free-solid-svg-icons/faFileUpload";
+import { faHandsHelping } from "@fortawesome/free-solid-svg-icons/faHandsHelping";
+import { faHeading } from "@fortawesome/free-solid-svg-icons/faHeading";
+import { faUpload } from "@fortawesome/free-solid-svg-icons/faUpload";
+import { faUserPlus } from "@fortawesome/free-solid-svg-icons/faUserPlus";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState } from "react";
+import { Link, useHistory, useParams } from "react-router-dom";
+import { List, Menu, Sidebar, Divider } from "semantic-ui-react";
 import AddTAModal from "./AddTAModal";
-import PendingPage from "./PendingPage";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faSearchPlus} from "@fortawesome/free-solid-svg-icons/faSearchPlus";
-import {faHeading} from "@fortawesome/free-solid-svg-icons/faHeading";
-import {faChalkboardTeacher} from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
-import {faHandsHelping} from "@fortawesome/free-solid-svg-icons/faHandsHelping";
-import {faUserPlus} from "@fortawesome/free-solid-svg-icons/faUserPlus";
-import {faFileUpload} from "@fortawesome/free-solid-svg-icons/faFileUpload";
-import {faUpload} from "@fortawesome/free-solid-svg-icons/faUpload";
-import {faFileImport} from "@fortawesome/free-solid-svg-icons/faFileImport";
 
 const sidePanelLStyle = {
-    backgroundColor: '#5383ff',
-    width: 250,
-    top: 70
-}
+  backgroundColor: "#478dcc",
+  width: 250,
+  top: 70
+};
 
 const sidePanelItemLStyle = {
-    overflow: 'auto',
-    color: 'white',
-    fontSize: '20px'
-}
-
-const TAs = [
-    "folan1",
-    "folan2",
-    "folan3",
-    "folan4",
-    "folan5",
-    "folan6",
-    "folan7"
-];
-
-// const ADD_TA_MUTATION = gql`
-//   mutation AddTA($courseID: String!, $targetUsername: String!) {
-//     promoteUserToTA(courseID: $courseID, targetUsername: $targetUsername) {
-//       __typename
-//       ... on Course {
-//         id
-//         title
-//         summary
-//         createdAt
-//       }
-//       ... on Exception {
-//         message
-//       }
-//     }
-//   }
-// `;
+  overflow: "auto",
+  color: "white",
+  fontSize: "20px"
+};
 
 function SideBar(props) {
-    const [state, setState] = useState({
-        activeItem: "Personal Information",
-        addingTA: false
-    });
+  const [state, setState] = useState({
+    activeItem: "Personal Information",
+    addingTA: false
+  });
 
-    let isProfTA =
-        props.courseTAs.some(ta => ta.username === props.username) || props.isProf;
+  let isProfTA =
+    props.courseTAs.some(ta => ta.username === props.username) || props.isProf;
 
-    console.log(
-        "{}{}{}",
-        props.courseTAs.some(ta => ta.username === props.username),
-        props.isProf,
-        isProfTA
-    );
+  console.log(
+    "{}{}{}",
+    props.courseTAs.some(ta => ta.username === props.username),
+    props.isProf,
+    isProfTA
+  );
 
-    // const [promoteUserToTA] = useMutation(ADD_TA_MUTATION, {
-    //   variables: {}
-    // })
+  // const [promoteUserToTA] = useMutation(ADD_TA_MUTATION, {
+  //   variables: {}
+  // })
 
-    let {id} = useParams();
-    id = id.substring(1);
+  let { id } = useParams();
+  id = id.substring(1);
 
-    const history = useHistory();
+  let uploadPath = isProfTA
+    ? "/course:" + id + "/upload"
+    : "/course:" + id + "/offer";
 
-    const handleItemClick = (e, {name}) => setState({activeItem: name});
+  return (
+    <Sidebar
+      as={Menu}
+      animation="overlay"
+      icon="labeled"
+      direction="left"
+      vertical
+      visible={props.isMobile ? props.sidebarIsOpen : true}
+      width="thin"
+      style={sidePanelLStyle}
+    >
+      <AddTAModal
+        open={state.addingTA}
+        setOpen={setState}
+        courseID={id}
+        students={props.students}
+      />
+      <Menu.Item style={sidePanelItemLStyle} as="a">
+        <FontAwesomeIcon size="1x" icon={faHeading} />
+        <span>
+          <b>&nbsp;&nbsp;{props.courseTitle ? props.courseTitle : ""}</b>
+        </span>
+      </Menu.Item>
+      <Menu.Item style={sidePanelItemLStyle} as="a">
+        <FontAwesomeIcon size="1x" icon={faChalkboardTeacher} />
+        <span>
+          <b>
+            &nbsp;&nbsp;{props.courseProf.name ? props.courseProf.name : ""}
+          </b>
+        </span>
+      </Menu.Item>
+      <Menu.Item as="a" style={sidePanelItemLStyle}>
+        <FontAwesomeIcon size="1x" icon={faHandsHelping} />
+        <span>
+          <b>&nbsp;&nbsp;TA List</b>
+        </span>
+        <List>
+          {props.courseTAs.map(TA => {
+            return (
+              <div>
+                <List.Item as="li">
+                  {/* <List.Icon name="user" color="yellow" /> */}
+                  {/* <List.Content>{TA}</List.Content> */}
+                  {TA.name}
+                </List.Item>
+              </div>
+            );
+          })}
+        </List>
+      </Menu.Item>
 
-    console.log("course TAs:", props.courseTAs);
-    console.log("username:", props.username);
-    console.log(
-        "is a TA:",
-        props.courseTAs.some(ta => ta.username === props.username)
-    );
-
-    let uploadPath = isProfTA
-        ? "/course:" + id + "/upload"
-        : "/course:" + id + "/offer";
-
-    return (
-        <Sidebar
-            as={Menu}
-            animation="overlay"
-            icon="labeled"
-            direction="left"
-            vertical
-            visible={props.isMobile ? props.sidebarIsOpen : true}
-            width="thin"
-            style={sidePanelLStyle}
+      {isProfTA && (
+        <Menu.Item
+          positive
+          onClick={() => {
+            setState({ ...state, addingTA: true });
+          }}
+          style={sidePanelItemLStyle}
         >
-            <AddTAModal
-                open={state.addingTA}
-                setOpen={setState}
-                courseID={id}
-                students={props.students}
-            />
-            <Menu.Item style={sidePanelItemLStyle} as="a">
-                <FontAwesomeIcon size='1x'
-                                 icon={faHeading}/><span><b>&nbsp;&nbsp;{props.courseTitle ? props.courseTitle : ""}</b></span>
-            </Menu.Item>
-            <Menu.Item style={sidePanelItemLStyle} as="a">
-                <FontAwesomeIcon size='1x'
-                                 icon={faChalkboardTeacher}/><span><b>&nbsp;&nbsp;{props.courseProf.name ? props.courseProf.name : ""}</b></span>
-            </Menu.Item>
-            <Menu.Item as="a" style={sidePanelItemLStyle}>
-                <FontAwesomeIcon size='1x' icon={faHandsHelping}/><span><b>&nbsp;&nbsp;TA List</b></span>
-                <List>
-                    {props.courseTAs.map(TA => {
-                        return (
-                            <List.Item as="li">
-                                {/* <List.Icon name="user" /> */}
-                                {/* <List.Content>{TA}</List.Content> */}
-                                {TA.name}
-                            </List.Item>
-                        );
-                    })}
-                </List>
-            </Menu.Item>
-
-            {isProfTA && (
-                <Menu.Item
-                    positive
-                    onClick={() => {
-                        setState({...state, addingTA: true});
-                    }}
-                    style={sidePanelItemLStyle}
-                >
-                    <FontAwesomeIcon size='1x' icon={faUserPlus}/><span><b>&nbsp;&nbsp;Add TA</b></span>
-                </Menu.Item>
-            )}
-            <Link to={uploadPath + "/video"}>
-                <Menu.Item style={sidePanelItemLStyle} as="a">
-                    <FontAwesomeIcon size='1x' icon={faUpload}/><span><b>&nbsp;&nbsp;Upload Videos</b></span>
-                </Menu.Item>
-            </Link>
-            <Link to={uploadPath + "/attachment"}>
-                <Menu.Item style={sidePanelItemLStyle} as="a">
-                    <FontAwesomeIcon size='1x' icon={faFileUpload}/><span><b>&nbsp;&nbsp;Upload Attachment</b></span>
-                </Menu.Item>
-            </Link>
-            {isProfTA && (
-                // <Link to={"/course:" + id + "/pendings"} component={PendingPage} >
-                <Link to={"/course:" + id + "/pendings"}>
-                    <Menu.Item style={sidePanelItemLStyle} as="a">
-                        <FontAwesomeIcon size='1x' icon={faFileImport}/><span><b>&nbsp;&nbsp;Pending Contents</b></span>
-                    </Menu.Item>
-                </Link>
-                // </Link>
-            )}
-        </Sidebar>
-    );
+          <FontAwesomeIcon size="1x" icon={faUserPlus} />
+          <span>
+            <b>&nbsp;&nbsp;Add TA</b>
+          </span>
+        </Menu.Item>
+      )}
+      <Link to={uploadPath + "/video"}>
+        <Menu.Item style={sidePanelItemLStyle} as="a">
+          <FontAwesomeIcon size="1x" icon={faUpload} />
+          <span>
+            <b>&nbsp;&nbsp;Upload Videos</b>
+          </span>
+        </Menu.Item>
+      </Link>
+      <Link to={uploadPath + "/attachment"}>
+        <Menu.Item style={sidePanelItemLStyle} as="a">
+          <FontAwesomeIcon size="1x" icon={faFileUpload} />
+          <span>
+            <b>&nbsp;&nbsp;Upload Attachment</b>
+          </span>
+        </Menu.Item>
+      </Link>
+      {isProfTA && (
+        // <Link to={"/course:" + id + "/pendings"} component={PendingPage} >
+        <Link to={"/course:" + id + "/pendings"}>
+          <Menu.Item style={sidePanelItemLStyle} as="a">
+            <FontAwesomeIcon size="1x" icon={faFileImport} />
+            <span>
+              <b>&nbsp;&nbsp;Pending Contents</b>
+            </span>
+          </Menu.Item>
+        </Link>
+        // </Link>
+      )}
+    </Sidebar>
+  );
 }
 
 export default SideBar;

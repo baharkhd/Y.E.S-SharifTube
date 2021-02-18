@@ -1,37 +1,44 @@
+import { gql, useQuery } from "@apollo/client";
+import { faChalkboardTeacher } from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import {Card, Grid, Segment} from "semantic-ui-react";
-import {Link} from "react-router-dom";
-import {useMutation, gql, useQuery} from "@apollo/client";
-import Image from "semantic-ui-react/dist/commonjs/elements/Image";
+import { Link } from "react-router-dom";
+import { Card, Grid, Segment } from "semantic-ui-react";
 import Icon from "semantic-ui-react/dist/commonjs/elements/Icon";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faChalkboardTeacher} from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
+import Image from "semantic-ui-react/dist/commonjs/elements/Image";
 import Input from "semantic-ui-react/dist/commonjs/elements/Input";
 
 const homePageBodyLStyle = {
     height: '100vh',
-    backgroundColor: '#abe0fd'
+    backgroundColor: '#cadbeb',
+    
 }
 
 const homePageCourseListLStyle = {
     backgroundColor: '#13678e',
     border: 'none',
-    borderRadius: '0px',
+    borderRadius: 7,
     margin: 'auto',
-    width: '90%',
     height: '80%',
-    marginTop: 0,
-    overflow: 'auto'
+    overflow: 'auto',
+    top: 80,
+    margin: 40,
+    marginTop: 10
 }
 
 const homepageSearchContainerStyle = {
     margin: 'auto',
     width: '50%',
-    padding: '20px'
+    padding: '20px',
+    top: 80,
+    borderRadius: 5
 }
 
 const homepageSearchLStyle = {
     color: '#007fc1',
+    top: 80,
+    borderRadius: 5
+    
 }
 
 const courseContentExtraLStyle = {
@@ -41,7 +48,8 @@ const courseContentExtraLStyle = {
 
 const courseDescriptionStyle = {
     overflow: 'hidden',
-    height: '20px'
+    height: '20px',
+    borderRadius: 5
 }
 const COURSES_QUERY = gql`
   query GetCoursesByFilter($keyWords: [String!]!, $amount: Int!, $start: Int!) {

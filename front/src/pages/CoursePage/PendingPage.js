@@ -1,19 +1,7 @@
+import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useState } from "react";
-import {
-  Segment,
-  Label,
-  Card,
-  Icon,
-  Grid,
-  Button,
-  Modal,
-  Form,
-  Input,
-  TextArea,
-  Message
-} from "semantic-ui-react";
 import { useParams } from "react-router-dom";
-import { useQuery, gql, useMutation } from "@apollo/client";
+import { Button, Card, Form, Grid, Icon, Input, Label, Message, Modal, Segment } from "semantic-ui-react";
 import constants from "../../constants";
 
 const PENDING_QUERY = gql`

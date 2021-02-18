@@ -1,11 +1,9 @@
+import { gql, useQuery } from "@apollo/client";
 import React, { useState } from "react";
-import { Sidebar, Menu, Button, Icon } from "semantic-ui-react";
-import SideBar from "./Sidebar.js";
-import Panel from "./Panel.js";
-import Courses from "./Courses.js";
-import { Route, Switch, Link } from "react-router-dom";
-import { gql, useQuery, useMutation } from "@apollo/client";
 import constants from "../../constants.js";
+import Courses from "./Courses.js";
+import Panel from "./Panel.js";
+import SideBar from "./Sidebar.js";
 
 const GET_USER_QUERY = gql`
   {

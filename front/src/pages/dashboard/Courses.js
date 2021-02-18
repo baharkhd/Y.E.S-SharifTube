@@ -1,19 +1,10 @@
-import React, {useState} from "react";
-import {
-    Grid,
-    Segment,
-    Image,
-    Placeholder,
-    Card,
-    Divider,
-    Header,
-    Icon, Container
-} from "semantic-ui-react";
-import {Link} from "react-router-dom";
-import {gql, useQuery} from "@apollo/client";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faChalkboardTeacher} from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
-import {faChalkboard} from "@fortawesome/free-solid-svg-icons/faChalkboard";
+import { gql, useQuery } from "@apollo/client";
+import { faChalkboard } from "@fortawesome/free-solid-svg-icons/faChalkboard";
+import { faChalkboardTeacher } from "@fortawesome/free-solid-svg-icons/faChalkboardTeacher";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Card, Container, Divider, Grid, Header, Icon, Segment } from "semantic-ui-react";
 
 const courseContentExtraLStyle = {
     color: '#023849',

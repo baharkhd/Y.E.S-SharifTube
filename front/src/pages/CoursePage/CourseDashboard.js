@@ -1,22 +1,10 @@
-import React, { useReducer, useCallback, useState } from "react";
-import _ from "lodash";
-import {
-  Segment,
-  Card,
-  Sidebar,
-  Label,
-  Icon,
-  Grid,
-  Divider,
-  Header,
-  Search,
-  Button
-} from "semantic-ui-react";
-import SideBar from "./CourseSidebar.js";
-import "./CourseDashboard.css";
-import { useParams, Link } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
+import React from "react";
+import { useParams } from "react-router-dom";
+import { Card, Divider, Grid, Header, Icon, Segment } from "semantic-ui-react";
 import ContentsPart from "./ContentsPart";
+import "./CourseDashboard.css";
+import SideBar from "./CourseSidebar.js";
 
 
 const COURSE_QUERY = gql`
@@ -72,11 +60,6 @@ const COURSE_QUERY = gql`
 function CourseDashboard(props) {
   let { id } = useParams();
   id = id.substring(1);
-  // Todo: use the course id to get the course information and use them
-
-  console.log("---------------- username:", props.username);
-
-  // const [contentsToSearch, setContents] = useState([]);
 
   const response = useQuery(COURSE_QUERY, {
     fetchPolicy: "cache-and-network",
@@ -96,16 +79,7 @@ function CourseDashboard(props) {
         delete ta.__typename;
       });
     }
-    // setContents(course.contents ? course.contents : [])
   }
-  console.log("this course:", course);
-
-  console.log(
-    "data in course dashboard",
-    response.data,
-    response.loading,
-    response.error
-  );
 
   return (
     <div>
@@ -140,7 +114,7 @@ function CourseDashboard(props) {
       >
         {!response.loading ? (
           course.contents ? (
-            <ContentsPart contents={course.contents} id={id} />
+            <ContentsPart contents={course.contents} id={id} makeNotif={props.makeNotif} />
           ) : (
             <div>
               <Divider horizontal>
