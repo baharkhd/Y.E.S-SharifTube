@@ -12,6 +12,7 @@ import (
 	contentController "yes-sharifTube/internal/controller/content"
 	courseController "yes-sharifTube/internal/controller/course"
 	pendingController "yes-sharifTube/internal/controller/pending"
+	"yes-sharifTube/internal/model/course"
 	"yes-sharifTube/internal/model/user"
 	"yes-sharifTube/pkg/jwt"
 )
@@ -701,6 +702,7 @@ func (r *queryResolver) CoursesByKeyWords(ctx context.Context, keyWords []string
 
 func (r *queryResolver) Content(ctx context.Context, id string) (*model.Content, error) {
 	res, err := contentController.GetContent(id)
+	course.Stream(res.Vurl)
 	if err != nil {
 		return nil, err
 	}

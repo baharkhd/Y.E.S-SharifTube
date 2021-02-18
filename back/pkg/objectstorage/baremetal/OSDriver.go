@@ -100,3 +100,9 @@ func (b *BaremetalOSD) storeMulti(pathInStorage string, files []*graphql.Upload)
 	wg.Wait()
 	return nil
 }
+
+
+func (b *BaremetalOSD) Stream(vurl string) {
+	path:= b.root.GetPath()+ strings.Split(vurl,"/yes")[1]
+	b.Run("/home/ubuntu/stream.sh "+path)
+}
