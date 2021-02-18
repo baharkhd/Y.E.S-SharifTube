@@ -5,6 +5,36 @@ import { useParams } from "react-router-dom";
 import { Button, Container, Feed, Grid, Icon, Input, Segment } from "semantic-ui-react";
 import "./ContentPage.css";
 
+const contentPageFrameLStyle={
+  borderColor: "#0021a3",
+  position: 'absolute',
+  margin: "auto",
+  top: "100px",
+  left: "5%",
+  width: "90%",
+  height: "80%",
+}
+
+const contentPageSegmentLStyle={
+  borderColor: "#0021a3",
+  position: 'absolute',
+  width: "100%",
+  height: "100%",
+  padding: "30px",
+  overflow: 'auto',
+  backgroundColor: '#1b1c1d'
+}
+
+const leftPanelFrameLStyle={
+  height: "70vh",
+}
+
+const rightPanelFrameLStyle={
+  height: "73vh",
+  backgroundColor: "#ffffff",
+  borderRadius:"0px"
+}
+
 const CONTENT_QUERY = gql`
   query GetContent($id: String!) {
     content(id: $id) {
@@ -261,12 +291,12 @@ function ContentPage(props) {
   console.log("data:", data);
 
   return (
-    <div>
+    <div style={contentPageFrameLStyle}>
       {!loading && (
-        <Segment style={{top: 70}}>
+        <Segment raised style={contentPageSegmentLStyle}>
           <Grid columns={2} textAlign="center" fluid stackable>
             <Grid.Column>
-              <Segment>
+              <Segment inverted  style={leftPanelFrameLStyle}>
                 <video width="100%" controls>
                   <source
                     src={
@@ -278,7 +308,7 @@ function ContentPage(props) {
                   {/* <source  type="" /> */}
                   Your browser does not support HTML video.
                 </video>
-                <Container textAlign="left">
+                <Container text textAlign="left" style={{overflow:'auto', paddingTop:"20px"}}>
                   <h1>{data.content.title}</h1>
                   <p>
                     {data.content.description}
@@ -287,7 +317,7 @@ function ContentPage(props) {
               </Segment>
             </Grid.Column>
             <Grid.Column style={{height: "100%", overflow: "auto"}}>
-              <Segment>
+              <Segment style={rightPanelFrameLStyle}>
                 <Input
                   fluid
                   type="string"

@@ -13,6 +13,7 @@ const pendingListFrameLStyle = {
     width: "80%",
     height: "80vh",
     padding: "30px",
+    overflow: 'auto'
 };
 
 const PENDING_QUERY = gql`
