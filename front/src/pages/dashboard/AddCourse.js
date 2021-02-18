@@ -7,12 +7,12 @@ import constants from "../../constants";
 
 
 const createCoursePanelLStyle={
-  backgroundColor:'#3b3261',
+  backgroundColor:'#203e59',
   fontColor:'#ffffff'
 }
 
 const createCoursePanelHFLStyle={
-  backgroundColor:'#e5700a'
+  backgroundColor:'#d5e0eb'
 }
 
 const CREATE_COURSE_MUTATION = gql`

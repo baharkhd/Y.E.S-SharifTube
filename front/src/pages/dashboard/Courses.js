@@ -112,7 +112,7 @@ function Courses(props) {
                      overflowY: 'auto',
                      overflowX: 'hidden',
                      backgroundColor: "#ffffff",
-                     borderColor: 'blue',
+                     borderColor: '#203e59',
                      color: 'blue',
                  }}
         >

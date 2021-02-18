@@ -96,9 +96,9 @@ function Homepage() {
 
     return (
         <div style={homePageBodyLStyle}>
-            <div style={homepageSearchContainerStyle}>
+            {/* <div style={homepageSearchContainerStyle}>
                 <Input fluid icon='search' placeholder='Search for courses...' size='big' style={homepageSearchLStyle}/>
-            </div>
+            </div> */}
             <Segment style={homePageCourseListLStyle}>
                 <Grid columns={4}>
                     {!loading && data && 

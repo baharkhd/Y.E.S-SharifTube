@@ -108,8 +108,10 @@ function CourseDashboard(props) {
           position: "absolute",
           left: props.isMobile ? 0 : 250,
           right: 0,
-          margin: 30,
-          top: 70
+          bottom : 0,
+          margin: 10,
+          top: 70,
+          // backgroundColor: "#203e59"
         }}
       >
         {!response.loading ? (
@@ -147,7 +149,7 @@ function CourseDashboard(props) {
                     href={attach.aurl}
                     download
                   >
-                    <Card fluid>
+                    <Card fluid className="Attachment">
                       <Card.Content>
                         <Card.Header>{attach.name}</Card.Header>
                         <Card.Description>

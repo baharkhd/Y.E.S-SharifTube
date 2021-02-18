@@ -121,7 +121,7 @@ const Header = props => {
   }
 
   return (
-    <div style={{position: "fixed", width: "100%"}}>
+    <div style={{position: "fixed", width: "100%", zIndex: 5}}>
       {!props.token ? (
         <MainHeader
           handleItemClick={handleItemClick}

@@ -7,7 +7,7 @@ import constants from "../../constants";
 
 
 const joinCourseContainerHeaderStyle = {
-    backgroundColor: "#4b4b4b"
+    backgroundColor: "#d5e0eb"
 }
 
 const joinCourseSearchLStyle = {
@@ -123,10 +123,11 @@ function JoinCourseModel({ joiningCourse, setState, username, makeNotif }) {
     return (
         <Modal open={joiningCourse}>
             <Modal.Header style={joinCourseContainerHeaderStyle}>
-                <div>
+              Join another course ...
+                {/* <div>
                     <Input label="Join other classes" fluid autoFocus icon='search' placeholder='Search for courses...'
                            style={joinCourseSearchLStyle}/>
-                </div>
+                </div> */}
             </Modal.Header>
             <Modal.Content scrolling>
                 <Grid columns={3} stackable>

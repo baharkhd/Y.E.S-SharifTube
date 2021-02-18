@@ -208,17 +208,6 @@ const Comment = ({ comment, contentID }) => {
   );
 };
 
-// mutation CreateComment(
-//   $contentID: String!
-//   $repliedAtID: String
-//   $body: String!
-// ) {
-//   createComment(
-//     contentID: $contentID
-//     repliedAtID: $repliedAtID
-//     body: $body
-//   )
-
 function ContentPage(props) {
   let { courseID, contentID } = useParams();
   courseID = courseID.substring(1);
@@ -274,7 +263,7 @@ function ContentPage(props) {
   return (
     <div>
       {!loading && (
-        <Segment style={{ top: 70, overflow: "hidden", borderRadius: 0 }}>
+        <Segment style={{top: 70}}>
           <Grid columns={2} textAlign="center" fluid stackable>
             <Grid.Column>
               <Segment>
@@ -297,7 +286,7 @@ function ContentPage(props) {
                 </Container>
               </Segment>
             </Grid.Column>
-            <Grid.Column>
+            <Grid.Column style={{height: "100%", overflow: "auto"}}>
               <Segment>
                 <Input
                   fluid
