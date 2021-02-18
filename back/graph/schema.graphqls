@@ -311,5 +311,5 @@ type Mutation {
     updateComment(username:String, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad!
     deleteComment(username:String, contentID:String!, commentID:String!): DeleteCommentPayLoad!
 
-    stream(vurl: String!): StreamPayload!
+    stream(vurl: String!): String!
 }

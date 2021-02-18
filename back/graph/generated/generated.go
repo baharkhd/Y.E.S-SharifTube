@@ -261,7 +261,7 @@ type MutationResolver interface {
 	CreateComment(ctx context.Context, username *string, contentID string, repliedAtID *string, target model.TargetComment) (model.CreateCommentPayLoad, error)
 	UpdateComment(ctx context.Context, username *string, contentID string, commentID string, target model.EditedComment) (model.EditCommentPayLoad, error)
 	DeleteComment(ctx context.Context, username *string, contentID string, commentID string) (model.DeleteCommentPayLoad, error)
-	Stream(ctx context.Context, vurl string) (model.StreamPayload, error)
+	Stream(ctx context.Context, vurl string) (string, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, username *string) (*model.User, error)
@@ -1570,7 +1570,7 @@ type Mutation {
     updateComment(username:String, contentID:String!, commentID:String!, target:EditedComment!): EditCommentPayLoad!
     deleteComment(username:String, contentID:String!, commentID:String!): DeleteCommentPayLoad!
 
-    stream(vurl: String!): StreamPayload!
+    stream(vurl: String!): String!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -5218,9 +5218,9 @@ func (ec *executionContext) _Mutation_stream(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.StreamPayload)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNStreamPayload2yesᚑsharifTubeᚋgraphᚋmodelᚐStreamPayload(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OfferedContentNotPendingException_message(ctx context.Context, field graphql.CollectedField, obj *model.OfferedContentNotPendingException) (ret graphql.Marshaler) {
@@ -11436,16 +11436,6 @@ func (ec *executionContext) unmarshalNStatus2yesᚑsharifTubeᚋgraphᚋmodelᚐ
 
 func (ec *executionContext) marshalNStatus2yesᚑsharifTubeᚋgraphᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v model.Status) graphql.Marshaler {
 	return v
-}
-
-func (ec *executionContext) marshalNStreamPayload2yesᚑsharifTubeᚋgraphᚋmodelᚐStreamPayload(ctx context.Context, sel ast.SelectionSet, v model.StreamPayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._StreamPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

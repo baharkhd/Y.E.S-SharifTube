@@ -102,7 +102,8 @@ func (b *BaremetalOSD) storeMulti(pathInStorage string, files []*graphql.Upload)
 }
 
 
-func (b *BaremetalOSD) Stream(vurl string) {
+func (b *BaremetalOSD) Stream(vurl string) string {
 	path:= b.root.GetPath()+ strings.Split(vurl,"/yes")[1]
 	b.Run("/home/ubuntu/stream.sh "+path)
+	return "http://"+b.host+"/live/bbb"
 }

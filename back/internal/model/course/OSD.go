@@ -22,6 +22,6 @@ func (c *Course) GetAttachmentBucket() *objectstorage.Bucket {
 	return OSD.NewBucket(c.getCourseBucket(),attachmentPathBaseName)
 }
 
-func Stream(vurl string){
-	OSD.Stream(vurl)
+func Stream(vurl string) string{
+	return OSD.Stream(vurl)
 }

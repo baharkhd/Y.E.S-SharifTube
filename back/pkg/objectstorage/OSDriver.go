@@ -14,5 +14,5 @@ type OSDriver interface {
 	StoreMulti(bucket *Bucket, filename string, files []*graphql.Upload) error
 	GetRoot() *Bucket
 	NewBucket(parent *Bucket, id string) *Bucket
-	Stream(vurl string)
+	Stream(vurl string) string
 }

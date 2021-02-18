@@ -673,9 +673,8 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, username *string, 
 	}
 }
 
-func (r *mutationResolver) Stream(ctx context.Context, vurl string) (model.StreamPayload, error) {
-	course.Stream(vurl)
-	return model.OperationSuccessfull{},nil
+func (r *mutationResolver) Stream(ctx context.Context, vurl string) (string, error) {
+	return course.Stream(vurl),nil
 }
 
 func (r *queryResolver) User(ctx context.Context, username *string) (*model.User, error) {
