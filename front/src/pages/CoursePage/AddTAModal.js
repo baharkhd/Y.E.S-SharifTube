@@ -3,8 +3,6 @@ import React from "react";
 import { Button, Header, Icon, Modal } from "semantic-ui-react";
 import Autocomplete from "./AutoComplete";
 
-// users(start: Int!=0, amount: Int!=5): [User!]!
-
 const USERS_QUERY = gql`
   query GetUsers($start: Int!, $amount: Int!) {
     users(start: $start, amount: $amount) {
@@ -27,8 +25,6 @@ const AddTAModal = ({ open, setOpen, courseID, students }) => {
   if (!loading) {
     usernames = students.map(user => user.username);
   }
-
-  console.log("usernamessssss:", usernames);
 
   return (
     <Modal open={open} size="tiny">

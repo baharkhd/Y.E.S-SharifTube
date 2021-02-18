@@ -106,12 +106,8 @@ function JoinCourseModel({ joiningCourse, setState, username, makeNotif }) {
                     ids: [courseInfo.courseID]
                 }
             });
-
-      console.log("addUserToCourse:", addUserToCourse);
-      console.log("data in adding user to course:", data);
     },
     onCompleted: ({ addUserToCourse }) => {
-      console.log("add user to coure:", addUserToCourse);
       if (addUserToCourse.__typename == "Course") {
         makeNotif("Success!", "You successfully joined a course .", "success");
       } else {
@@ -198,12 +194,10 @@ function JoinCourseModel({ joiningCourse, setState, username, makeNotif }) {
                 <Button
                     positive
                     onClick={() => {
-                      // Join class
                       if (
                           courseInfo.courseID.trim() !== "" &&
                           courseInfo.token.trim() !== ""
                       ) {
-                        // console.log("courseInfo.couresID:", courseInfo.courseID)
                         addUserToCourse();
                       } else {
                         makeNotif("Error!", constants.EMPTY_FIELDS, "danger");

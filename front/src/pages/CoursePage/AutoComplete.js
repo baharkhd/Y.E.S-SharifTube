@@ -29,25 +29,10 @@ const COURSE_QUERY = gql`
   query GetCoursesByID($ids: [String!]!) {
     courses(ids: $ids) {
       id
-      #   title
-      #   summary
-      #   contents {
-      #     id
-      #     title
-      #     description
-      #   }
-      #   prof {
-      #     name
-      #     username
-      #     email
-      #   }
       tas {
         name
         username
       }
-      #   students {
-      #     username
-      #   }
     }
   }
 `;
@@ -87,7 +72,7 @@ function Autocomplete(props) {
       });
     },
     onCompleted: ({ promoteUserToTA }) => {
-      console.log("promoteUserToTA------- :", promoteUserToTA);
+      console.log("promoteUserToTA :", promoteUserToTA);
     }
   });
 

@@ -110,10 +110,6 @@ const DeletModal = props => {
         }
       );
 
-      console.log("local datta in delete content:", localData);
-      console.log("data in delete content:", data);
-      console.log("deleteContent:", deleteContent);
-
       cache.writeQuery({
         query: COURSE_QUERY,
         data: {
@@ -122,7 +118,6 @@ const DeletModal = props => {
       });
     },
     onCompleted: ({ deleteContent }) => {
-      console.log("deleteContent:", deleteContent);
       if (deleteContent.__typename === "Content") {
         props.makeNotif("Success", "Content successfully removed .", "success");
       } else {
@@ -284,9 +279,6 @@ function ContentsPart({ contents, id, makeNotif }) {
       clearTimeout(timeoutRef.current);
     };
   }, []);
-
-  console.log("results shown:", resultsShown);
-  console.log("results:", results);
 
   return (
     <div>

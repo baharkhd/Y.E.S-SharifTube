@@ -19,9 +19,6 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
 });
 
 const cache = new InMemoryCache({ fragmentMatcher });
-// const link = new HttpLink({
-//   uri: "http://localhost:8080/query"
-// });
 
 const link = createUploadLink({
   uri: "http://localhost:8080/query",

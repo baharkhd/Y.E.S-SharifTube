@@ -88,7 +88,6 @@ const CONTENT_QUERY = gql`
   }
 `;
 
-// createComment(username:String, contentID:String!, repliedAtID:String, target:TargetComment!): CreateCommentPayLoad!
 
 const ADD_COMMENT_MUTATION = gql`
   mutation CreateComment(
@@ -309,7 +308,6 @@ function ContentPage(props) {
       });
 
       let localData = _.cloneDeep(data);
-      console.log("222 localData in creating comment:", localData);
 
       localData.content.comments = [
         ...(localData.content.comments ? localData.content.comments : []),
@@ -322,23 +320,13 @@ function ContentPage(props) {
           ...localData
         }
       });
-      console.log("222data in cache--------", data);
-      console.log("222crreate comment:", createComment);
+
     },
     onCompleted: ({ createComment }) => {
-      console.log("222createCommenttttt:", createComment);
+      console.log("createComment:", createComment);
     }
   });
 
-  console.log("data:", data);
-
-  // if (!loading && data && data.content) {
-  //   stream({
-  //     variables: {
-  //       vurl: data.content.vurl
-  //     }
-  //   });
-  // }
 
   return (
     <div style={contentPageFrameLStyle}>

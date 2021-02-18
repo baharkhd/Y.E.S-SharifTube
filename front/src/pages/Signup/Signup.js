@@ -94,26 +94,19 @@ const RegisterForm = props => {
       password: state.password
     },
     update(cache, { data: { login } }) {
-      // console.log("update in login:", login);
-      // console.log("cache in login update fuunction:", cache);
     },
     onCompleted: ({ login }) => {
       if (login.__typename == "Token") {
         props.setUsername(state.username);
-        // props.setToken(login.token);
-        // history.push("/dashboard");
         props.makeNotif("Success", "You successfully loged in .", "success");
         changeToken(login.token);
       } else {
         switch (login.__typename) {
           case "UserPassMissMatchException":
-            // setState({ ...state, error: constants.USER_PASS_MISMATCH });
             props.makeNotif("Error", constants.USER_PASS_MISMATCH, "danger");
             break;
           case "InternalServerException":
-            // alert(constants.INTERNAL_SERVER_EXCEPTION);
             props.makeNotif("Error", "Login was not successfull .", "danger");
-            // setState({ ...state, error: constants.INTERNAL_SERVER_EXCEPTION });
             break;
         }
       }

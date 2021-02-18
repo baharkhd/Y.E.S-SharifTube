@@ -92,7 +92,6 @@ const Header = props => {
   console.log("active item:", state.activeItem);
 
   const history = useHistory();
-  //   const auth_token = localStorage.getItem(constants.AUTH_TOKEN);
 
   async function changeToken() {
     await props.setToken(undefined);
@@ -133,12 +132,9 @@ const Header = props => {
           handleItemClick={handleItemClick}
           state={state}
           setState={setState}
-          // setToken={props.setToken}
           isMobile={props.isMobile}
           sidebarOpen={props.sidebarOpen}
           setSidebarOpen={props.setSidebarOpen}
-          // setSidebarIsOpen={props.setSidebarIsOpen}
-          // sidebarIsOpen={props.sidebarIsOpen}
         />
       )}
     </div>

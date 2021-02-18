@@ -3,27 +3,6 @@ import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Icon, Segment } from "semantic-ui-react";
 
-// uploadContent(username:String, courseID:String!, target:TargetContent!): UploadContentPayLoad!
-
-// input TargetContent{
-//     title: String!
-//     description: String
-//     video: Upload!
-//     tags: [String!]
-// }
-
-// type Content{
-//     id: ID!
-//     title: String!
-//     description: String
-//     timestamp: Int!
-//     uploadedBY: User!
-//     approvedBY: User
-//     vurl: String! #todo better implementation for video file
-//     comments(start: Int!=0, amount: Int!=5): [Comment!]
-//     tags: [String!]
-//     courseID: String!
-// }
 
 const UPLOAD_MUTATION = gql`
   mutation UploadContent(
@@ -58,22 +37,11 @@ const UPLOAD_MUTATION = gql`
 `;
 
 const FileUpload = props => {
-  // const [file, setFile] = useState(null)
-
-  //   const [uploadContent] = useMutation(UPLOAD_MUTATION);
   const onDrop = useCallback(
     acceptedFiles => {
-      // select the first file from the Array of files
       const file = acceptedFiles[0];
-      // use the uploadFile variable created earlier
-      console.log("file:", file);
-      //   setFile(file)
-    //   console.log("my fileeeeee:", myFile)
       props.setFile({ ...props.otherState, file: file });
     }
-    // ,
-    // pass in uploadFile as a dependency
-    // [uploadFile]
   );
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop

@@ -51,11 +51,8 @@ function App() {
     fetchPolicy: "cache-and-network"
     //   nextFetchPolicy: "cache-first"
   });
-  console.log("checkkkkkkk:", data, loading, error);
-  console.log("username:", username);
-  const { token, setToken } = useToken();
-  console.log("token in app:", token);
 
+  const { token, setToken } = useToken();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -146,7 +143,6 @@ function App() {
                     : ""
                   : ""
               }
-              // component={<Panel isMobile={isMobile} />}
             />
           )}
         </Route>
@@ -167,7 +163,6 @@ function App() {
                     : ""
                   : ""
               }
-              // component={<Courses isMobile={isMobile} />}
             />
           )}
         </Route>
@@ -175,7 +170,6 @@ function App() {
         <Route exact path="/content">
           {token && <ContentPage makeNotif={makeNotif} />}
         </Route>
-        {/* Todo: remove this part! */}
         <Route exact path="/course:id">
           {token && (
             <CourseDashboard
@@ -216,9 +210,6 @@ function App() {
             />
           )}
         </Route>
-        {/* <Route exact path="/search">
-          <SearchIndex />
-        </Route> */}
         <Route exact path="/course:courseID/content:contentID">
           {token && <ContentPage makeNotif={makeNotif} />}
         </Route>

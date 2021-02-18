@@ -2,7 +2,6 @@ import { gql, useMutation } from "@apollo/client";
 import _ from "lodash";
 import React, { useState } from "react";
 import { Button, Form, Input, Modal } from "semantic-ui-react";
-// import { gql } from "graphql-tag";
 import constants from "../../constants";
 
 
@@ -40,10 +39,6 @@ const COURSES_QUERY = gql`
       title
       summary
       createdAt
-      # prof {
-      #   username
-      #   name
-      # }
     }
   }
 `;
@@ -67,18 +62,13 @@ function AddCourseModal({ addingCourse, setState, makeNotif }) {
         }
       });
 
-      // const data2
 
       const localData = _.cloneDeep(data);
-      console.log("course added in add course:", createCourse);
-      console.log("local data in add course:", localData);
 
       localData.coursesByKeyWords = [
         ...localData.coursesByKeyWords,
         createCourse
       ];
-
-      console.log("local data after chaning?:", localData);
 
       cache.writeQuery({
         query: COURSES_QUERY,

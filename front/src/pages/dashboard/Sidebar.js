@@ -25,7 +25,6 @@ function SideBar(props) {
 
   const history = useHistory();
 
-  const handleItemClick = (e, { name }) => setState({ activeItem: name });
 
   return (
     <div>
@@ -50,11 +49,9 @@ function SideBar(props) {
         width="thin"
         style={sidePanelLStyle}
       >
-        {/* <Link to="/dashboard/panel"> */}
         <Menu.Item
           name="personal information"
           active={state.activeItem === "personal information"}
-          // onClick={handleItemClick}
           onClick={() => {
             setState({ ...state, activeItem: "personal information" });
             history.push("/dashboard/panel");
@@ -64,13 +61,11 @@ function SideBar(props) {
           <Icon inverted name="user" />
           Presonal Information
         </Menu.Item>
-        {/* </Link> */}
 
         <Link to="/dashboard/courses">
           <Menu.Item
             name="classes"
             active={state.activeItem === "classes"}
-            // onClick={handleItemClick}
             onClick={() => {
               history.push("/dashboard/courses");
               setState({ ...state, activeItem: "classes" });

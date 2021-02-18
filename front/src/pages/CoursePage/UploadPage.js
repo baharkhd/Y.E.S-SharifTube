@@ -29,7 +29,6 @@ const OFFER_CONTENT_MUTATION = gql`
         title: $title
         description: $description
         video: $video
-        # tags: $tags
       }
     ) {
       ... on Pending {
@@ -209,9 +208,6 @@ function UploadPage(props) {
         ? [...localData.courses[0].inventory, uploadAttachment]
         : [localData.courses[0].inventory];
 
-      // console.log("localData:", localData);
-      // console.log("uploadAttachment:", uploadAttachment);
-
       cache.writeQuery({
         query: COURSE_QUERY,
         data: {
@@ -220,7 +216,6 @@ function UploadPage(props) {
       });
     },
     onCompleted: ({ uploadAttachment }) => {
-      console.log("upload attachmenttttttttt", uploadAttachment);
       if (uploadAttachment.__typename === "Attachment") {
         props.makeNotif(
           "Success!",
@@ -328,7 +323,6 @@ function UploadPage(props) {
 
   return (
     <Segment raised inverted style={fileUploadFrameLStyle}>
-      {/* <Segment>Where you should upload videos</Segment> */}
       <Form inverted>
         <Form.Group widths="four">
           <Form.Field
@@ -391,13 +385,11 @@ function UploadPage(props) {
         ) : (
           <></>
         )}
-        {/* <FileUpload setFile={setState} otherState={state} /> */}
         <input
           type="file"
           onChange={e => {
             const [file] = e.target.files;
 
-            console.log("-------------", file);
             setState({ ...state, file: file });
           }}
           style={{

@@ -57,8 +57,7 @@ const LoginForm = props => {
       password: state.password
     },
     update(cache, { data: { login } }) {
-      console.log("update in login:", login);
-      console.log("cache in login update fuunction:", cache);
+      // update users
     },
     onCompleted: ({ login }) => {
       if (login.__typename == "Token") {

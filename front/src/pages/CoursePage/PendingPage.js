@@ -1,7 +1,7 @@
-import {gql, useMutation, useQuery} from "@apollo/client";
-import React, {useState} from "react";
-import {useParams} from "react-router-dom";
-import {Button, Card, Form, Grid, Icon, Input, Label, Message, Modal, Segment} from "semantic-ui-react";
+import { gql, useMutation, useQuery } from "@apollo/client";
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
+import { Button, Card, Form, Grid, Icon, Input, Label, Message, Modal, Segment } from "semantic-ui-react";
 import constants from "../../constants";
 
 const pendingListFrameLStyle = {
@@ -121,8 +121,6 @@ const ChangePendingModal = props => {
             message: "test message for accept pending"
         },
         onCompleted: ({acceptOfferedContent}) => {
-            console.log("accept offered contenttttttt:", acceptOfferedContent);
-            console.log("reject offered contentttttttt:", acceptOfferedContent);
             if (acceptOfferedContent.__typename === "Pending") {
                 props.makeNotif("Success!", "Content was accepted!", "success");
             } else {
@@ -269,7 +267,6 @@ const ContentCard = ({
             message: "test message for reject pending"
         },
         onCompleted: ({rejectOfferedContent}) => {
-            console.log("reject offered contentttttttt:", rejectOfferedContent);
             if (rejectOfferedContent.__typename === "Pending") {
                 makeNotif("Success!", "Content was rejected!", "success");
             } else {
@@ -291,9 +288,7 @@ const ContentCard = ({
                 furl={furl}
             />
             <Card fluid>
-                {/* <Card.Content>
-          <Card.Header>{furl}</Card.Header>
-        </Card.Content> */}
+
                 <Card.Content>
                     <Card.Header>{title}</Card.Header>
                 </Card.Content>
@@ -331,8 +326,6 @@ function PendingPage(props) {
     let {courseID} = useParams();
     courseID = courseID.substring(1);
 
-    // ($coureID: String, $status: Status, $uploaderUsername: String, $start: Int!, amount: Int!)
-
     const {data, loading, error} = useQuery(PENDING_QUERY, {
         fetchPolicy: "cache-and-network",
         nextFetchPolicy: "cache-first",
@@ -343,11 +336,6 @@ function PendingPage(props) {
             amount: 100
         }
     });
-
-    console.log("In pending page:");
-    console.log("data:", data);
-    console.log("loading:", loading);
-    console.log("error:", error);
 
     return (
         <Segment raised style={pendingListFrameLStyle}>

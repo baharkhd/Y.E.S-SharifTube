@@ -7,8 +7,8 @@ import { faUpload } from "@fortawesome/free-solid-svg-icons/faUpload";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons/faUserPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
-import { Link, useHistory, useParams } from "react-router-dom";
-import { List, Menu, Sidebar, Divider } from "semantic-ui-react";
+import { Link, useParams } from "react-router-dom";
+import { List, Menu, Sidebar } from "semantic-ui-react";
 import AddTAModal from "./AddTAModal";
 
 const sidePanelLStyle = {
@@ -38,10 +38,6 @@ function SideBar(props) {
     props.isProf,
     isProfTA
   );
-
-  // const [promoteUserToTA] = useMutation(ADD_TA_MUTATION, {
-  //   variables: {}
-  // })
 
   let { id } = useParams();
   id = id.substring(1);
@@ -91,8 +87,6 @@ function SideBar(props) {
             return (
               <div>
                 <List.Item as="li">
-                  {/* <List.Icon name="user" color="yellow" /> */}
-                  {/* <List.Content>{TA}</List.Content> */}
                   {TA.name}
                 </List.Item>
               </div>
@@ -132,7 +126,6 @@ function SideBar(props) {
         </Menu.Item>
       </Link>
       {isProfTA && (
-        // <Link to={"/course:" + id + "/pendings"} component={PendingPage} >
         <Link to={"/course:" + id + "/pendings"}>
           <Menu.Item style={sidePanelItemLStyle} as="a">
             <FontAwesomeIcon size="1x" icon={faFileImport} />

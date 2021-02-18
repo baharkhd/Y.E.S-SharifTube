@@ -1,7 +1,6 @@
-import React, { useReducer, useCallback } from "react";
 import _ from "lodash";
-import faker from "faker";
-import { Grid, Search, Segment, Header, Label, Card } from "semantic-ui-react";
+import React from "react";
+import { Card, Grid, Header, Search, Segment } from "semantic-ui-react";
 
 const initialState = {
   loading: false,
@@ -41,8 +40,6 @@ const resultRenderer = ({ title, summary }) => {
 function SearchCourse({ source }) {
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { loading, results, value } = state;
-
-  console.log("source:", source);
 
   const timeoutRef = React.useRef();
   const handleSearchChange = React.useCallback((e, data) => {

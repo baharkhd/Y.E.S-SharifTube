@@ -42,12 +42,6 @@ const GET_USER_QUERY = gql`
   }
 `;
 
-const genderOptions = [
-  { key: "m", text: "Male", value: "male" },
-  { key: "f", text: "Female", value: "female" },
-  { key: "o", text: "Other", value: "other" }
-];
-
 const UpdatePanelModal = ({
   modalOpen,
   setModalOpen,
@@ -55,7 +49,6 @@ const UpdatePanelModal = ({
   setUser,
   makeNotif
 }) => {
-  // console.log("user in update modal:", user);
   const [state, setState] = useState({
     newName: user.name,
     newGender: "",
@@ -75,14 +68,7 @@ const UpdatePanelModal = ({
         query: GET_USER_QUERY
       });
 
-      console.log("updateUser:", updateUser);
-      console.log("????????????????????????", data);
-
       const localData = _.cloneDeep(data);
-      console.log("localData:", localData);
-      // localData.user = localData.user.map(post => {
-      //   return post.id === updatePost.id ? updatePost : post;
-      // });
 
       let newName =
         updateUser.name == "" ? localData.user.name : updateUser.name;
@@ -93,20 +79,6 @@ const UpdatePanelModal = ({
       let newEmail =
         updateUser.email == "" ? localData.user.email : updateUser.email;
 
-      console.log("?????", {
-        name: newName,
-        password: newPassword,
-        email: newEmail,
-        username: localData.user.username
-      });
-
-      console.log("???????????????????//", {
-        __typename: "User",
-        name: newName,
-        email: newEmail,
-        username: localData.username,
-        password: ""
-      });
 
       cache.writeQuery({
         query: GET_USER_QUERY,
@@ -122,9 +94,6 @@ const UpdatePanelModal = ({
       });
     },
     onCompleted: ({ updateUser }) => {
-      // console.log("updateUser", updateUser);
-      // setUser({ user: { ...user, ...updateUser } });
-      // console.log("new state:", state);
       makeNotif(
         "Success!",
         "Your personal information successfully updated!",
@@ -189,7 +158,6 @@ const UpdatePanelModal = ({
           positive
           primary
           onClick={() => {
-            // Todo: update information
             if (
               state.newName.trim() !== "" &&
               state.newEmail.trim() !== "" &&
