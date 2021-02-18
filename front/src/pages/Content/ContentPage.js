@@ -1,6 +1,6 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import _ from "lodash";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Button,
@@ -9,19 +9,9 @@ import {
   Grid,
   Icon,
   Input,
-  Segment,
-  List
+  List,
+  Segment
 } from "semantic-ui-react";
-
-const STREAM_MUTATION = gql`
-  mutation Stream($vurl: String!) {
-    stream(vurl: $vurl) {
-      ... on Stream {
-        surl
-      }
-    }
-  }
-`;
 
 const contentPageFrameLStyle = {
   borderColor: "#0021a3",
@@ -86,7 +76,6 @@ const CONTENT_QUERY = gql`
     }
   }
 `;
-
 
 const ADD_COMMENT_MUTATION = gql`
   mutation CreateComment(
@@ -156,7 +145,7 @@ const Reply = ({ author, body, time }) => {
   );
 };
 
-const Comment = ({ comment, contentID }) => {
+const Comment = ({ comment, contentID, makeNotif }) => {
   let date = new Date(comment.timestamp * 1000).toLocaleString("en-US", {
     month: "long",
     year: "numeric"
@@ -175,7 +164,6 @@ const Comment = ({ comment, contentID }) => {
       });
 
       let localData = _.cloneDeep(data);
-      console.log("localData in creating comment:", localData);
 
       localData.content.comments = localData.content.comments.map(cm => {
         return cm.id === createComment.commentID
@@ -192,11 +180,14 @@ const Comment = ({ comment, contentID }) => {
           ...localData
         }
       });
-      console.log("data in cache--------", data);
-      console.log("crreate comment:", createComment);
     },
     onCompleted: ({ createComment }) => {
-      console.log("createCommenttttt:", createComment);
+      if (createComment.__typename === "Reply") {
+        // Successfull
+      } else {
+        makeNotif("Error!", createComment.message, "danger");
+      }
+      // console.log("createCommenttttt:", createComment);
     }
   });
 
@@ -259,23 +250,8 @@ function ContentPage(props) {
   let { courseID, contentID } = useParams();
   courseID = courseID.substring(1);
   contentID = contentID.substring(1);
-  console.log("contentID:", contentID, ", courseID:", courseID);
-
-  const [streamLoading, setLoading] = useState(true);
-  const [surl, setSurl] = useState("");
 
   const [newComment, setNewComment] = useState("");
-
-  const [stream] = useMutation(STREAM_MUTATION, {
-    onCompleted: ({ stream }) => {
-      console.log("streammmm:", stream);
-      if (stream.__typename === "Stream") {
-        setLoading(false);
-        setSurl(stream.surl);
-        console.log("streams surl:", stream.surl)
-      }
-    }
-  });
 
   const { data, loading, error } = useQuery(CONTENT_QUERY, {
     variables: {
@@ -283,11 +259,6 @@ function ContentPage(props) {
     },
     onCompleted({ content }) {
       if (content.__typename === "Content") {
-        // stream({
-        //   variables: {
-        //     vurl: content.vurl
-        //   }
-        // });
       }
     }
   });
@@ -319,13 +290,15 @@ function ContentPage(props) {
           ...localData
         }
       });
-
     },
     onCompleted: ({ createComment }) => {
-      console.log("createComment:", createComment);
+      if (createComment.__typename === "Comment") {
+        // Successfull
+      } else {
+        props.makeNotif("Error!", createComment.message, "danger");
+      }
     }
   });
-
 
   return (
     <div style={contentPageFrameLStyle}>
@@ -335,15 +308,7 @@ function ContentPage(props) {
             <Grid.Column>
               <Segment inverted style={leftPanelFrameLStyle}>
                 <video width="100%" controls>
-                  <source
-                    src={
-                      // "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
-                      data.content.vurl
-                      // surl !== "" ? surl : ""
-                    }
-                    type="video/mp4"
-                  />
-                  {/* <source  type="" /> */}
+                  <source src={data.content.vurl} type="video/mp4" />
                   Your browser does not support HTML video.
                 </video>
                 <Container textAlign="left">
@@ -399,7 +364,11 @@ function ContentPage(props) {
                     data.content.comments.map(comment => {
                       return (
                         <>
-                          <Comment comment={comment} contentID={contentID} />
+                          <Comment
+                            comment={comment}
+                            contentID={contentID}
+                            makeNotif={props.makeNotif}
+                          />
                           <p></p>
                         </>
                       );

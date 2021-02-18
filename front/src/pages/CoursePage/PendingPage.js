@@ -1,19 +1,30 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Card, Form, Grid, Icon, Input, Label, Message, Modal, Segment } from "semantic-ui-react";
+import {
+  Button,
+  Card,
+  Form,
+  Grid,
+  Icon,
+  Input,
+  Label,
+  Message,
+  Modal,
+  Segment
+} from "semantic-ui-react";
 import constants from "../../constants";
 
 const pendingListFrameLStyle = {
-    borderColor: "#0021a3",
-    position: 'absolute',
-    margin: "auto",
-    top: "120px",
-    left: "10%",
-    width: "80%",
-    height: "80vh",
-    padding: "30px",
-    overflow: 'auto'
+  borderColor: "#0021a3",
+  position: "absolute",
+  margin: "auto",
+  top: "120px",
+  left: "10%",
+  width: "80%",
+  height: "80vh",
+  padding: "30px",
+  overflow: "auto"
 };
 
 const PENDING_QUERY = gql`
@@ -104,273 +115,274 @@ const REJECT_PENDING_MUTATION = gql`
 `;
 
 const ChangePendingModal = props => {
-    const [state, setState] = useState({
-        title: props.title,
-        description: props.description,
-        tagInput: "",
-        tags: []
-    });
+  const [state, setState] = useState({
+    title: props.title,
+    description: props.description,
+    tagInput: "",
+    tags: []
+  });
 
-    const [acceptOfferedContent] = useMutation(ACCEPT_PENDING_MUTATION, {
-        variables: {
-            courseID: props.courseID,
-            pendingID: props.pendingID,
-            title: state.title,
-            description: state.description,
-            tags: state.tags,
-            message: "test message for accept pending"
-        },
-        onCompleted: ({acceptOfferedContent}) => {
-            if (acceptOfferedContent.__typename === "Pending") {
-                props.makeNotif("Success!", "Content was accepted!", "success");
+  const [acceptOfferedContent] = useMutation(ACCEPT_PENDING_MUTATION, {
+    variables: {
+      courseID: props.courseID,
+      pendingID: props.pendingID,
+      title: state.title,
+      description: state.description,
+      tags: state.tags,
+      message: "test message for accept pending"
+    },
+    onCompleted: ({ acceptOfferedContent }) => {
+      if (acceptOfferedContent.__typename === "Pending") {
+        props.makeNotif("Success!", "Content was accepted!", "success");
+      } else {
+        props.makeNotif("Error!", acceptOfferedContent.message, "danger");
+      }
+    }
+  });
+
+  return (
+    <Modal open={props.open}>
+      <Modal.Header>Change the offered content if you want .</Modal.Header>
+
+      <Modal.Content scrolling>
+        <Modal.Content>
+          <video width="60%" controls>
+            <source
+              src={
+                // "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
+                props.furl
+              }
+              type="video/mp4"
+            />
+            {/* <source  type="" /> */}
+            Your browser does not support HTML video.
+          </video>
+        </Modal.Content>
+        <Form>
+          <Form.Group>
+            <Form.Field
+              control={Input}
+              label="Title"
+              placeholder="Enter title for this content"
+              value={state.title}
+              onChange={e => {
+                setState({ ...state, title: e.target.value });
+              }}
+            />
+          </Form.Group>
+          <Form.TextArea
+            label="Description"
+            placeholder="Enter description for this content"
+            value={state.description}
+            onChange={e => {
+              setState({ ...state, description: e.target.value });
+            }}
+          />
+          <Form.Group>
+            <Form.Field
+              control={Input}
+              value={state.tagInput}
+              // label="Tags"
+              placeholder="Add a tag"
+              onChange={e => {
+                setState({ ...state, tagInput: e.target.value });
+              }}
+            />
+            <Form.Field>
+              <Form.Button
+                icon="plus"
+                positive
+                onClick={() => {
+                  if (state.tagInput !== "") {
+                    let newTag = state.tagInput;
+                    setState({
+                      ...state,
+                      tags: [...state.tags, newTag],
+                      tagInput: ""
+                    });
+                  }
+                }}
+              />
+            </Form.Field>
+          </Form.Group>
+
+          <Form.Field>
+            <Label.Group>
+              {state.tags.map(tag => {
+                return (
+                  <Label size="large">
+                    <Icon name="hashtag" /> {tag}
+                  </Label>
+                );
+              })}
+            </Label.Group>
+          </Form.Field>
+        </Form>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button
+          positive
+          onClick={() => {
+            if (state.title.trim() !== "" && state.description.trim() !== "") {
+              acceptOfferedContent();
+              props.setOpen(false);
             } else {
-                props.makeNotif("Error!", acceptOfferedContent.message, "danger");
+              props.makeNotif("Error!", constants.EMPTY_FIELDS, "danger");
             }
-        }
-    });
-
-    return (
-        <Modal open={props.open}>
-            <Modal.Header>Change the offered content if you want .</Modal.Header>
-
-            <Modal.Content scrolling>
-                <Modal.Content>
-                    <video width="60%" controls>
-                        <source
-                            src={
-                                // "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
-                                props.furl
-                            }
-                            type="video/mp4"
-                        />
-                        {/* <source  type="" /> */}
-                        Your browser does not support HTML video.
-                    </video>
-                </Modal.Content>
-                <Form>
-                    <Form.Group>
-                        <Form.Field
-                            control={Input}
-                            label="Title"
-                            placeholder="Enter title for this content"
-                            value={state.title}
-                            onChange={e => {
-                                setState({...state, title: e.target.value});
-                            }}
-                        />
-                    </Form.Group>
-                    <Form.TextArea
-                        label="Description"
-                        placeholder="Enter description for this content"
-                        value={state.description}
-                        onChange={e => {
-                            setState({...state, description: e.target.value});
-                        }}
-                    />
-                    <Form.Group>
-                        <Form.Field
-                            control={Input}
-                            value={state.tagInput}
-                            // label="Tags"
-                            placeholder="Add a tag"
-                            onChange={e => {
-                                setState({...state, tagInput: e.target.value});
-                            }}
-                        />
-                        <Form.Field>
-                            <Form.Button
-                                icon="plus"
-                                positive
-                                onClick={() => {
-                                    if (state.tagInput !== "") {
-                                        let newTag = state.tagInput
-                                        setState({
-                                            ...state,
-                                            tags: [...state.tags, newTag],
-                                            tagInput: ""
-                                        });
-                                    }
-                                }}
-                            />
-                        </Form.Field>
-                    </Form.Group>
-
-                    <Form.Field>
-                        <Label.Group>
-                            {state.tags.map(tag => {
-                                return (
-                                    <Label size="large">
-                                        <Icon name="hashtag"/> {tag}
-                                    </Label>
-                                );
-                            })}
-                        </Label.Group>
-                    </Form.Field>
-                </Form>
-            </Modal.Content>
-            <Modal.Actions>
-                <Button
-                    positive
-                    onClick={() => {
-                        if (state.title.trim() !== "" && state.description.trim() !== "") {
-                            acceptOfferedContent();
-                            props.setOpen(false);
-                        } else {
-                            props.makeNotif("Error!", constants.EMPTY_FIELDS, "danger");
-                        }
-                    }}
-                >
-                    Change and Approve!
-                </Button>
-                <Button
-                    negative
-                    onClick={() => {
-                        props.setOpen(false);
-                    }}
-                >
-                    Cancel
-                </Button>
-            </Modal.Actions>
-        </Modal>
-    );
+          }}
+        >
+          Change and Approve!
+        </Button>
+        <Button
+          negative
+          onClick={() => {
+            props.setOpen(false);
+          }}
+        >
+          Cancel
+        </Button>
+      </Modal.Actions>
+    </Modal>
+  );
 };
 
 const ContentCard = ({
-                         title,
-                         time,
-                         uploadedBY,
-                         tags,
-                         id,
-                         courseID,
-                         description,
-                         furl,
-                         makeNotif
-                     }) => {
-    let date = new Date(time * 1000).toLocaleString("en-US", {
-        month: "long",
-        year: "numeric"
-    });
+  title,
+  time,
+  uploadedBY,
+  tags,
+  id,
+  courseID,
+  description,
+  furl,
+  makeNotif
+}) => {
+  let date = new Date(time * 1000).toLocaleString("en-US", {
+    month: "long",
+    year: "numeric"
+  });
 
-    const [state, setState] = useState({
-        modalOpen: false
-        // contentID
-    });
+  const [state, setState] = useState({
+    modalOpen: false
+    // contentID
+  });
 
-    const setOpen = val => {
-        setState({modalOpen: val});
-    };
+  const setOpen = val => {
+    setState({ modalOpen: val });
+  };
 
-    const [rejectOfferedContent] = useMutation(REJECT_PENDING_MUTATION, {
-        variables: {
-            courseID: courseID,
-            pendingID: id,
-            message: "test message for reject pending"
-        },
-        onCompleted: ({rejectOfferedContent}) => {
-            if (rejectOfferedContent.__typename === "Pending") {
-                makeNotif("Success!", "Content was rejected!", "success");
-            } else {
-                makeNotif("Error!", rejectOfferedContent.message, "danger");
-            }
-        }
-    });
+  const [rejectOfferedContent] = useMutation(REJECT_PENDING_MUTATION, {
+    variables: {
+      courseID: courseID,
+      pendingID: id,
+      message: "test message for reject pending"
+    },
+    onCompleted: ({ rejectOfferedContent }) => {
+      console.log("reject offered content:", rejectOfferedContent)
+      if (rejectOfferedContent.__typename === "Pending") {
+        makeNotif("Success!", "Content was rejected!", "success");
+      } else {
+        makeNotif("Error!", rejectOfferedContent.message, "danger");
+      }
+    }
+  });
 
-    return (
-        <div>
-            <ChangePendingModal
-                pendingID={id}
-                courseID={courseID}
-                open={state.modalOpen}
-                title={title}
-                description={description}
-                setOpen={setOpen}
-                makeNotif={makeNotif}
-                furl={furl}
-            />
-            <Card fluid>
+  return (
+    <div>
+      <ChangePendingModal
+        pendingID={id}
+        courseID={courseID}
+        open={state.modalOpen}
+        title={title}
+        description={description}
+        setOpen={setOpen}
+        makeNotif={makeNotif}
+        furl={furl}
+      />
+      <Card fluid>
+        <Card.Content>
+          <Card.Header>{title}</Card.Header>
+        </Card.Content>
+        <Card.Content description>{description}</Card.Content>
+        <Card.Content extra>
+          uploaded by <b>{uploadedBY.name}</b> in <b>{date}</b>
+        </Card.Content>
 
-                <Card.Content>
-                    <Card.Header>{title}</Card.Header>
-                </Card.Content>
-                <Card.Content description>{description}</Card.Content>
-                <Card.Content extra>
-                    uploaded by <b>{uploadedBY.name}</b> in <b>{date}</b>
-                </Card.Content>
-
-                <Card.Content>
-                    <Button.Group fluid>
-                        <Button
-                            positive
-                            onClick={() => {
-                                setState({modalOpen: true});
-                            }}
-                        >
-                            Approve
-                        </Button>
-                        <Button
-                            color="red"
-                            onClick={() => {
-                                rejectOfferedContent();
-                            }}
-                        >
-                            Reject
-                        </Button>
-                    </Button.Group>
-                </Card.Content>
-            </Card>
-        </div>
-    );
+        <Card.Content>
+          <Button.Group fluid>
+            <Button
+              positive
+              onClick={() => {
+                setState({ modalOpen: true });
+              }}
+            >
+              Approve
+            </Button>
+            <Button
+              color="red"
+              onClick={() => {
+                console.log(courseID, id)
+                rejectOfferedContent();
+              }}
+            >
+              Reject
+            </Button>
+          </Button.Group>
+        </Card.Content>
+      </Card>
+    </div>
+  );
 };
 
 function PendingPage(props) {
-    let {courseID} = useParams();
-    courseID = courseID.substring(1);
+  let { courseID } = useParams();
+  courseID = courseID.substring(1);
 
-    const {data, loading, error} = useQuery(PENDING_QUERY, {
-        fetchPolicy: "cache-and-network",
-        nextFetchPolicy: "cache-first",
-        variables: {
-            courseID: courseID,
-            status: "PENDING",
-            start: 0,
-            amount: 100
-        }
-    });
+  const { data, loading, error } = useQuery(PENDING_QUERY, {
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
+    variables: {
+      courseID: courseID,
+      status: "PENDING",
+      start: 0,
+      amount: 100
+    }
+  });
 
-    return (
-        <Segment raised style={pendingListFrameLStyle}>
-            <Grid columns={3} stackable textAlign="left">
-                {!loading &&
-                (data.pendings != null && data.pendings.length !== 0 ? (
-                    data.pendings.map(content => {
-                        return (
-                            <Grid.Column textAlign="left">
-                                <ContentCard
-                                    makeNotif={props.makeNotif}
-                                    title={content.title}
-                                    time={content.timestamp}
-                                    uploadedBY={content.uploadedBY}
-                                    description={content.description}
-                                    furl={content.furl}
-                                    // approvedBY={content.approvedBY}
-                                    // tags={content.tags}
-                                    id={content.id}
-                                    courseID={courseID}
-                                />
-                            </Grid.Column>
-                        );
-                    })
-                ) : (
-                    <Message warning size="massive" compact style={{margin:"auto"}}>
-                        <Message.Header>
-                            <Icon name="th"/>
-                            There are no pendings yet
-                        </Message.Header>
-                    </Message>
-                ))}
-            </Grid>
-        </Segment>
-    );
+  return (
+    <Segment raised style={pendingListFrameLStyle}>
+      <Grid columns={3} stackable textAlign="left">
+        {!loading &&
+          (data.pendings != null && data.pendings.length !== 0 ? (
+            data.pendings.map(content => {
+              return (
+                <Grid.Column textAlign="left">
+                  <ContentCard
+                    makeNotif={props.makeNotif}
+                    title={content.title}
+                    time={content.timestamp}
+                    uploadedBY={content.uploadedBY}
+                    description={content.description}
+                    furl={content.furl}
+                    // approvedBY={content.approvedBY}
+                    // tags={content.tags}
+                    id={content.id}
+                    courseID={courseID}
+                  />
+                </Grid.Column>
+              );
+            })
+          ) : (
+            <Message warning size="massive" compact style={{ margin: "auto" }}>
+              <Message.Header>
+                <Icon name="th" />
+                There are no pendings yet
+              </Message.Header>
+            </Message>
+          ))}
+      </Grid>
+    </Segment>
+  );
 }
 
 export default PendingPage;

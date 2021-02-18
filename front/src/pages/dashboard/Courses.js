@@ -42,19 +42,16 @@ const GET_COURSES_QUERY = gql`
       title
       summary
       createdAt
-
       prof {
         username
         name
         email
       }
-
       tas {
         username
         name
         email
       }
-
       students {
         username
       }
