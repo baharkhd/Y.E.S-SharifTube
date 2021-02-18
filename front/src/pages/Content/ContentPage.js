@@ -1,6 +1,6 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import _ from "lodash";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
   Button,
@@ -14,45 +14,45 @@ import {
 } from "semantic-ui-react";
 import "./ContentPage.css";
 
-<<<<<<< HEAD
-// const STREAM_MUTATION = gql`
-//   mutation Stream($vurl: String!) {
-//     stream(vurl: $vurl) {
+const STREAM_MUTATION = gql`
+  mutation Stream($vurl: String!) {
+    stream(vurl: $vurl) {
+      ... on Stream {
+        surl
+      }
+    }
+  }
+`;
 
-//     }
-//   }
-// `;
-=======
-const contentPageFrameLStyle={
+const contentPageFrameLStyle = {
   borderColor: "#0021a3",
-  position: 'absolute',
+  position: "absolute",
   margin: "auto",
   top: "100px",
   left: "5%",
   width: "90%",
-  height: "80%",
-}
+  height: "80%"
+};
 
-const contentPageSegmentLStyle={
+const contentPageSegmentLStyle = {
   borderColor: "#0021a3",
-  position: 'absolute',
+  position: "absolute",
   width: "100%",
   height: "100%",
   padding: "30px",
-  overflow: 'auto',
-  backgroundColor: '#1b1c1d'
-}
+  overflow: "auto",
+  backgroundColor: "#1b1c1d"
+};
 
-const leftPanelFrameLStyle={
-  height: "70vh",
-}
+const leftPanelFrameLStyle = {
+  height: "70vh"
+};
 
-const rightPanelFrameLStyle={
+const rightPanelFrameLStyle = {
   height: "73vh",
   backgroundColor: "#ffffff",
-  borderRadius:"0px"
-}
->>>>>>> 498756b29f60fc1fa3c3a03086965a00ce3367f1
+  borderRadius: "0px"
+};
 
 const CONTENT_QUERY = gql`
   query GetContent($id: String!) {
@@ -263,11 +263,34 @@ function ContentPage(props) {
   contentID = contentID.substring(1);
   console.log("contentID:", contentID, ", courseID:", courseID);
 
+  const [streamLoading, setLoading] = useState(true);
+  const [surl, setSurl] = useState("");
+
   const [newComment, setNewComment] = useState("");
+
+  const [stream] = useMutation(STREAM_MUTATION, {
+    onCompleted: ({ stream }) => {
+      console.log("streammmm:", stream);
+      if (stream.__typename === "Stream") {
+        setLoading(false);
+        setSurl(stream.surl);
+        console.log("streams surl:", stream.surl)
+      }
+    }
+  });
 
   const { data, loading, error } = useQuery(CONTENT_QUERY, {
     variables: {
       id: contentID
+    },
+    onCompleted({ content }) {
+      if (content.__typename === "Content") {
+        stream({
+          variables: {
+            vurl: content.vurl
+          }
+        });
+      }
     }
   });
 
@@ -309,34 +332,43 @@ function ContentPage(props) {
 
   console.log("data:", data);
 
+  // if (!loading && data && data.content) {
+  //   stream({
+  //     variables: {
+  //       vurl: data.content.vurl
+  //     }
+  //   });
+  // }
+
   return (
     <div style={contentPageFrameLStyle}>
       {!loading && (
-<<<<<<< HEAD
-        <Segment style={{ top: 70, position: "absolute" }}>
-=======
         <Segment raised style={contentPageSegmentLStyle}>
->>>>>>> 498756b29f60fc1fa3c3a03086965a00ce3367f1
           <Grid columns={2} textAlign="center" fluid stackable>
             <Grid.Column>
-              <Segment inverted  style={leftPanelFrameLStyle}>
+              <Segment inverted style={leftPanelFrameLStyle}>
                 <video width="100%" controls>
                   <source
                     src={
                       // "https://s70.upera.net/2751313-0-WonderWoman4849193-480.mp4?owner=2640789&ref=1794068"
-                      data.content.vurl
+                      // data.content.vurl
+                      surl !== "" ? surl : ""
                     }
                     type="video/mp4"
                   />
                   {/* <source  type="" /> */}
                   Your browser does not support HTML video.
                 </video>
-<<<<<<< HEAD
                 <Container textAlign="left">
                   <List horizontal>
                     <List.Item>
                       <a href={data.content.vurl} download>
-                        <Button color="blue" icon floated="right">
+                        <Button
+                          color="blue"
+                          icon
+                          floated="right"
+                          loading={streamLoading}
+                        >
                           <Icon name="download" />
                         </Button>
                       </a>
@@ -351,20 +383,8 @@ function ContentPage(props) {
                 </Container>
               </Segment>
             </Grid.Column>
-            <Grid.Column style={{ height: "100%", overflow: "auto" }}>
+            <Grid.Column style={{ height: "100%", overflow: "auto", top: 13 }}>
               <Segment>
-=======
-                <Container text textAlign="left" style={{overflow:'auto', paddingTop:"20px"}}>
-                  <h1>{data.content.title}</h1>
-                  <p>
-                    {data.content.description}
-                  </p>
-                </Container>
-              </Segment>
-            </Grid.Column>
-            <Grid.Column style={{height: "100%", overflow: "auto"}}>
-              <Segment style={rightPanelFrameLStyle}>
->>>>>>> 498756b29f60fc1fa3c3a03086965a00ce3367f1
                 <Input
                   fluid
                   type="string"
